@@ -22,19 +22,16 @@ import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
 import com.fasterxml.jackson.databind.util.ClassUtil;
+import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
-import honhimw.jackson.dataformat.hyper.schema.Styles.Builder;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
-import honhimw.jackson.dataformat.hyper.schema.style.StylesBuilder;
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
 import honhimw.jackson.dataformat.hyper.schema.generator.FormatVisitorWrapper;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.CellAddress;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 public final class SchemaGenerator {
@@ -42,7 +39,7 @@ public final class SchemaGenerator {
     private final GeneratorSettings _generatorSettings;
 
     public SchemaGenerator() {
-        _generatorSettings = new GeneratorSettings(CellAddress.A1, new StylesBuilder(), ColumnNameResolver.NULL);
+        _generatorSettings = new GeneratorSettings(CellAddress.A1, ColumnNameResolver.NULL);
     }
 
     private SchemaGenerator(final GeneratorSettings generatorSettings) {
@@ -53,20 +50,17 @@ public final class SchemaGenerator {
         return new SchemaGenerator(_generatorSettings.with(origin));
     }
 
-    public SchemaGenerator withStylesBuilder(final Builder builder) {
-        return new SchemaGenerator(_generatorSettings.with(builder));
-    }
-
     public SchemaGenerator withColumnNameResolver(final ColumnNameResolver resolver) {
         return new SchemaGenerator(_generatorSettings.with(resolver));
     }
 
-    SpreadsheetSchema generate(final JavaType type, final DefaultSerializerProvider provider, final SerializerFactory factory)
-            throws JsonMappingException {
+    SpreadsheetSchema generate(final JavaType type, final DefaultSerializerProvider provider,
+        final SerializerFactory factory)
+        throws JsonMappingException {
         _verifyType(type, provider);
         final FormatVisitorWrapper visitor = new FormatVisitorWrapper();
         final SerializationConfig config = provider.getConfig()
-                .withAttribute(ColumnNameResolver.class, _generatorSettings._columnNameResolver);
+            .withAttribute(ColumnNameResolver.class, _generatorSettings._columnNameResolver);
         final DefaultSerializerProvider instance = provider.createInstance(config, factory);
         try {
             instance.acceptJsonFormatVisitor(type, visitor);
@@ -80,10 +74,11 @@ public final class SchemaGenerator {
                 log.trace(column.toString());
             }
         }
-        return new SpreadsheetSchema(columns, _generatorSettings._stylesBuilder, _generatorSettings._origin);
+        return new SpreadsheetSchema(columns, _generatorSettings._origin);
     }
 
-    private void _verifyType(final JavaType type, final DefaultSerializerProvider provider) throws JsonMappingException {
+    private void _verifyType(final JavaType type, final DefaultSerializerProvider provider)
+        throws JsonMappingException {
         if (type.isArrayType() || type.isCollectionLikeType()) {
             throw _invalidSchemaDefinition(type, "can NOT be a Collection or array type");
         }
@@ -100,9 +95,11 @@ public final class SchemaGenerator {
         return _invalidSchemaDefinition(type, cause.getMessage(), cause);
     }
 
-    private JsonMappingException _invalidSchemaDefinition(final JavaType type, final String problem, final Throwable cause) {
-        final String msg = String.format("Failed to generate schema of type '%s' for %s, problem: %s", SpreadsheetSchema.SCHEMA_TYPE,
-                ClassUtil.getTypeDescription(type), problem);
+    private JsonMappingException _invalidSchemaDefinition(final JavaType type, final String problem,
+        final Throwable cause) {
+        final String msg = String.format("Failed to generate schema of type '%s' for %s, problem: %s",
+            SpreadsheetSchema.SCHEMA_TYPE,
+            ClassUtil.getTypeDescription(type), problem);
         return InvalidDefinitionException.from((JsonGenerator) null, msg, type).withCause(cause);
     }
 
@@ -110,19 +107,14 @@ public final class SchemaGenerator {
     static final class GeneratorSettings {
 
         private final CellAddress _origin;
-        private final Builder _stylesBuilder;
         private final ColumnNameResolver _columnNameResolver;
 
         private GeneratorSettings with(final CellAddress origin) {
-            return _origin.equals(origin) ? this : new GeneratorSettings(origin, _stylesBuilder, _columnNameResolver);
-        }
-
-        private GeneratorSettings with(final Builder styles) {
-            return _stylesBuilder.equals(styles) ? this : new GeneratorSettings(_origin, styles, _columnNameResolver);
+            return _origin.equals(origin) ? this : new GeneratorSettings(origin, _columnNameResolver);
         }
 
         private GeneratorSettings with(final ColumnNameResolver resolver) {
-            return _columnNameResolver.equals(resolver) ? this : new GeneratorSettings(_origin, _stylesBuilder, resolver);
+            return _columnNameResolver.equals(resolver) ? this : new GeneratorSettings(_origin, resolver);
         }
     }
 }

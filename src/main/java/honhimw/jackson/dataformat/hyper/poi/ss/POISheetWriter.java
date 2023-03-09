@@ -17,7 +17,6 @@ package honhimw.jackson.dataformat.hyper.poi.ss;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
-import honhimw.jackson.dataformat.hyper.schema.Styles;
 import honhimw.jackson.dataformat.hyper.ser.SheetWriter;
 import honhimw.jackson.dataformat.hyper.annotation.DataColumn;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +45,6 @@ public final class POISheetWriter implements SheetWriter {
     private final Sheet _sheet;
     private SpreadsheetSchema _schema;
     private CellAddress _reference;
-    private Styles _styles;
     private int _lastRow;
 
     public POISheetWriter(final Sheet sheet) {
@@ -61,7 +59,6 @@ public final class POISheetWriter implements SheetWriter {
     @Override
     public void setSchema(final SpreadsheetSchema schema) {
         _schema = schema;
-        _styles = _schema.buildStyles(_sheet.getWorkbook());
     }
 
     @Override
@@ -107,9 +104,6 @@ public final class POISheetWriter implements SheetWriter {
         final Cell cell = CellUtil.getCell(CellUtil.getRow(row, _sheet), _reference.getColumn());
         consumer.accept(cell, value);
         final Column column = _schema.findColumn(_reference);
-        if (column != null) {
-            cell.setCellStyle(_schema.getDataRow() > row ? _styles.getHeaderStyle(column) : _styles.getStyle(column));
-        }
         _lastRow = Math.max(_lastRow, row);
         if (log.isTraceEnabled()) {
             log.trace("{} {} {}", _reference, cell.getCellType(), cell);

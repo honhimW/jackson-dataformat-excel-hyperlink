@@ -28,7 +28,6 @@ public final class SpreadsheetSchema implements FormatSchema, Iterable<Column> {
 
     public static final String SCHEMA_TYPE = "spreadsheet";
     private final List<Column> _columns;
-    private final Styles.Builder _stylesBuilder;
     private final CellAddress _origin;
 
     @Override
@@ -82,10 +81,6 @@ public final class SpreadsheetSchema implements FormatSchema, Iterable<Column> {
             return _columns;
         }
         return _columns.stream().filter(c -> c.getPointer().startsWith(filter)).collect(Collectors.toList());
-    }
-
-    public Styles buildStyles(final Workbook workbook) {
-        return _stylesBuilder.build(workbook);
     }
 
     public boolean isInRowBounds(final int row) {

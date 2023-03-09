@@ -14,24 +14,33 @@
 
 package honhimw.jackson.dataformat.hyper;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.core.FormatSchema;
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.InjectableValues;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import honhimw.jackson.dataformat.hyper.deser.SheetInput;
 import honhimw.jackson.dataformat.hyper.deser.SheetParser;
 import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
-import honhimw.jackson.dataformat.hyper.schema.Styles;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
 import honhimw.jackson.dataformat.hyper.ser.SheetGenerator;
 import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellAddress;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellAddress;
 
 @SuppressWarnings("java:S2177")
 public final class SpreadsheetMapper extends ObjectMapper {
@@ -258,11 +267,6 @@ public final class SpreadsheetMapper extends ObjectMapper {
         return setSchemaGenerator(_schemaGenerator.withOrigin(address));
     }
 
-    public SpreadsheetMapper setStylesBuilder(final Styles.Builder builder) {
-        _assertNotNull("builder", builder);
-        return setSchemaGenerator(_schemaGenerator.withStylesBuilder(builder));
-    }
-
     public SpreadsheetMapper setColumnNameResolver(final ColumnNameResolver resolver) {
         _assertNotNull("resolver", resolver);
         return setSchemaGenerator(_schemaGenerator.withColumnNameResolver(resolver));
@@ -486,11 +490,6 @@ public final class SpreadsheetMapper extends ObjectMapper {
 
         public Builder origin(final CellAddress address) {
             _mapper.setOrigin(address);
-            return _this();
-        }
-
-        public Builder stylesBuilder(final Styles.Builder builder) {
-            _mapper.setStylesBuilder(builder);
             return _this();
         }
 
