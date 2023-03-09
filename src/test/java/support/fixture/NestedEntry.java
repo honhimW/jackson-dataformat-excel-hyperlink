@@ -14,7 +14,6 @@
 
 package support.fixture;
 
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,7 +21,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@DataGrid
 public class NestedEntry {
 
     int a;

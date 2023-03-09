@@ -14,11 +14,16 @@
 
 package honhimw.jackson.dataformat.hyper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import honhimw.jackson.dataformat.hyper.schema.generator.AnnotatedNameResolver;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
-import honhimw.jackson.dataformat.hyper.annotation.DataColumn;
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
+import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.nio.file.Path;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -29,14 +34,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import support.fixture.Entry;
-
-import java.io.File;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.nio.file.Path;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SchemaGeneratorTest {
 
@@ -52,7 +49,7 @@ class SchemaGeneratorTest {
 
     @Test
     void changeOriginAddress() throws Exception {
-        final SpreadsheetMapper mapper = new SpreadsheetMapper().setOrigin("B2");
+        final HyperMapper mapper = new HyperMapper().setOrigin("B2");
         mapper.writeValue(out, Entry.VALUE);
         try (XSSFWorkbook workbook = new XSSFWorkbook(out)) {
             final XSSFSheet sheet = workbook.getSheetAt(0);
@@ -73,7 +70,7 @@ class SchemaGeneratorTest {
 
     @Test
     void overwriteColumnNames() throws Exception {
-        final SpreadsheetMapper mapper = new SpreadsheetMapper()
+        final HyperMapper mapper = new HyperMapper()
                 .setColumnNameResolver(prop -> prop.getName().toUpperCase());
         mapper.writeValue(out, Entry.VALUE);
         try (XSSFWorkbook workbook = new XSSFWorkbook(out)) {
@@ -87,7 +84,7 @@ class SchemaGeneratorTest {
     @Test
     void annotatedColumnNames() throws Exception {
         ColumnNameResolver byText = AnnotatedNameResolver.forValue(NameOf.class, ColumnCode::getText);
-        final SpreadsheetMapper mapper = new SpreadsheetMapper()
+        final HyperMapper mapper = new HyperMapper()
                 .setColumnNameResolver(byText);
         mapper.writeValue(out, null, AnnotatedEntity.class);
         try (XSSFWorkbook workbook = new XSSFWorkbook(out)) {
@@ -101,7 +98,7 @@ class SchemaGeneratorTest {
     @Test
     void annotatedNameMustHaveAnnotation() throws Exception {
         ColumnNameResolver byText = AnnotatedNameResolver.forValue(NameOf.class, ColumnCode::getText);
-        final SpreadsheetMapper mapper = new SpreadsheetMapper()
+        final HyperMapper mapper = new HyperMapper()
                 .setColumnNameResolver(byText);
         assertThatThrownBy(() -> mapper.writeValue(out, null, MissingAnnotationEntity.class))
                 .isInstanceOf(InvalidDefinitionException.class)
@@ -130,19 +127,15 @@ class SchemaGeneratorTest {
     }
 
     @Data
-    @DataGrid
     class AnnotatedEntity {
         @NameOf(ColumnCode.A)
-        @DataColumn("It will be overwritten")
         int a;
         @NameOf(ColumnCode.B)
         int b;
     }
 
     @Data
-    @DataGrid
     class MissingAnnotationEntity {
-        @DataColumn("Annotation `@NameOf` must not be null")
         int a;
         @NameOf(ColumnCode.B)
         int b;

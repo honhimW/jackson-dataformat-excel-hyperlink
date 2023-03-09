@@ -18,6 +18,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.IOException;
 
+/**
+ * Workbook Supplier
+ */
 public interface WorkbookProvider {
 
     Workbook create() throws IOException;

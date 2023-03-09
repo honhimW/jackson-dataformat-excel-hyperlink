@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.MappingIterator;
 import honhimw.jackson.dataformat.hyper.deser.SheetLocation;
 import honhimw.jackson.dataformat.hyper.deser.SheetParser;
-import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 
 public final class SheetMappingIterator<T> extends MappingIterator<T> {
 
@@ -36,8 +36,8 @@ public final class SheetMappingIterator<T> extends MappingIterator<T> {
     }
 
     @Override
-    public SpreadsheetSchema getParserSchema() {
-        return (SpreadsheetSchema) super.getParserSchema();
+    public HyperSchema getParserSchema() {
+        return (HyperSchema) super.getParserSchema();
     }
 
     @Override

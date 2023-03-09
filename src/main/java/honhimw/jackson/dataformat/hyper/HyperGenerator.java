@@ -12,15 +12,29 @@
  * limitations under the License.
  */
 
-package honhimw.jackson.dataformat.hyper.ser;
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package honhimw.jackson.dataformat.hyper;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.IOContext;
-import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
-import honhimw.jackson.dataformat.hyper.PackageVersion;
-import honhimw.jackson.dataformat.hyper.SheetStreamContext;
-import honhimw.jackson.dataformat.hyper.SheetStreamWriteException;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
+import honhimw.jackson.dataformat.hyper.exception.SheetStreamWriteException;
+import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
+import honhimw.jackson.dataformat.hyper.ser.SheetWriter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -29,7 +43,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @Slf4j
-public final class SheetGenerator extends GeneratorBase {
+public final class HyperGenerator extends GeneratorBase {
 
     private static final String START_ARRAY = "Start an array";
     private static final String END_ARRAY = "End an array";
@@ -42,10 +56,10 @@ public final class SheetGenerator extends GeneratorBase {
 
     private final IOContext _ioContext;
     private final SheetWriter _writer;
-    private SpreadsheetSchema _schema;
+    private HyperSchema _schema;
     private SheetStreamContext _outputContext;
 
-    public SheetGenerator(final IOContext ctxt, final int features, final ObjectCodec codec, final SheetWriter writer) {
+    public HyperGenerator(final IOContext ctxt, final int features, final ObjectCodec codec, final SheetWriter writer) {
         super(features, codec);
         _ioContext = ctxt;
         _writer = writer;
@@ -62,14 +76,14 @@ public final class SheetGenerator extends GeneratorBase {
     }
 
     @Override
-    public SpreadsheetSchema getSchema() {
+    public HyperSchema getSchema() {
         return _schema;
     }
 
     @Override
     public void setSchema(final FormatSchema schema) {
         if (_schema != null) return;
-        _schema = (SpreadsheetSchema) schema;
+        _schema = (HyperSchema) schema;
         _writer.setSchema(_schema);
         _writer.writeHeaders();
         _outputContext = SheetStreamContext.createRootContext(_schema);
@@ -77,7 +91,7 @@ public final class SheetGenerator extends GeneratorBase {
 
     @Override
     public boolean canUseSchema(final FormatSchema schema) {
-        return schema instanceof SpreadsheetSchema;
+        return schema instanceof HyperSchema;
     }
 
     public boolean isDate1904() {
@@ -272,7 +286,7 @@ public final class SheetGenerator extends GeneratorBase {
 
     private void _checkSchemaSet() throws IOException {
         if (_schema == null) {
-            throw new SheetStreamWriteException("No schema of type '" + SpreadsheetSchema.SCHEMA_TYPE + "' set, can not generate", this);
+            throw new SheetStreamWriteException("No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not generate", this);
         }
     }
 }

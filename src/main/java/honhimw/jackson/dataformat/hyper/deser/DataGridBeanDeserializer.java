@@ -23,8 +23,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.std.DelegatingDeserializer;
 import com.fasterxml.jackson.databind.util.Annotations;
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
-
 import java.io.IOException;
 
 public final class DataGridBeanDeserializer extends DelegatingDeserializer {
@@ -50,10 +48,7 @@ public final class DataGridBeanDeserializer extends DelegatingDeserializer {
         @Override
         public JsonDeserializer<?> modifyDeserializer(final DeserializationConfig config, final BeanDescription beanDesc, final JsonDeserializer<?> deserializer) {
             final Annotations annotations = beanDesc.getClassAnnotations();
-            if (annotations.has(DataGrid.class)) {
-                return new DataGridBeanDeserializer(deserializer);
-            }
-            return deserializer;
+            return new DataGridBeanDeserializer(deserializer);
         }
     }
 }

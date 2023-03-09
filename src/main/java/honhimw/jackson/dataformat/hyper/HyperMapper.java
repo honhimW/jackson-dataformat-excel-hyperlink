@@ -30,9 +30,8 @@ import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import honhimw.jackson.dataformat.hyper.deser.SheetInput;
 import honhimw.jackson.dataformat.hyper.deser.SheetParser;
-import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
-import honhimw.jackson.dataformat.hyper.ser.SheetGenerator;
 import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
 import java.io.File;
 import java.io.IOException;
@@ -43,31 +42,31 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellAddress;
 
 @SuppressWarnings("java:S2177")
-public final class SpreadsheetMapper extends ObjectMapper {
+public final class HyperMapper extends ObjectMapper {
 
     private transient SchemaGenerator _schemaGenerator;
 
-    public SpreadsheetMapper() {
+    public HyperMapper() {
         this(new HyperFactory());
     }
 
-    public SpreadsheetMapper(final HyperFactory f) {
+    public HyperMapper(final HyperFactory f) {
         super(f);
         registerModule(new HyperModule());
         _schemaGenerator = new SchemaGenerator();
     }
 
-    private SpreadsheetMapper(final SpreadsheetMapper src) {
+    private HyperMapper(final HyperMapper src) {
         super(src);
         _schemaGenerator = src._schemaGenerator;
     }
 
     public static Builder builder() {
-        return new Builder(new SpreadsheetMapper());
+        return new Builder(new HyperMapper());
     }
 
     public static Builder builder(final HyperFactory streamFactory) {
-        return new Builder(new SpreadsheetMapper(streamFactory));
+        return new Builder(new HyperMapper(streamFactory));
     }
 
     public Builder rebuild() {
@@ -75,14 +74,14 @@ public final class SpreadsheetMapper extends ObjectMapper {
     }
 
     @Override
-    public SpreadsheetMapper copy() {
-        _checkInvalidCopy(SpreadsheetMapper.class);
-        return new SpreadsheetMapper(this);
+    public HyperMapper copy() {
+        _checkInvalidCopy(HyperMapper.class);
+        return new HyperMapper(this);
     }
 
     @Override
-    public SpreadsheetMapper copyWith(final JsonFactory factory) {
-        return (SpreadsheetMapper) super.copyWith(factory);
+    public HyperMapper copyWith(final JsonFactory factory) {
+        return (HyperMapper) super.copyWith(factory);
     }
 
     /*
@@ -137,18 +136,18 @@ public final class SpreadsheetMapper extends ObjectMapper {
      */
 
     @Override
-    public SpreadsheetMapper registerModule(final com.fasterxml.jackson.databind.Module module) {
-        return (SpreadsheetMapper) super.registerModule(module);
+    public HyperMapper registerModule(final com.fasterxml.jackson.databind.Module module) {
+        return (HyperMapper) super.registerModule(module);
     }
 
     @Override
-    public SpreadsheetMapper registerModules(final com.fasterxml.jackson.databind.Module... modules) {
-        return (SpreadsheetMapper) super.registerModules(modules);
+    public HyperMapper registerModules(final com.fasterxml.jackson.databind.Module... modules) {
+        return (HyperMapper) super.registerModules(modules);
     }
 
     @Override
-    public SpreadsheetMapper registerModules(final Iterable<? extends com.fasterxml.jackson.databind.Module> modules) {
-        return (SpreadsheetMapper) super.registerModules(modules);
+    public HyperMapper registerModules(final Iterable<? extends com.fasterxml.jackson.databind.Module> modules) {
+        return (HyperMapper) super.registerModules(modules);
     }
 
     /*
@@ -157,33 +156,33 @@ public final class SpreadsheetMapper extends ObjectMapper {
     /**********************************************************
      */
 
-    public SheetGenerator createGenerator(final Sheet out) {
+    public HyperGenerator createGenerator(final Sheet out) {
         _assertNotNull("out", out);
-        final SheetGenerator g = tokenStreamFactory().createGenerator(out);
+        final HyperGenerator g = tokenStreamFactory().createGenerator(out);
         _serializationConfig.initialize(g);
         return g;
     }
 
-    public SheetGenerator createGenerator(final SheetOutput<?> out) throws IOException {
+    public HyperGenerator createGenerator(final SheetOutput<?> out) throws IOException {
         _assertNotNull("out", out);
-        final SheetGenerator g = tokenStreamFactory().createGenerator(out);
+        final HyperGenerator g = tokenStreamFactory().createGenerator(out);
         _serializationConfig.initialize(g);
         return g;
     }
 
     @Override
-    public SheetGenerator createGenerator(final OutputStream out) throws IOException {
-        return (SheetGenerator) super.createGenerator(out);
+    public HyperGenerator createGenerator(final OutputStream out) throws IOException {
+        return (HyperGenerator) super.createGenerator(out);
     }
 
     @Override
-    public SheetGenerator createGenerator(final OutputStream out, final JsonEncoding enc) throws IOException {
-        return (SheetGenerator) super.createGenerator(out, enc);
+    public HyperGenerator createGenerator(final OutputStream out, final JsonEncoding enc) throws IOException {
+        return (HyperGenerator) super.createGenerator(out, enc);
     }
 
     @Override
-    public SheetGenerator createGenerator(final File outputFile, final JsonEncoding enc) throws IOException {
-        return (SheetGenerator) super.createGenerator(outputFile, enc);
+    public HyperGenerator createGenerator(final File outputFile, final JsonEncoding enc) throws IOException {
+        return (HyperGenerator) super.createGenerator(outputFile, enc);
     }
 
     /*
@@ -218,19 +217,19 @@ public final class SpreadsheetMapper extends ObjectMapper {
     /**********************************************************
      */
 
-    public SpreadsheetMapper configure(final SheetParser.Feature f, final boolean state) {
+    public HyperMapper configure(final SheetParser.Feature f, final boolean state) {
         tokenStreamFactory().configure(f, state);
         return this;
     }
 
-    public SpreadsheetMapper enable(final SheetParser.Feature... features) {
+    public HyperMapper enable(final SheetParser.Feature... features) {
         for (SheetParser.Feature f : features) {
             tokenStreamFactory().enable(f);
         }
         return this;
     }
 
-    public SpreadsheetMapper disable(final SheetParser.Feature... features) {
+    public HyperMapper disable(final SheetParser.Feature... features) {
         for (SheetParser.Feature f : features) {
             tokenStreamFactory().disable(f);
         }
@@ -247,27 +246,27 @@ public final class SpreadsheetMapper extends ObjectMapper {
         return _schemaGenerator;
     }
 
-    public SpreadsheetMapper setSchemaGenerator(final SchemaGenerator generator) {
+    public HyperMapper setSchemaGenerator(final SchemaGenerator generator) {
         _assertNotNull("generator", generator);
         _schemaGenerator = generator;
         return this;
     }
 
-    public SpreadsheetMapper setOrigin(final int row, final int column) {
+    public HyperMapper setOrigin(final int row, final int column) {
         return setOrigin(new CellAddress(row, column));
     }
 
-    public SpreadsheetMapper setOrigin(final String address) {
+    public HyperMapper setOrigin(final String address) {
         _assertNotNull("address", address);
         return setSchemaGenerator(_schemaGenerator.withOrigin(new CellAddress(address)));
     }
 
-    public SpreadsheetMapper setOrigin(final CellAddress address) {
+    public HyperMapper setOrigin(final CellAddress address) {
         _assertNotNull("address", address);
         return setSchemaGenerator(_schemaGenerator.withOrigin(address));
     }
 
-    public SpreadsheetMapper setColumnNameResolver(final ColumnNameResolver resolver) {
+    public HyperMapper setColumnNameResolver(final ColumnNameResolver resolver) {
         _assertNotNull("resolver", resolver);
         return setSchemaGenerator(_schemaGenerator.withColumnNameResolver(resolver));
     }
@@ -436,7 +435,7 @@ public final class SpreadsheetMapper extends ObjectMapper {
     /**********************************************************
      */
 
-    public SpreadsheetSchema sheetSchemaFor(final Class<?> type) throws JsonMappingException {
+    public HyperSchema sheetSchemaFor(final Class<?> type) throws JsonMappingException {
         return _schemaGenerator.generate(constructType(type), _serializerProvider(_serializationConfig), _serializerFactory);
     }
 
@@ -454,9 +453,9 @@ public final class SpreadsheetMapper extends ObjectMapper {
         }
     }
 
-    public static final class Builder extends MapperBuilder<SpreadsheetMapper, Builder> {
+    public static final class Builder extends MapperBuilder<HyperMapper, Builder> {
 
-        private Builder(final SpreadsheetMapper mapper) {
+        private Builder(final HyperMapper mapper) {
             super(mapper);
         }
 

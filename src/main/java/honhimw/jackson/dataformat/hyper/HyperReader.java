@@ -30,11 +30,11 @@ import java.io.InputStream;
 
 public final class HyperReader extends ObjectReader {
 
-    HyperReader(final SpreadsheetMapper mapper, final DeserializationConfig config) {
+    HyperReader(final HyperMapper mapper, final DeserializationConfig config) {
         super(mapper, config);
     }
 
-    HyperReader(final SpreadsheetMapper mapper, final DeserializationConfig config, final JavaType valueType,
+    HyperReader(final HyperMapper mapper, final DeserializationConfig config, final JavaType valueType,
                       final Object valueToUpdate, final FormatSchema schema,
                       final InjectableValues injectableValues) {
         super(mapper, config, valueType, valueToUpdate, schema, injectableValues);

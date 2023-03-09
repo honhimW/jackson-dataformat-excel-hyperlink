@@ -16,7 +16,6 @@ package honhimw.jackson.dataformat.hyper.schema;
 
 import com.fasterxml.jackson.core.FormatSchema;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 
 import java.util.Iterator;
@@ -24,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public final class SpreadsheetSchema implements FormatSchema, Iterable<Column> {
+public final class HyperSchema implements FormatSchema, Iterable<Column> {
 
     public static final String SCHEMA_TYPE = "spreadsheet";
     private final List<Column> _columns;

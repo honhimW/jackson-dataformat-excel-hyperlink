@@ -22,9 +22,9 @@ import com.fasterxml.jackson.core.io.IOContext;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.PackageVersion;
 import honhimw.jackson.dataformat.hyper.SheetStreamContext;
-import honhimw.jackson.dataformat.hyper.SheetStreamReadException;
+import honhimw.jackson.dataformat.hyper.exception.SheetStreamReadException;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
-import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellAddress;
@@ -47,7 +47,7 @@ public final class SheetParser extends ParserMinimalBase {
     private final int _formatFeatures;
     private boolean _closed;
     private ObjectCodec _objectCodec;
-    private SpreadsheetSchema _schema;
+    private HyperSchema _schema;
     private SheetStreamContext _parsingContext;
     private CellAddress _reference;
     private CellValue _value;
@@ -77,19 +77,19 @@ public final class SheetParser extends ParserMinimalBase {
     }
 
     @Override
-    public SpreadsheetSchema getSchema() {
+    public HyperSchema getSchema() {
         return _schema;
     }
 
     @Override
     public void setSchema(final FormatSchema schema) {
-        _schema = (SpreadsheetSchema) schema;
+        _schema = (HyperSchema) schema;
         _parsingContext = SheetStreamContext.createRootContext(_schema);
     }
 
     @Override
     public boolean canUseSchema(final FormatSchema schema) {
-        return schema instanceof SpreadsheetSchema;
+        return schema instanceof HyperSchema;
     }
 
     public boolean isDate1904() {
@@ -381,7 +381,7 @@ public final class SheetParser extends ParserMinimalBase {
 
     private void _checkSchemaSet() throws IOException {
         if (_schema == null) {
-            throw new SheetStreamReadException(this, "No schema of type '" + SpreadsheetSchema.SCHEMA_TYPE + "' set, can not parse");
+            throw new SheetStreamReadException(this, "No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not parse");
         }
     }
 

@@ -19,7 +19,7 @@ import honhimw.jackson.dataformat.hyper.deser.DataGridBeanDeserializer.Modifier;
 
 final class HyperModule extends com.fasterxml.jackson.databind.Module {
 
-    public static final String MODULE_NAME = "spreadsheet";
+    public static final String MODULE_NAME = "hyper";
 
     @Override
     public String getModuleName() {

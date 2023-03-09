@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.SerializationConfig;
-import honhimw.jackson.dataformat.hyper.ser.SheetGenerator;
 import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -30,16 +29,16 @@ import java.io.IOException;
 
 public final class HyperWriter extends ObjectWriter {
 
-    HyperWriter(final SpreadsheetMapper mapper, final SerializationConfig config,
+    HyperWriter(final HyperMapper mapper, final SerializationConfig config,
                       final JavaType rootType, final PrettyPrinter pp) {
         super(mapper, config, rootType, pp);
     }
 
-    HyperWriter(final SpreadsheetMapper mapper, final SerializationConfig config) {
+    HyperWriter(final HyperMapper mapper, final SerializationConfig config) {
         super(mapper, config);
     }
 
-    HyperWriter(final SpreadsheetMapper mapper, final SerializationConfig config, final FormatSchema s) {
+    HyperWriter(final HyperMapper mapper, final SerializationConfig config, final FormatSchema s) {
         super(mapper, config, s);
     }
 
@@ -88,14 +87,14 @@ public final class HyperWriter extends ObjectWriter {
     /**********************************************************
      */
 
-    public SheetGenerator createGenerator(final Sheet out) {
+    public HyperGenerator createGenerator(final Sheet out) {
         _assertNotNull("out", out);
-        return (SheetGenerator) _configureGenerator(generatorFactory().createGenerator(out));
+        return (HyperGenerator) _configureGenerator(generatorFactory().createGenerator(out));
     }
 
-    public SheetGenerator createGenerator(final SheetOutput<?> out) throws IOException {
+    public HyperGenerator createGenerator(final SheetOutput<?> out) throws IOException {
         _assertNotNull("out", out);
-        return (SheetGenerator) _configureGenerator(generatorFactory().createGenerator(out));
+        return (HyperGenerator) _configureGenerator(generatorFactory().createGenerator(out));
     }
 
     /*

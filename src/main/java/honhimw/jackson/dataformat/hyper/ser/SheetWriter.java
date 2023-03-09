@@ -15,7 +15,7 @@
 package honhimw.jackson.dataformat.hyper.ser;
 
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
-import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.util.CellAddress;
 
@@ -26,7 +26,7 @@ public interface SheetWriter extends AutoCloseable {
 
     SpreadsheetVersion getSpreadsheetVersion();
 
-    void setSchema(SpreadsheetSchema schema);
+    void setSchema(HyperSchema schema);
 
     void setReference(CellAddress reference);
 

@@ -15,21 +15,19 @@
 package honhimw.jackson.dataformat.hyper.schema;
 
 import com.fasterxml.jackson.databind.JavaType;
-import honhimw.jackson.dataformat.hyper.annotation.DataColumn;
-import lombok.EqualsAndHashCode;
-
 import java.util.StringJoiner;
+import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode
 public final class Column {
 
     private final ColumnPointer _pointer;
-    private final DataColumn.Value _value;
+    private final String _name;
     private final JavaType _type;
 
-    public Column(final ColumnPointer pointer, final DataColumn.Value value, final JavaType type) {
+    public Column(final ColumnPointer pointer, final String name, final JavaType type) {
         this._pointer = pointer;
-        this._value = value;
+        this._name = name;
         this._type = type;
     }
 
@@ -47,15 +45,10 @@ public final class Column {
     }
 
     public String getName() {
-        final String name = _value.getName();
-        if (name.isEmpty()) {
+        if (_name.isEmpty()) {
             return _pointer.toString();
         }
-        return name;
-    }
-
-    public DataColumn.Value getValue() {
-        return _value;
+        return _name;
     }
 
     public JavaType getType() {
@@ -73,7 +66,7 @@ public final class Column {
     public String toString() {
         return new StringJoiner(", ", Column.class.getSimpleName() + "[", "]")
                 .add("pointer=" + _pointer)
-                .add("value=" + _value)
+                .add("name=" + _name)
                 .add("type=" + _type)
                 .toString();
     }

@@ -24,8 +24,7 @@ import honhimw.jackson.dataformat.hyper.poi.ooxml.SSMLSheetReader;
 import honhimw.jackson.dataformat.hyper.poi.ooxml.SSMLWorkbook;
 import honhimw.jackson.dataformat.hyper.poi.ss.POISheetReader;
 import honhimw.jackson.dataformat.hyper.poi.ss.POISheetWriter;
-import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
-import honhimw.jackson.dataformat.hyper.ser.SheetGenerator;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
 import honhimw.jackson.dataformat.hyper.ser.SheetWriter;
 import org.apache.poi.openxml4j.opc.PackagePart;
@@ -45,7 +44,7 @@ import java.nio.file.StandardCopyOption;
 @SuppressWarnings("java:S2177")
 public final class HyperFactory extends JsonFactory {
 
-    public static final String FORMAT_NAME = "spreadsheet";
+    public static final String FORMAT_NAME = "hyper";
     public static final int DEFAULT_SHEET_PARSER_FEATURE_FLAGS = SheetParser.Feature.collectDefaults();
 
     private final transient WorkbookProvider _workbookProvider;
@@ -79,7 +78,7 @@ public final class HyperFactory extends JsonFactory {
 
     @Override
     public boolean canUseSchema(final FormatSchema schema) {
-        return schema instanceof SpreadsheetSchema;
+        return schema instanceof HyperSchema;
     }
 
     @Override
@@ -159,14 +158,14 @@ public final class HyperFactory extends JsonFactory {
     /**********************************************************
      */
 
-    public SheetGenerator createGenerator(final Sheet out) {
+    public HyperGenerator createGenerator(final Sheet out) {
         final IOContext ctxt = _createContext(_createContentReference(out), false);
-        final SheetGenerator g = _createGenerator(new POISheetWriter(out), ctxt);
+        final HyperGenerator g = _createGenerator(new POISheetWriter(out), ctxt);
         g.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
         return g;
     }
 
-    public SheetGenerator createGenerator(final SheetOutput<?> out) throws IOException {
+    public HyperGenerator createGenerator(final SheetOutput<?> out) throws IOException {
         final SheetOutput<OutputStream> output = _rawAsOutputStream(out);
         final boolean resourceManaged = out != output;
         final IOContext ctxt = _createContext(_createContentReference(output), resourceManaged);
@@ -174,17 +173,17 @@ public final class HyperFactory extends JsonFactory {
     }
 
     @Override
-    public SheetGenerator createGenerator(final File out, final JsonEncoding enc) throws IOException {
+    public HyperGenerator createGenerator(final File out, final JsonEncoding enc) throws IOException {
         return createGenerator(SheetOutput.target(out));
     }
 
     @Override
-    public SheetGenerator createGenerator(final OutputStream out, final JsonEncoding enc) throws IOException {
+    public HyperGenerator createGenerator(final OutputStream out, final JsonEncoding enc) throws IOException {
         return createGenerator(SheetOutput.target(out));
     }
 
     @Override
-    public SheetGenerator createGenerator(final OutputStream out) throws IOException {
+    public HyperGenerator createGenerator(final OutputStream out) throws IOException {
         return createGenerator(SheetOutput.target(out));
     }
 
@@ -247,8 +246,8 @@ public final class HyperFactory extends JsonFactory {
     /**********************************************************
      */
 
-    private SheetGenerator _createGenerator(final SheetWriter writer, final IOContext ctxt) {
-        return new SheetGenerator(ctxt, _generatorFeatures, _objectCodec, writer);
+    private HyperGenerator _createGenerator(final SheetWriter writer, final IOContext ctxt) {
+        return new HyperGenerator(ctxt, _generatorFeatures, _objectCodec, writer);
     }
 
     @SuppressWarnings("resource")

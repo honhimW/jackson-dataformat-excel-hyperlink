@@ -15,9 +15,9 @@
 package honhimw.jackson.dataformat.hyper.deser;
 
 import com.fasterxml.jackson.core.JsonToken;
-import honhimw.jackson.dataformat.hyper.SheetStreamReadException;
-import honhimw.jackson.dataformat.hyper.SpreadsheetMapper;
-import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
+import honhimw.jackson.dataformat.hyper.exception.SheetStreamReadException;
+import honhimw.jackson.dataformat.hyper.HyperMapper;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.FixtureAs;
@@ -31,12 +31,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SheetParserTest implements FixtureAs {
 
-    SpreadsheetMapper mapper;
+    HyperMapper mapper;
     SheetParser parser;
 
     @BeforeEach
     void setUp() throws Exception {
-        mapper = new SpreadsheetMapper();
+        mapper = new HyperMapper();
         parser = mapper.createParser(fixtureAsFile("entries.xlsx"));
     }
 
@@ -44,7 +44,7 @@ class SheetParserTest implements FixtureAs {
     void noSchema() throws Exception {
         assertThatThrownBy(parser::nextToken)
                 .isInstanceOf(SheetStreamReadException.class)
-                .hasMessageContaining("No schema of type '%s' set, can not parse", SpreadsheetSchema.SCHEMA_TYPE);
+                .hasMessageContaining("No schema of type '%s' set, can not parse", HyperSchema.SCHEMA_TYPE);
     }
 
     @Test

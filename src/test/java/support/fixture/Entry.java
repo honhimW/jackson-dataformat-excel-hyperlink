@@ -14,20 +14,17 @@
 
 package support.fixture;
 
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
+import java.util.Arrays;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
-import java.util.Arrays;
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-@DataGrid
 public class Entry {
 
     public static final Entry VALUE = new Entry(1, 2);

@@ -32,13 +32,13 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class SpreadsheetMapperTest implements FixtureAs {
+class HyperMapperTest implements FixtureAs {
 
-    SpreadsheetMapper mapper;
+    HyperMapper mapper;
 
     @BeforeEach
     void setUp() throws Exception {
-        mapper = new SpreadsheetMapper();
+        mapper = new HyperMapper();
     }
 
     @Nested

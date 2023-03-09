@@ -40,7 +40,7 @@ final class ArrayFormatVisitor extends JsonArrayFormatVisitor.Base {
         final FormatVisitorWrapper visitor = new FormatVisitorWrapper(_wrapper, pointer);
         handler.acceptJsonFormatVisitor(visitor, elementType);
         if (visitor.isEmpty()) {
-            _wrapper.add(new Column(pointer, _wrapper.getColumn(), _type));
+            _wrapper.add(new Column(pointer, _wrapper.getColumnName(), _type));
         } else {
             _wrapper.addAll(visitor);
         }
@@ -49,6 +49,6 @@ final class ArrayFormatVisitor extends JsonArrayFormatVisitor.Base {
     @Override
     public void itemsFormat(final JsonFormatTypes format) throws JsonMappingException {
         final ColumnPointer pointer = _wrapper.getPointer().resolveArray();
-        _wrapper.add(new Column(pointer, _wrapper.getColumn(), _type));
+        _wrapper.add(new Column(pointer, _wrapper.getColumnName(), _type));
     }
 }

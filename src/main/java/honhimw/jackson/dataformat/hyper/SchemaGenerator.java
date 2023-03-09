@@ -22,9 +22,8 @@ import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
 import com.fasterxml.jackson.databind.util.ClassUtil;
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
 import honhimw.jackson.dataformat.hyper.schema.Column;
-import honhimw.jackson.dataformat.hyper.schema.SpreadsheetSchema;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
 import honhimw.jackson.dataformat.hyper.schema.generator.FormatVisitorWrapper;
 import java.util.ArrayList;
@@ -54,7 +53,7 @@ public final class SchemaGenerator {
         return new SchemaGenerator(_generatorSettings.with(resolver));
     }
 
-    SpreadsheetSchema generate(final JavaType type, final DefaultSerializerProvider provider,
+    HyperSchema generate(final JavaType type, final DefaultSerializerProvider provider,
         final SerializerFactory factory)
         throws JsonMappingException {
         _verifyType(type, provider);
@@ -74,16 +73,13 @@ public final class SchemaGenerator {
                 log.trace(column.toString());
             }
         }
-        return new SpreadsheetSchema(columns, _generatorSettings._origin);
+        return new HyperSchema(columns, _generatorSettings._origin);
     }
 
     private void _verifyType(final JavaType type, final DefaultSerializerProvider provider)
         throws JsonMappingException {
         if (type.isArrayType() || type.isCollectionLikeType()) {
             throw _invalidSchemaDefinition(type, "can NOT be a Collection or array type");
-        }
-        if (!provider.getConfig().introspect(type).getClassAnnotations().has(DataGrid.class)) {
-            throw _invalidSchemaDefinition(type, "MUST be annotated with `@" + DataGrid.class.getSimpleName() + '`');
         }
     }
 
@@ -98,7 +94,7 @@ public final class SchemaGenerator {
     private JsonMappingException _invalidSchemaDefinition(final JavaType type, final String problem,
         final Throwable cause) {
         final String msg = String.format("Failed to generate schema of type '%s' for %s, problem: %s",
-            SpreadsheetSchema.SCHEMA_TYPE,
+            HyperSchema.SCHEMA_TYPE,
             ClassUtil.getTypeDescription(type), problem);
         return InvalidDefinitionException.from((JsonGenerator) null, msg, type).withCause(cause);
     }

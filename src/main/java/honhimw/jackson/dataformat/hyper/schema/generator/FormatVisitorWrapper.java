@@ -23,35 +23,30 @@ import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonMapFormatVisitor;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
-import honhimw.jackson.dataformat.hyper.annotation.DataColumn;
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public final class FormatVisitorWrapper extends JsonFormatVisitorWrapper.Base implements Iterable<Column> {
 
     private final ColumnPointer _pointer;
-    private final DataGrid.Value _grid;
-    private final DataColumn.Value _column;
+    private final String _columnName;
     private final List<Column> _columns;
 
     public FormatVisitorWrapper() {
-        this(ColumnPointer.empty(), DataGrid.Value.empty(), DataColumn.Value.empty(), null);
+        this(ColumnPointer.empty(), "", null);
     }
 
     FormatVisitorWrapper(final FormatVisitorWrapper base, final ColumnPointer pointer) {
-        this(pointer, base._grid, base._column, base._provider);
+        this(pointer, base._columnName, base._provider);
     }
 
-    FormatVisitorWrapper(final ColumnPointer pointer, final DataGrid.Value sheet, final DataColumn.Value column, final SerializerProvider provider) {
+    FormatVisitorWrapper(final ColumnPointer pointer, final String columnName, final SerializerProvider provider) {
         super(provider);
         _pointer = pointer;
-        _grid = sheet;
-        _column = column;
+        _columnName = columnName;
         _columns = new ArrayList<>();
     }
 
@@ -79,12 +74,8 @@ public final class FormatVisitorWrapper extends JsonFormatVisitorWrapper.Base im
         return _pointer;
     }
 
-    DataGrid.Value getSheet() {
-        return _grid;
-    }
-
-    DataColumn.Value getColumn() {
-        return _column;
+    String getColumnName() {
+        return _columnName;
     }
 
     boolean isEmpty() {

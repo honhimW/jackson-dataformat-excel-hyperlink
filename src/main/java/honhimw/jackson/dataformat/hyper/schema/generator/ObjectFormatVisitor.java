@@ -14,8 +14,13 @@
 
 package honhimw.jackson.dataformat.hyper.schema.generator;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
@@ -25,12 +30,10 @@ import com.fasterxml.jackson.databind.util.ClassUtil;
 import honhimw.jackson.dataformat.hyper.ExcelDateModule;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
-import honhimw.jackson.dataformat.hyper.annotation.DataColumn;
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
+import java.util.Optional;
 import java.util.stream.BaseStream;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
@@ -58,15 +61,14 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
             throw new IllegalStateException(type.getRawClass() + " is not (yet?) supported");
         }
         final ColumnPointer pointer = _wrapper.getPointer().resolve(prop.getName());
-        final DataGrid.Value gridValue = _gridValue(prop);
-        final DataColumn.Value columnValue = _columnValue(prop, gridValue);
-        final FormatVisitorWrapper visitor = new FormatVisitorWrapper(pointer, gridValue, columnValue, _provider);
+        final String columnDescription = _columnValue(prop);
+        final FormatVisitorWrapper visitor = new FormatVisitorWrapper(pointer, columnDescription, _provider);
         final JsonSerializer<Object> serializer = _findValueSerializer(prop);
         _checkTypeSupported(serializer);
         serializer.acceptJsonFormatVisitor(visitor, type);
         if (visitor.isEmpty()) {
             final String columnName = _resolveColumnName(prop);
-            _wrapper.add(new Column(pointer, columnValue.withName(columnName), type));
+            _wrapper.add(new Column(pointer, columnName, type));
         } else {
             _wrapper.addAll(visitor);
         }
@@ -87,14 +89,11 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
         return resolver.resolve(prop);
     }
 
-    private DataGrid.Value _gridValue(BeanProperty prop) {
-        final DataGrid ann = prop.getContextAnnotation(DataGrid.class);
-        return DataGrid.Value.from(ann).withDefaults(_wrapper.getSheet());
-    }
-
-    private DataColumn.Value _columnValue(BeanProperty prop, DataGrid.Value grid) {
-        final DataColumn ann = prop.getAnnotation(DataColumn.class);
-        return DataColumn.Value.from(ann).withDefaults(grid);
+    private String _columnValue(BeanProperty prop) {
+        return Optional.of(prop)
+            .map(beanProperty -> beanProperty.getAnnotation(JsonPropertyDescription.class))
+            .map(JsonPropertyDescription::value)
+            .orElseGet(prop::getName);
     }
 
     private void _checkTypeSupported(final JsonSerializer<Object> serializer) throws JsonMappingException {

@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.BeanProperty;
 
 public interface ColumnNameResolver {
 
-    ColumnNameResolver NULL = prop -> null;
+    ColumnNameResolver NULL = BeanProperty::getName;
 
     String resolve(BeanProperty prop);
 }
