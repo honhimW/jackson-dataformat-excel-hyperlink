@@ -12,26 +12,13 @@
  * limitations under the License.
  */
 
-package support.fixture;
+package honhimw.jackson.dataformat.hyper.schema.generator;
 
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.databind.BeanProperty;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@DataGrid
-public class NestedEntry {
+public interface ColumnNameResolver {
 
-    int a;
-    Inner inner;
+    ColumnNameResolver NULL = prop -> null;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Inner {
-        int b;
-    }
+    String resolve(BeanProperty prop);
 }

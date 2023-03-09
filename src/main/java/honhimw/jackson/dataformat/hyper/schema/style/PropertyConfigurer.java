@@ -12,26 +12,19 @@
  * limitations under the License.
  */
 
-package support.fixture;
+package honhimw.jackson.dataformat.hyper.schema.style;
 
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.function.Function;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@DataGrid
-public class NestedEntry {
+abstract class PropertyConfigurer<E, B extends Builder<?>> {
 
-    int a;
-    Inner inner;
+    private final Function<E, B> _property;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Inner {
-        int b;
+    protected PropertyConfigurer(final Function<E, B> property) {
+        _property = property;
+    }
+
+    protected final B apply(final E value) {
+        return _property.apply(value);
     }
 }

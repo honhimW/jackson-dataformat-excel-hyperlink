@@ -12,26 +12,20 @@
  * limitations under the License.
  */
 
-package support.fixture;
+package honhimw.jackson.dataformat.hyper.schema;
 
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Workbook;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@DataGrid
-public class NestedEntry {
+public interface Styles {
 
-    int a;
-    Inner inner;
+    CellStyle getStyle(Column column);
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Inner {
-        int b;
+    default CellStyle getHeaderStyle(final Column column) {
+        return getStyle(column);
+    }
+
+    interface Builder {
+        Styles build(Workbook workbook);
     }
 }

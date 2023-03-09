@@ -12,26 +12,30 @@
  * limitations under the License.
  */
 
-package support.fixture;
+package honhimw.jackson.dataformat.hyper.deser;
 
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.util.CellAddress;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@DataGrid
-public class NestedEntry {
+import java.io.IOException;
+import java.util.Iterator;
 
-    int a;
-    Inner inner;
+public interface SheetReader extends AutoCloseable, Iterator<SheetToken> {
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Inner {
-        int b;
-    }
+    SpreadsheetVersion getSpreadsheetVersion();
+
+    boolean isDate1904();
+
+    CellAddress getReference();
+
+    CellValue getCellValue();
+
+    int getRow();
+
+    int getColumn();
+
+    boolean isClosed();
+
+    @Override
+    void close() throws IOException;
 }

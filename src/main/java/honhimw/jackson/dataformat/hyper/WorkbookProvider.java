@@ -12,26 +12,13 @@
  * limitations under the License.
  */
 
-package support.fixture;
+package honhimw.jackson.dataformat.hyper;
 
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@DataGrid
-public class NestedEntry {
+import java.io.IOException;
 
-    int a;
-    Inner inner;
+public interface WorkbookProvider {
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Inner {
-        int b;
-    }
+    Workbook create() throws IOException;
 }

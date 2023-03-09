@@ -12,26 +12,21 @@
  * limitations under the License.
  */
 
-package support.fixture;
+package honhimw.jackson.dataformat.hyper;
 
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.exc.StreamWriteException;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@DataGrid
-public class NestedEntry {
+@SuppressWarnings("java:S110")
+public final class SheetStreamWriteException extends StreamWriteException {
 
-    int a;
-    Inner inner;
+    public SheetStreamWriteException(final String msg, final JsonGenerator g) {
+        super(msg, g);
+    }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Inner {
-        int b;
+    @Override
+    public StreamWriteException withGenerator(final JsonGenerator g) {
+        _processor = g;
+        return this;
     }
 }

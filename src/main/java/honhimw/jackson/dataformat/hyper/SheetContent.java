@@ -12,26 +12,21 @@
  * limitations under the License.
  */
 
-package support.fixture;
+package honhimw.jackson.dataformat.hyper;
 
-import honhimw.jackson.dataformat.hyper.annotation.DataGrid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.io.File;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@DataGrid
-public class NestedEntry {
+public interface SheetContent<T> {
 
-    int a;
-    Inner inner;
+    T getRaw();
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Inner {
-        int b;
+    String getName();
+
+    default boolean isNamed() {
+        return getName() != null;
+    }
+
+    default boolean isFile() {
+        return getRaw() instanceof File;
     }
 }
