@@ -64,8 +64,8 @@ public abstract class SheetStreamContext extends JsonStreamContext {
         return new ArrayContext(this, size);
     }
 
-    public SheetStreamContext createChildObjectContext() {
-        return new ObjectContext(this);
+    public SheetStreamContext createChildObjectContext(Object forValue) {
+        return new ObjectContext(this, forValue);
     }
 
     public int size() {
@@ -224,8 +224,11 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         private String _name;
 
-        ObjectContext(final SheetStreamContext parent) {
+        private final Object _currentValue;
+
+        ObjectContext(final SheetStreamContext parent, final Object currentValue) {
             super(TYPE_OBJECT, parent);
+            this._currentValue = currentValue;
         }
 
         @Override

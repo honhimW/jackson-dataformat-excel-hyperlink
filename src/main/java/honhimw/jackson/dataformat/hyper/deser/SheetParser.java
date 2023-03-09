@@ -113,7 +113,7 @@ public final class SheetParser extends ParserMinimalBase {
                 _parsingContext = _parsingContext.createChildArrayContext();
                 break;
             case START_OBJECT:
-                _parsingContext = _parsingContext.createChildObjectContext();
+                _parsingContext = _parsingContext.createChildObjectContext(null);
                 break;
             case END_ARRAY:
             case END_OBJECT:

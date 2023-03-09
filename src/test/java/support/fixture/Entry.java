@@ -14,6 +14,7 @@
 
 package support.fixture;
 
+import com.fasterxml.jackson.annotation.JsonClassDescription;
 import java.util.Arrays;
 import java.util.List;
 import lombok.AllArgsConstructor;

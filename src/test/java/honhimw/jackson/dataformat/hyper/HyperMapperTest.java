@@ -92,6 +92,7 @@ class HyperMapperTest implements FixtureAs {
 
         @BeforeEach
         void setUp() throws Exception {
+            tempDir = Path.of("E:\\temp");
             out = tempDir.resolve("test.xlsx").toFile();
         }
 

@@ -60,6 +60,7 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
         if (type.isTypeOrSubTypeOf(BaseStream.class)) {
             throw new IllegalStateException(type.getRawClass() + " is not (yet?) supported");
         }
+
         final ColumnPointer pointer = _wrapper.getPointer().resolve(prop.getName());
         final String columnDescription = _columnValue(prop);
         final FormatVisitorWrapper visitor = new FormatVisitorWrapper(pointer, columnDescription, _provider);
@@ -70,6 +71,8 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
             final String columnName = _resolveColumnName(prop);
             _wrapper.add(new Column(pointer, columnName, type));
         } else {
+            final String columnName = _resolveColumnName(prop);
+            _wrapper.add(new Column(pointer, columnName, type));
             _wrapper.addAll(visitor);
         }
     }

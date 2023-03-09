@@ -76,6 +76,11 @@ public final class HyperGenerator extends GeneratorBase {
     }
 
     @Override
+    public boolean canUseSchema(final FormatSchema schema) {
+        return schema instanceof HyperSchema;
+    }
+
+    @Override
     public HyperSchema getSchema() {
         return _schema;
     }
@@ -87,11 +92,6 @@ public final class HyperGenerator extends GeneratorBase {
         _writer.setSchema(_schema);
         _writer.writeHeaders();
         _outputContext = SheetStreamContext.createRootContext(_schema);
-    }
-
-    @Override
-    public boolean canUseSchema(final FormatSchema schema) {
-        return schema instanceof HyperSchema;
     }
 
     public boolean isDate1904() {
@@ -122,7 +122,7 @@ public final class HyperGenerator extends GeneratorBase {
     @Override
     public void writeStartObject(final Object forValue) throws IOException {
         _verifyValueWrite(START_OBJECT);
-        _outputContext = _outputContext.createChildObjectContext();
+        _outputContext = _outputContext.createChildObjectContext(forValue);
     }
 
     @Override

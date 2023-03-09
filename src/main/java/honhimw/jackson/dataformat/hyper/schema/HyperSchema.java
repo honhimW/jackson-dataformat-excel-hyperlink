@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public final class HyperSchema implements FormatSchema, Iterable<Column> {
 
-    public static final String SCHEMA_TYPE = "spreadsheet";
+    public static final String SCHEMA_TYPE = "hyper";
     private final List<Column> _columns;
     private final CellAddress _origin;
 

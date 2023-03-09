@@ -28,6 +28,9 @@ import java.util.Iterator;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ *
+ */
 @Slf4j
 public final class FormatVisitorWrapper extends JsonFormatVisitorWrapper.Base implements Iterable<Column> {
 
