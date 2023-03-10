@@ -156,13 +156,6 @@ public final class HyperMapper extends ObjectMapper {
     /**********************************************************
      */
 
-    public HyperGenerator createGenerator(final Sheet out) {
-        _assertNotNull("out", out);
-        final HyperGenerator g = tokenStreamFactory().createGenerator(out);
-        _serializationConfig.initialize(g);
-        return g;
-    }
-
     public HyperGenerator createGenerator(final SheetOutput<?> out) throws IOException {
         _assertNotNull("out", out);
         final HyperGenerator g = tokenStreamFactory().createGenerator(out);
@@ -338,11 +331,6 @@ public final class HyperMapper extends ObjectMapper {
     /**********************************************************
      */
 
-    public void writeValue(final Sheet out, final Object value) throws IOException {
-        _verifyValueType(value);
-        writeValue(out, value, value.getClass());
-    }
-
     public void writeValue(final SheetOutput<?> out, final Object value) throws IOException {
         _verifyValueType(value);
         writeValue(out, value, value.getClass());
@@ -358,10 +346,6 @@ public final class HyperMapper extends ObjectMapper {
     public void writeValue(final OutputStream out, final Object value) throws IOException {
         _verifyValueType(value);
         writeValue(out, value, value.getClass());
-    }
-
-    public void writeValue(final Sheet out, final Object value, final Class<?> valueType) throws IOException {
-        sheetWriterFor(valueType).writeValue(out, value);
     }
 
     public void writeValue(final SheetOutput<?> out, final Object value, final Class<?> valueType) throws IOException {

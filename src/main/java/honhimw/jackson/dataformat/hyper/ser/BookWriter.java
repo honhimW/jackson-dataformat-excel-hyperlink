@@ -14,6 +14,7 @@
 
 package honhimw.jackson.dataformat.hyper.ser;
 
+import honhimw.jackson.dataformat.hyper.Range;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import org.apache.poi.ss.SpreadsheetVersion;
@@ -22,9 +23,13 @@ import org.apache.poi.ss.util.CellAddress;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public interface SheetWriter extends AutoCloseable {
+public interface BookWriter extends AutoCloseable {
 
     SpreadsheetVersion getSpreadsheetVersion();
+
+    void switchSheet(Class<?> type);
+
+    void link(final Class<?> type, String value, Range range);
 
     void setSchema(HyperSchema schema);
 

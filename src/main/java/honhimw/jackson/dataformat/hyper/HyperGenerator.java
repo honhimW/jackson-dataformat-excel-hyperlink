@@ -31,10 +31,11 @@ package honhimw.jackson.dataformat.hyper;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.IOContext;
+import honhimw.jackson.dataformat.hyper.SheetStreamContext.ObjectContext;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.exception.SheetStreamWriteException;
 import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
-import honhimw.jackson.dataformat.hyper.ser.SheetWriter;
+import honhimw.jackson.dataformat.hyper.ser.BookWriter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -55,11 +56,11 @@ public final class HyperGenerator extends GeneratorBase {
     private static final String WRITE_NULL = "Write a null";
 
     private final IOContext _ioContext;
-    private final SheetWriter _writer;
+    private final BookWriter _writer;
     private HyperSchema _schema;
     private SheetStreamContext _outputContext;
 
-    public HyperGenerator(final IOContext ctxt, final int features, final ObjectCodec codec, final SheetWriter writer) {
+    public HyperGenerator(final IOContext ctxt, final int features, final ObjectCodec codec, final BookWriter writer) {
         super(features, codec);
         _ioContext = ctxt;
         _writer = writer;
@@ -122,13 +123,21 @@ public final class HyperGenerator extends GeneratorBase {
     @Override
     public void writeStartObject(final Object forValue) throws IOException {
         _verifyValueWrite(START_OBJECT);
+        _writer.switchSheet(forValue.getClass());
         _outputContext = _outputContext.createChildObjectContext(forValue);
     }
 
     @Override
     public void writeEndObject() throws IOException {
         // final int size = _outputContext.size()
+        Range range = ((ObjectContext) _outputContext).contentRows();
+        Object subValue = _outputContext.getCurrentValue();
         _outputContext = _closeStruct(END_OBJECT);
+        if (!_outputContext.inRoot() && !_outputContext.inArray()) {
+            _writer.switchSheet(_outputContext.getCurrentValue().getClass());
+            _writer.setReference(_outputContext.currentReference());
+            _writer.link(subValue.getClass(), null, range);
+        }
         // final ColumnPointer pointer = _outputContext.currentPointer()
         // TODO support merge column in scope to optional features via annotation
         // _writer.mergeScopedColumns(pointer, _outputContext.getRow(), size)

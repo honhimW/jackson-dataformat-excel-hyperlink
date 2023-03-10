@@ -87,11 +87,6 @@ public final class HyperWriter extends ObjectWriter {
     /**********************************************************
      */
 
-    public HyperGenerator createGenerator(final Sheet out) {
-        _assertNotNull("out", out);
-        return (HyperGenerator) _configureGenerator(generatorFactory().createGenerator(out));
-    }
-
     public HyperGenerator createGenerator(final SheetOutput<?> out) throws IOException {
         _assertNotNull("out", out);
         return (HyperGenerator) _configureGenerator(generatorFactory().createGenerator(out));
@@ -103,16 +98,8 @@ public final class HyperWriter extends ObjectWriter {
     /**********************************************************
      */
 
-    public SequenceWriter writeValues(final Sheet out) throws IOException {
-        return _newSequenceWriter(false, createGenerator(out), true);
-    }
-
     public SequenceWriter writeValues(final SheetOutput<?> out) throws IOException {
         return _newSequenceWriter(false, createGenerator(out), true);
-    }
-
-    public SequenceWriter writeValuesAsArray(final Sheet out) throws IOException {
-        return _newSequenceWriter(true, createGenerator(out), true);
     }
 
     public SequenceWriter writeValuesAsArray(final SheetOutput<?> out) throws IOException {
@@ -124,10 +111,6 @@ public final class HyperWriter extends ObjectWriter {
     /* Serialization methods, others
     /**********************************************************
      */
-
-    public void writeValue(final Sheet out, final Object value) throws IOException {
-        _writeValueAndClose(createGenerator(out), value);
-    }
 
     public void writeValue(final SheetOutput<?> out, final Object value) throws IOException {
         _writeValueAndClose(createGenerator(out), value);

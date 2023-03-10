@@ -36,17 +36,20 @@ public class Person implements Serializable {
 
     private String title;
 
+    @JsonProperty(index = 2)
     private Double height;
 
     private Boolean gender;
 
-//    @JsonSerialize(converter = List2String.class)
-//    @JsonDeserialize(converter = String2List.class)
+    @JsonSerialize(converter = List2String.class)
+    @JsonDeserialize(converter = String2List.class)
     private List<String> properties;
 
+    @JsonIgnore
     private List<Ext> properties2;
 
 //    @JsonIgnore
+    @JsonProperty(index = 3)
     private Ext ext;
     private Ext ext2;
     private Ext ext3;
@@ -58,9 +61,10 @@ public class Person implements Serializable {
     public static class Ext implements Serializable {
         @JsonProperty(index = 0)
         private String address;
-        private String job;
-
         @JsonProperty(index = 1)
+        private Double job;
+
+        @JsonProperty(index = 2)
         private More more;
 
         @Data

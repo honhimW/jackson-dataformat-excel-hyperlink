@@ -23,10 +23,10 @@ import honhimw.jackson.dataformat.hyper.poi.ooxml.PackageUtil;
 import honhimw.jackson.dataformat.hyper.poi.ooxml.SSMLSheetReader;
 import honhimw.jackson.dataformat.hyper.poi.ooxml.SSMLWorkbook;
 import honhimw.jackson.dataformat.hyper.poi.ss.POISheetReader;
-import honhimw.jackson.dataformat.hyper.poi.ss.POISheetWriter;
+import honhimw.jackson.dataformat.hyper.poi.ss.POIBookWriter;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
-import honhimw.jackson.dataformat.hyper.ser.SheetWriter;
+import honhimw.jackson.dataformat.hyper.ser.BookWriter;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -158,13 +158,6 @@ public final class HyperFactory extends JsonFactory {
     /**********************************************************
      */
 
-    public HyperGenerator createGenerator(final Sheet out) {
-        final IOContext ctxt = _createContext(_createContentReference(out), false);
-        final HyperGenerator g = _createGenerator(new POISheetWriter(out), ctxt);
-        g.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-        return g;
-    }
-
     public HyperGenerator createGenerator(final SheetOutput<?> out) throws IOException {
         final SheetOutput<OutputStream> output = _rawAsOutputStream(out);
         final boolean resourceManaged = out != output;
@@ -246,20 +239,20 @@ public final class HyperFactory extends JsonFactory {
     /**********************************************************
      */
 
-    private HyperGenerator _createGenerator(final SheetWriter writer, final IOContext ctxt) {
+    private HyperGenerator _createGenerator(final BookWriter writer, final IOContext ctxt) {
         return new HyperGenerator(ctxt, _generatorFeatures, _objectCodec, writer);
     }
 
     @SuppressWarnings("resource")
-    private SheetWriter _createSheetWriter(final SheetOutput<?> out) throws IOException {
+    private BookWriter _createSheetWriter(final SheetOutput<?> out) throws IOException {
         final Workbook workbook = _workbookProvider.create();
-        final Sheet sheet;
-        if (out.isNamed()) {
-            sheet = workbook.createSheet(out.getName());
-        } else {
-            sheet = workbook.createSheet();
-        }
-        return new POISheetWriter(sheet);
+//        final Sheet sheet;
+//        if (out.isNamed()) {
+//            sheet = workbook.createSheet(out.getName());
+//        } else {
+//            sheet = workbook.createSheet();
+//        }
+        return new POIBookWriter(workbook);
     }
 
     @SuppressWarnings("unchecked")

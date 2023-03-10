@@ -24,11 +24,20 @@ public final class Column {
     private final ColumnPointer _pointer;
     private final String _name;
     private final JavaType _type;
+    private final boolean _leaf;
 
     public Column(final ColumnPointer pointer, final String name, final JavaType type) {
+        this(pointer, name, type, true);
+    }
+    public Column(final ColumnPointer pointer, final String name, final JavaType type, boolean leaf) {
         this._pointer = pointer;
         this._name = name;
         this._type = type;
+        this._leaf = leaf;
+    }
+
+    public boolean isLeaf() {
+        return _leaf;
     }
 
     public ColumnPointer getPointer() {
@@ -58,7 +67,7 @@ public final class Column {
         return _type;
     }
 
-    private boolean isArray() {
+    public boolean isArray() {
         return _type.isArrayType() || _type.isCollectionLikeType();
     }
 

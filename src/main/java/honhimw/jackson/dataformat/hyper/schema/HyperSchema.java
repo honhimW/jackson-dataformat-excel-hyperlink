@@ -15,6 +15,7 @@
 package honhimw.jackson.dataformat.hyper.schema;
 
 import com.fasterxml.jackson.core.FormatSchema;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.util.CellAddress;
 
@@ -56,6 +57,21 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
 
     public int getOriginColumn() {
         return _origin.getColumn();
+    }
+
+    public int columnIndexOfCurrentSheet(final ColumnPointer pointer) {
+        int index = -1;
+        // i = 1, _columns first member is root, so we just ignore it
+        for (int i = 1; i < _columns.size(); i++) {
+            Column column = _columns.get(i);
+            if (column.getPointer().getParent().equals(pointer.getParent())) {
+                index++;
+                if (column.matches(pointer)) {
+                    return index + getOriginColumn();
+                }
+            }
+        }
+        return -1;
     }
 
     public int columnIndexOf(final ColumnPointer pointer) {

@@ -14,43 +14,72 @@
 
 package honhimw.jackson.dataformat.hyper.poi.ss;
 
+import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.databind.JavaType;
+import honhimw.jackson.dataformat.hyper.Range;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
-import honhimw.jackson.dataformat.hyper.ser.SheetWriter;
+import honhimw.jackson.dataformat.hyper.ser.BookWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Date1904Support;
+import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellUtil;
-import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 @Slf4j
-public final class POISheetWriter implements SheetWriter {
+public final class POIBookWriter implements BookWriter {
 
     private static final int MAX_COLUMN_WIDTH = 255 * 256;
 
-    private final Sheet _sheet;
+    private final Workbook _workbook;
+    private final Map<Class<?>, Sheet> _sheetMap = new HashMap<>();
+    private Sheet _sheet;
     private HyperSchema _schema;
     private CellAddress _reference;
     private int _lastRow;
 
-    public POISheetWriter(final Sheet sheet) {
-        _sheet = sheet;
+    public POIBookWriter(final Workbook _workbook) {
+        this._workbook = _workbook;
     }
 
     @Override
     public SpreadsheetVersion getSpreadsheetVersion() {
-        return _sheet.getWorkbook().getSpreadsheetVersion();
+        return _workbook.getSpreadsheetVersion();
+    }
+
+    @Override
+    public void switchSheet(final Class<?> type) {
+        this._sheet = _sheetMap.get(type);
+    }
+
+    @Override
+    public void link(final Class<?> type, String value, Range range) {
+        Sheet sheet = _sheetMap.get(type);
+        _write(value, (cell, s) -> {
+            String address = String.format("#%s!%d:%d", sheet.getSheetName(), range.start(), range.end());
+            String text = StringUtil.isNotBlank(s) ? s : address;
+            CreationHelper creationHelper = _workbook.getCreationHelper();
+            Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
+            hyperlink.setAddress(address);
+            cell.setHyperlink(hyperlink);
+            cell.setCellValue(text);
+        });
     }
 
     @Override
@@ -67,9 +96,36 @@ public final class POISheetWriter implements SheetWriter {
     public void writeHeaders() {
         final int row = _schema.getOriginRow();
         for (final Column column : _schema) {
-            final int col = _schema.columnIndexOf(column);
-            setReference(new CellAddress(row, col));
-            writeString(column.getName());
+            JavaType type = column.getType();
+            String sheetName = null;
+            if (!column.isLeaf() && !column.isArray()) {
+                Class<?> clazz = type.getRawClass();
+                if (!_sheetMap.containsKey(clazz)) {
+                    if (clazz.isAnnotationPresent(JsonClassDescription.class)) {
+                        JsonClassDescription annotation = clazz.getAnnotation(JsonClassDescription.class);
+                        sheetName = annotation.value();
+                    }
+                    if (StringUtil.isBlank(sheetName)) {
+                        sheetName = clazz.getSimpleName();
+                    }
+                    Sheet sheet = _workbook.createSheet(sheetName);
+                    _sheetMap.put(clazz, sheet);
+                    this._sheet = sheet;
+                } else {
+                    this._sheet = _sheetMap.get(clazz);
+                }
+                ColumnPointer pointer = column.getPointer();
+                List<Column> columns = _schema.getColumns(pointer);
+                // only first-order path
+                columns = columns.stream().filter(
+                    col -> col.getPointer().getParent().equals(pointer) && !ColumnPointer.empty()
+                        .equals(col.getPointer())).toList();
+                for (int i = 0; i < columns.size(); i++) {
+                    final int col = _schema.getOriginColumn() + i;
+                    setReference(new CellAddress(row, col));
+                    writeString(columns.get(i).getName());
+                }
+            }
         }
     }
 
@@ -93,11 +149,10 @@ public final class POISheetWriter implements SheetWriter {
         _write(null, (cell, o) -> cell.setBlank());
     }
 
-    private <T> void _write(final T value, final BiConsumer<Cell, T> consumer) {
+    private <T> void  _write(final T value, final BiConsumer<Cell, T> consumer) {
         final int row = _reference.getRow();
         final Cell cell = CellUtil.getCell(CellUtil.getRow(row, _sheet), _reference.getColumn());
         consumer.accept(cell, value);
-        final Column column = _schema.findColumn(_reference);
         _lastRow = Math.max(_lastRow, row);
         if (log.isTraceEnabled()) {
             log.trace("{} {} {}", _reference, cell.getCellType(), cell);

@@ -98,6 +98,7 @@ public abstract class SheetStreamContext extends JsonStreamContext {
     }
 
     interface Matcher {
+
         boolean matches(SheetStreamContext context);
     }
 
@@ -151,6 +152,8 @@ public abstract class SheetStreamContext extends JsonStreamContext {
             _parent = parent;
         }
 
+        public abstract Range contentRows();
+
         @Override
         public SheetStreamContext getParent() {
             return _parent;
@@ -168,6 +171,7 @@ public abstract class SheetStreamContext extends JsonStreamContext {
         }
     }
 
+
     static final class ArrayContext extends ChildContext implements StepAware {
 
         private int _step = DEFAULT_STEP;
@@ -179,8 +183,15 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         @Override
         public ColumnPointer currentPointer() {
-            if (_parent.inRoot()) return _parent.currentPointer();
+            if (_parent.inRoot()) {
+                return _parent.currentPointer();
+            }
             return _parent.currentPointer().resolveArray();
+        }
+
+        @Override
+        public Range contentRows() {
+            return new Range(0, 0);
         }
 
         @Override
@@ -226,6 +237,8 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         private final Object _currentValue;
 
+        private Range range;
+
         ObjectContext(final SheetStreamContext parent, final Object currentValue) {
             super(TYPE_OBJECT, parent);
             this._currentValue = currentValue;
@@ -242,24 +255,38 @@ public abstract class SheetStreamContext extends JsonStreamContext {
         }
 
         @Override
+        public Object getCurrentValue() {
+            return _currentValue;
+        }
+
+        @Override
         public ColumnPointer currentPointer() {
             return _parent.currentPointer().resolve(_name);
         }
 
         @Override
+        public Range contentRows() {
+            return range;
+        }
+
+        @Override
         public int getRow() {
-            return _parent.getRow();
+            int row = _parent.getRow();
+            range = new Range(row, row);
+            return row;
         }
 
         @Override
         public int getColumn() {
-            return hasCurrentIndex() ? _index : _parent.getColumn();
+            return _schema.getOriginColumn() + _index;
         }
 
         @Override
         public void writeValue() {
-            _index = _schema.columnIndexOf(currentPointer());
-            if (_size == 0) _size = 1;
+            _index = _schema.columnIndexOfCurrentSheet(currentPointer());
+            if (_size == 0) {
+                _size = 1;
+            }
         }
     }
 }

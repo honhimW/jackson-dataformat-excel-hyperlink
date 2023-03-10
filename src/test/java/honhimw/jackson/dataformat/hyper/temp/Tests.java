@@ -28,12 +28,11 @@ public class Tests {
         generate.forEach(person -> person.setProperties(List.of("hello", "world")));
         generate.forEach(person -> person.setProperties2(new ArrayList<>(MockUtils.generate(Ext.class, 4))));
         generate.forEach(person -> person.setName(null));
-//        some file
         File file = new File("E:\\temp\\1234.xlsx");
         mapper.writeValue(file, generate, Person.class);
 
-        List<Person> people = mapper.readValues(file, Person.class);
-        people.forEach(System.out::println);
+//        List<Person> people = mapper.readValues(file, Person.class);
+//        people.forEach(System.out::println);
     }
 
 }

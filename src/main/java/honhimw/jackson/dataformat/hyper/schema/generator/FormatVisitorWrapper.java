@@ -55,7 +55,8 @@ public final class FormatVisitorWrapper extends JsonFormatVisitorWrapper.Base im
 
     @Override
     public JsonObjectFormatVisitor expectObjectFormat(final JavaType type) throws JsonMappingException {
-        return new ObjectFormatVisitor(this, _provider);
+//        add(new Column(_pointer, "", type, false));
+        return new ObjectFormatVisitor(this, type, _provider);
     }
 
     @Override
