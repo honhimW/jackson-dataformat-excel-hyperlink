@@ -41,12 +41,12 @@ public class Person implements Serializable {
 
     private Boolean gender;
 
-    @JsonSerialize(converter = List2String.class)
-    @JsonDeserialize(converter = String2List.class)
+//    @JsonSerialize(converter = List2String.class)
+//    @JsonDeserialize(converter = String2List.class)
     private List<String> properties;
 
 //    @JsonIgnore
-    private List<Ext> properties2;
+    private List<Object> properties2;
 
 //    @JsonIgnore
     @JsonProperty(index = 3)

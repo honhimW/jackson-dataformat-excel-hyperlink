@@ -16,16 +16,17 @@ package honhimw.jackson.dataformat.hyper.poi.ss;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.databind.JavaType;
-import honhimw.jackson.dataformat.hyper.Range;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
+import honhimw.jackson.dataformat.hyper.schema.Table;
 import honhimw.jackson.dataformat.hyper.ser.BookWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.common.usermodel.HyperlinkType;
@@ -46,6 +47,8 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 public final class POIBookWriter implements BookWriter {
 
     private static final int MAX_COLUMN_WIDTH = 255 * 256;
+
+    private static final Set<String> RETAIN_SHEET_NAMES = Set.of("List", "Set", "Map", "Object");
 
     private final Workbook _workbook;
     private final Map<Class<?>, Sheet> _sheetMap = new HashMap<>();
@@ -69,10 +72,10 @@ public final class POIBookWriter implements BookWriter {
     }
 
     @Override
-    public void link(final Class<?> type, String value, Range range) {
+    public void link(final Class<?> type, String value, int row) {
         Sheet sheet = _sheetMap.get(type);
         _write(value, (cell, s) -> {
-            String address = String.format("#%s!%d:%d", sheet.getSheetName(), range.start(), range.end());
+            String address = String.format("#%s!%d:%d", sheet.getSheetName(), row, row);
             String text = StringUtil.isNotBlank(s) ? s : address;
             CreationHelper creationHelper = _workbook.getCreationHelper();
             Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
@@ -95,36 +98,38 @@ public final class POIBookWriter implements BookWriter {
     @Override
     public void writeHeaders() {
         final int row = _schema.getOriginRow();
-        for (final Column column : _schema) {
-            JavaType type = column.getType();
+        for (final Table table : _schema.getTables()) {
+            JavaType type = table.getType();
+            Class<?> clazz = type.getRawClass();
             String sheetName = null;
-            if (!column.isLeaf() && !column.isArray()) {
-                Class<?> clazz = type.getRawClass();
-                if (!_sheetMap.containsKey(clazz)) {
-                    if (clazz.isAnnotationPresent(JsonClassDescription.class)) {
-                        JsonClassDescription annotation = clazz.getAnnotation(JsonClassDescription.class);
-                        sheetName = annotation.value();
-                    }
-                    if (StringUtil.isBlank(sheetName)) {
-                        sheetName = clazz.getSimpleName();
-                    }
-                    Sheet sheet = _workbook.createSheet(sheetName);
-                    _sheetMap.put(clazz, sheet);
-                    this._sheet = sheet;
-                } else {
-                    this._sheet = _sheetMap.get(clazz);
+            if (!_sheetMap.containsKey(clazz)) {
+                if (clazz.isAnnotationPresent(JsonClassDescription.class)) {
+                    JsonClassDescription annotation = clazz.getAnnotation(JsonClassDescription.class);
+                    sheetName = annotation.value();
                 }
-                ColumnPointer pointer = column.getPointer();
-                List<Column> columns = _schema.getColumns(pointer);
-                // only first-order path
-                columns = columns.stream().filter(
-                    col -> col.getPointer().getParent().equals(pointer) && !ColumnPointer.empty()
-                        .equals(col.getPointer())).toList();
-                for (int i = 0; i < columns.size(); i++) {
-                    final int col = _schema.getOriginColumn() + i;
-                    setReference(new CellAddress(row, col));
-                    writeString(columns.get(i).getName());
+                if (StringUtil.isBlank(sheetName)) {
+                    sheetName = clazz.getSimpleName();
                 }
+                if (RETAIN_SHEET_NAMES.contains(sheetName)) {
+                    throw new IllegalArgumentException(String.format("[%s] is retained, please rename the sheet", sheetName));
+                }
+                Sheet sheet = _workbook.createSheet(sheetName);
+                _sheetMap.put(clazz, sheet);
+                this._sheet = sheet;
+            } else {
+                this._sheet = _sheetMap.get(clazz);
+            }
+            List<Column> columns = table.getColumns();
+            for (int i = 0; i < columns.size(); i++) {
+                final int col = _schema.getOriginColumn() + i;
+                setReference(new CellAddress(row, col));
+                writeString(columns.get(i).getName());
+            }
+        }
+        for (final Column column : _schema) {
+            if (column.isArray()) {
+                _sheetMap.put(List.class, _workbook.createSheet("List"));
+                break;
             }
         }
     }

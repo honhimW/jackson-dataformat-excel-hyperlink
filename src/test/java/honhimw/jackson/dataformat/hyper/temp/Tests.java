@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
@@ -26,7 +27,11 @@ public class Tests {
         HyperMapper mapper = new HyperMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         generate.forEach(person -> person.setProperties(List.of("hello", "world")));
-        generate.forEach(person -> person.setProperties2(new ArrayList<>(MockUtils.generate(Ext.class, 4))));
+        List<Object> p2 = new ArrayList<>(MockUtils.generate(Ext.class,
+            ThreadLocalRandom.current().nextInt(2,5)));
+        p2.add("hello");
+        p2.add(123);
+        generate.forEach(person -> person.setProperties2(p2));
         generate.forEach(person -> person.setName(null));
         File file = new File("E:\\temp\\1234.xlsx");
         mapper.writeValue(file, generate, Person.class);

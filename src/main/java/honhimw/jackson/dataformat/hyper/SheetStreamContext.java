@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.JsonStreamContext;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -158,8 +159,6 @@ public abstract class SheetStreamContext extends JsonStreamContext {
             _parent = parent;
         }
 
-        public abstract Range contentRows();
-
         @Override
         public SheetStreamContext getParent() {
             return _parent;
@@ -182,14 +181,25 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         private int _step = DEFAULT_STEP;
 
-        private Range _range;
-
         private final Object _currentValue;
+
+        private final int row;
 
         ArrayContext(final SheetStreamContext parent, final Object currentValue, final int size) {
             super(TYPE_ARRAY, parent);
             _size = size;
             this._currentValue = currentValue;
+            AtomicInteger atomicInteger;
+
+            if (_tableRows.containsKey(List.class)) {
+                atomicInteger = _tableRows.get(List.class);
+                atomicInteger.incrementAndGet();
+            } else {
+                atomicInteger = new AtomicInteger(_schema.getOriginRow());
+                atomicInteger.decrementAndGet();
+                _tableRows.put(List.class, atomicInteger);
+            }
+            row = atomicInteger.get();
         }
 
         @Override
@@ -200,27 +210,19 @@ public abstract class SheetStreamContext extends JsonStreamContext {
             return _parent.currentPointer().resolveArray();
         }
 
-        public void setRange(Range range) {
-            this._range = range;
-        }
-
-        @Override
-        public Range contentRows() {
-            return _range;
-        }
-
         @Override
         public int getRow() {
-            return _parent.getRow();
+            return row;
         }
 
         @Override
         public int getColumn() {
-            return _parent.getColumn();
+            return _schema.getOriginColumn() + _index;
         }
 
         @Override
         public void writeValue() {
+            _index++;
         }
 
         @Override
@@ -245,14 +247,13 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         private final Object _currentValue;
 
-        private Range range;
-
         private final int row;
 
         ObjectContext(final SheetStreamContext parent, final Object currentValue) {
             super(TYPE_OBJECT, parent);
             this._currentValue = currentValue;
             AtomicInteger atomicInteger;
+
             if (_tableRows.containsKey(_currentValue.getClass())) {
                 atomicInteger = _tableRows.get(_currentValue.getClass());
                 atomicInteger.incrementAndGet();
@@ -284,14 +285,7 @@ public abstract class SheetStreamContext extends JsonStreamContext {
         }
 
         @Override
-        public Range contentRows() {
-            return range;
-        }
-
-        @Override
         public int getRow() {
-            int rowNumber = row + 1;
-            range = new Range(rowNumber, rowNumber);
             return row;
         }
 
@@ -308,17 +302,5 @@ public abstract class SheetStreamContext extends JsonStreamContext {
             }
         }
 
-        @Override
-        public SheetStreamContext clearAndGetParent() {
-            if (_parent instanceof ArrayContext arrayContext) {
-                Range r = contentRows();
-                if (Objects.isNull(arrayContext.contentRows())) {
-                    arrayContext.setRange(new Range(r.start(), r.end()));
-                } else {
-                    arrayContext.setRange(new Range(arrayContext.contentRows().start(), r.end()));
-                }
-            }
-            return super.clearAndGetParent();
-        }
     }
 }

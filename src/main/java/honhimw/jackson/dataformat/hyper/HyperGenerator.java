@@ -37,6 +37,7 @@ import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.exception.SheetStreamWriteException;
 import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
 import honhimw.jackson.dataformat.hyper.ser.BookWriter;
+import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 
@@ -109,18 +110,18 @@ public final class HyperGenerator extends GeneratorBase {
     @Override
     public void writeStartArray(final Object forValue, final int size) throws IOException {
         _verifyValueWrite(START_ARRAY);
+        _writer.switchSheet(List.class);
         _outputContext = _outputContext.createChildArrayContext(forValue, size);
     }
 
     @Override
     public void writeEndArray() throws IOException {
-        Range range = ((ArrayContext) _outputContext).contentRows();
-        Object subValue = _outputContext.getCurrentValue();
+        int row = _outputContext.getRow();
         _outputContext = _closeStruct(END_ARRAY);
-        if (!_outputContext.inRoot() && !_outputContext.inArray()) {
+        if (_outputContext.inObject()) {
             _writer.switchSheet(_outputContext.getCurrentValue().getClass());
             _writer.setReference(_outputContext.currentReference());
-            _writer.link(subValue.getClass(), null, range);
+            _writer.link(List.class, null, row + 1);
         }
     }
 
@@ -139,13 +140,18 @@ public final class HyperGenerator extends GeneratorBase {
     @Override
     public void writeEndObject() throws IOException {
         // final int size = _outputContext.size()
-        Range range = ((ObjectContext) _outputContext).contentRows();
+        int row = _outputContext.getRow();
         Object subValue = _outputContext.getCurrentValue();
         _outputContext = _closeStruct(END_OBJECT);
-        if (!_outputContext.inRoot() && !_outputContext.inArray()) {
+        if (_outputContext.inObject()) {
             _writer.switchSheet(_outputContext.getCurrentValue().getClass());
             _writer.setReference(_outputContext.currentReference());
-            _writer.link(subValue.getClass(), null, range);
+            _writer.link(subValue.getClass(), null, row + 1);
+        }
+        if (_outputContext.inArray() && !_outputContext.getParent().inRoot()) {
+            _writer.switchSheet(List.class);
+            _writer.setReference(_outputContext.currentReference());
+            _writer.link(subValue.getClass(), null, row + 1);
         }
         // final ColumnPointer pointer = _outputContext.currentPointer()
         // TODO support merge column in scope to optional features via annotation
@@ -160,7 +166,6 @@ public final class HyperGenerator extends GeneratorBase {
     @Override
     public void writeString(final String text) throws IOException {
         _verifyValueWrite(WRITE_STRING);
-        inArray(text);
         _writer.writeString(text);
     }
 
@@ -168,7 +173,6 @@ public final class HyperGenerator extends GeneratorBase {
     public void writeString(final char[] buffer, final int offset, final int len) throws IOException {
         _verifyValueWrite(WRITE_STRING);
         String value = new String(buffer, offset, len);
-        inArray(value);
         _writer.writeString(value);
     }
 
@@ -210,63 +214,54 @@ public final class HyperGenerator extends GeneratorBase {
     @Override
     public void writeNumber(final int v) throws IOException {
         _verifyValueWrite(WRITE_NUMBER);
-        inArray(v);
         _writer.writeNumeric(v);
     }
 
     @Override
     public void writeNumber(final long v) throws IOException {
         _verifyValueWrite(WRITE_NUMBER);
-        inArray(v);
         _writer.writeNumeric(v);
     }
 
     @Override
     public void writeNumber(final BigInteger v) throws IOException {
         _verifyValueWrite(WRITE_NUMBER);
-        inArray(v);
         _writer.writeString(v.toString());
     }
 
     @Override
     public void writeNumber(final double v) throws IOException {
         _verifyValueWrite(WRITE_NUMBER);
-        inArray(v);
         _writer.writeNumeric(v);
     }
 
     @Override
     public void writeNumber(final float v) throws IOException {
         _verifyValueWrite(WRITE_NUMBER);
-        inArray(v);
         _writer.writeNumeric(v);
     }
 
     @Override
     public void writeNumber(final BigDecimal v) throws IOException {
         _verifyValueWrite(WRITE_NUMBER);
-        inArray(v);
         _writer.writeString(isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) ? v.toPlainString() : v.toString());
     }
 
     @Override
     public void writeNumber(final String encodedValue) throws IOException {
         _verifyValueWrite(WRITE_NUMBER);
-        inArray(encodedValue);
         _writer.writeString(encodedValue);
     }
 
     @Override
     public void writeBoolean(final boolean state) throws IOException {
         _verifyValueWrite(WRITE_BOOLEAN);
-        inArray(state);
         _writer.writeBoolean(state);
     }
 
     @Override
     public void writeNull() throws IOException {
         _verifyValueWrite(WRITE_NULL);
-        inArray(null);
         _writer.writeBlank();
     }
 
@@ -317,17 +312,6 @@ public final class HyperGenerator extends GeneratorBase {
     private void _checkSchemaSet() throws IOException {
         if (_schema == null) {
             throw new SheetStreamWriteException("No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not generate", this);
-        }
-    }
-
-    private void inArray(Object value) {
-        if (_outputContext.getParent() instanceof ArrayContext arrayContext) {
-            Range r = arrayContext.contentRows();
-            if (Objects.isNull(arrayContext.contentRows())) {
-                arrayContext.setRange(new Range(r.start(), r.end()));
-            } else {
-                arrayContext.setRange(new Range(arrayContext.contentRows().start(), r.end()));
-            }
         }
     }
 }

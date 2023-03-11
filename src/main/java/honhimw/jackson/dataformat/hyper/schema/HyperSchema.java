@@ -59,6 +59,10 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
         return _columns.get(reference.getColumn() - getOriginColumn());
     }
 
+    public List<Table> getTables() {
+        return _tables;
+    }
+
     public int getDataRow() {
         return _origin.getRow() + 1;
     }
@@ -137,6 +141,14 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
                 if (table.matches(column.getPointer().getParent()) && !table.getPointer().equals(column.getPointer())) {
                     table.getColumns().add(column);
                 }
+            }
+        }
+    }
+
+    private void checkType() {
+        for (final Column column : this) {
+            if (column.getType().isMapLikeType()) {
+                throw new IllegalArgumentException("map like types are not supported");
             }
         }
     }
