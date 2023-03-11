@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.util.ClassUtil;
 import honhimw.jackson.dataformat.hyper.ExcelDateModule;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
+import honhimw.jackson.dataformat.hyper.schema.Table;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.BaseStream;
@@ -46,6 +47,7 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
         super(provider);
         _wrapper = wrapper;
         this._type = type;
+        _wrapper.add(new Table(_wrapper.getPointer(), _resolveTableName(_type), _type));
     }
 
     @Override
@@ -82,6 +84,7 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
             _wrapper.add(new Column(pointer, columnName, type, false));
             _wrapper.addAll(visitor);
         }
+        _wrapper.getTables().addAll(visitor.getTables());
     }
 
     private JsonSerializer<Object> _findValueSerializer(final BeanProperty prop) throws JsonMappingException {
@@ -97,6 +100,11 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
     private String _resolveColumnName(final BeanProperty prop) {
         final ColumnNameResolver resolver = (ColumnNameResolver) _provider.getAttribute(ColumnNameResolver.class);
         return resolver.resolve(prop);
+    }
+
+    private String _resolveTableName(final JavaType type) {
+        final TableNameResolver resolver = (TableNameResolver) _provider.getAttribute(TableNameResolver.class);
+        return resolver.resolve(type);
     }
 
     private String _columnValue(BeanProperty prop) {

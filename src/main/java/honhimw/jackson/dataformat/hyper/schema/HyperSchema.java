@@ -23,12 +23,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 public final class HyperSchema implements FormatSchema, Iterable<Column> {
 
     public static final String SCHEMA_TYPE = "hyper";
     private final List<Column> _columns;
+    private final List<Table> _tables;
     private final CellAddress _origin;
+
+    public HyperSchema(final List<Column> _columns, final List<Table> _tables, final CellAddress _origin) {
+        this._columns = _columns;
+        this._tables = _tables;
+        this._origin = _origin;
+        setupTables();
+    }
 
     @Override
     public String getSchemaType() {
@@ -60,18 +67,19 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
     }
 
     public int columnIndexOfCurrentSheet(final ColumnPointer pointer) {
-        int index = -1;
-        // i = 1, _columns first member is root, so we just ignore it
-        for (int i = 1; i < _columns.size(); i++) {
-            Column column = _columns.get(i);
-            if (column.getPointer().getParent().equals(pointer.getParent())) {
-                index++;
-                if (column.matches(pointer)) {
-                    return index + getOriginColumn();
-                }
+        Table table = currentTable(pointer);
+        List<Column> tableColumns = table.getColumns();
+        for (int i = 0; i < tableColumns.size(); i++) {
+            if (tableColumns.get(i).matches(pointer)) {
+                return i + getOriginColumn();
             }
         }
         return -1;
+    }
+
+    public Table currentTable(final ColumnPointer pointer) {
+        return  _tables.stream().filter(t -> t.matches(pointer.getParent())).findFirst()
+            .orElseThrow(() -> new IllegalStateException("sheet table is not exists"));
     }
 
     public int columnIndexOf(final ColumnPointer pointer) {
@@ -104,5 +112,15 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
 
     public boolean isInColumnBounds(final int col) {
         return getOriginColumn() <= col && col < getOriginColumn() + _columns.size();
+    }
+
+    private void setupTables() {
+        for (final Table table : _tables) {
+            for (final Column column : _columns) {
+                if (table.matches(column.getPointer().getParent()) && !table.getPointer().equals(column.getPointer())) {
+                    table.getColumns().add(column);
+                }
+            }
+        }
     }
 }

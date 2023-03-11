@@ -15,8 +15,13 @@
 package honhimw.jackson.dataformat.hyper;
 
 import com.fasterxml.jackson.core.JsonStreamContext;
+import com.fasterxml.jackson.databind.JavaType;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
+import honhimw.jackson.dataformat.hyper.schema.Table;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.poi.ss.util.CellAddress;
 
 public abstract class SheetStreamContext extends JsonStreamContext {
@@ -24,6 +29,8 @@ public abstract class SheetStreamContext extends JsonStreamContext {
     protected static final int INITIAL_INDEX = -1;
     protected final HyperSchema _schema;
     protected int _size;
+
+    protected static final Map<Class<?>, AtomicInteger> _tableRows = new HashMap<>();
 
     protected SheetStreamContext(final int type, final HyperSchema schema) {
         super(type, INITIAL_INDEX);
@@ -239,9 +246,20 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         private Range range;
 
+        private final int row;
+
         ObjectContext(final SheetStreamContext parent, final Object currentValue) {
             super(TYPE_OBJECT, parent);
             this._currentValue = currentValue;
+            AtomicInteger atomicInteger;
+            if (_tableRows.containsKey(_currentValue.getClass())) {
+                atomicInteger = _tableRows.get(_currentValue.getClass());
+                atomicInteger.incrementAndGet();
+            } else {
+                atomicInteger = new AtomicInteger(_schema.getDataRow());
+                _tableRows.put(_currentValue.getClass(), atomicInteger);
+            }
+            row = atomicInteger.get();
         }
 
         @Override
@@ -271,14 +289,14 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         @Override
         public int getRow() {
-            int row = _parent.getRow();
-            range = new Range(row, row);
+            int rowNumber = row + 1;
+            range = new Range(rowNumber, rowNumber);
             return row;
         }
 
         @Override
         public int getColumn() {
-            return _schema.getOriginColumn() + _index;
+            return _index;
         }
 
         @Override

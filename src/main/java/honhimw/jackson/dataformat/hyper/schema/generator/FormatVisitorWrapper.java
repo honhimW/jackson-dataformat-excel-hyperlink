@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonMapFormatVisitor;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
+import honhimw.jackson.dataformat.hyper.schema.Table;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +38,7 @@ public final class FormatVisitorWrapper extends JsonFormatVisitorWrapper.Base im
     private final ColumnPointer _pointer;
     private final String _columnName;
     private final List<Column> _columns;
+    private final List<Table> _tables;
 
     public FormatVisitorWrapper() {
         this(ColumnPointer.empty(), "", null);
@@ -51,6 +53,7 @@ public final class FormatVisitorWrapper extends JsonFormatVisitorWrapper.Base im
         _pointer = pointer;
         _columnName = columnName;
         _columns = new ArrayList<>();
+        _tables = new ArrayList<>();
     }
 
     @Override
@@ -74,6 +77,10 @@ public final class FormatVisitorWrapper extends JsonFormatVisitorWrapper.Base im
         return _columns.iterator();
     }
 
+    public List<Table> getTables() {
+        return _tables;
+    }
+
     ColumnPointer getPointer() {
         return _pointer;
     }
@@ -94,5 +101,9 @@ public final class FormatVisitorWrapper extends JsonFormatVisitorWrapper.Base im
         for (final Column column : columns) {
             add(column);
         }
+    }
+
+    void add(final Table table) {
+        _tables.add(table);
     }
 }

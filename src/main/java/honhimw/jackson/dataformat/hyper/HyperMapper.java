@@ -32,6 +32,7 @@ import honhimw.jackson.dataformat.hyper.deser.SheetInput;
 import honhimw.jackson.dataformat.hyper.deser.SheetParser;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
+import honhimw.jackson.dataformat.hyper.schema.generator.TableNameResolver;
 import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
 import java.io.File;
 import java.io.IOException;
@@ -260,8 +261,13 @@ public final class HyperMapper extends ObjectMapper {
     }
 
     public HyperMapper setColumnNameResolver(final ColumnNameResolver resolver) {
-        _assertNotNull("resolver", resolver);
+        _assertNotNull("columnNameResolver", resolver);
         return setSchemaGenerator(_schemaGenerator.withColumnNameResolver(resolver));
+    }
+
+    public HyperMapper setTableNameResolver(final TableNameResolver resolver) {
+        _assertNotNull("tableNameResolver", resolver);
+        return setSchemaGenerator(_schemaGenerator.withTableNameResolver(resolver));
     }
 
     /*
@@ -478,6 +484,11 @@ public final class HyperMapper extends ObjectMapper {
 
         public Builder columnNameResolver(final ColumnNameResolver resolver) {
             _mapper.setColumnNameResolver(resolver);
+            return _this();
+        }
+
+        public Builder tableNameResolver(final TableNameResolver resolver) {
+            _mapper.setTableNameResolver(resolver);
             return _this();
         }
     }

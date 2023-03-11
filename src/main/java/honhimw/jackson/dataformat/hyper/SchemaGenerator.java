@@ -24,8 +24,10 @@ import com.fasterxml.jackson.databind.ser.SerializerFactory;
 import com.fasterxml.jackson.databind.util.ClassUtil;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
+import honhimw.jackson.dataformat.hyper.schema.Table;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
 import honhimw.jackson.dataformat.hyper.schema.generator.FormatVisitorWrapper;
+import honhimw.jackson.dataformat.hyper.schema.generator.TableNameResolver;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +40,7 @@ public final class SchemaGenerator {
     private final GeneratorSettings _generatorSettings;
 
     public SchemaGenerator() {
-        _generatorSettings = new GeneratorSettings(CellAddress.A1, ColumnNameResolver.NULL);
+        _generatorSettings = new GeneratorSettings(CellAddress.A1, ColumnNameResolver.NULL, TableNameResolver.DEFAULT);
     }
 
     private SchemaGenerator(final GeneratorSettings generatorSettings) {
@@ -53,13 +55,18 @@ public final class SchemaGenerator {
         return new SchemaGenerator(_generatorSettings.with(resolver));
     }
 
+    public SchemaGenerator withTableNameResolver(final TableNameResolver resolver) {
+        return new SchemaGenerator(_generatorSettings.with(resolver));
+    }
+
     HyperSchema generate(final JavaType type, final DefaultSerializerProvider provider,
         final SerializerFactory factory)
         throws JsonMappingException {
         _verifyType(type, provider);
         final FormatVisitorWrapper visitor = new FormatVisitorWrapper();
         final SerializationConfig config = provider.getConfig()
-            .withAttribute(ColumnNameResolver.class, _generatorSettings._columnNameResolver);
+            .withAttribute(ColumnNameResolver.class, _generatorSettings._columnNameResolver)
+            .withAttribute(TableNameResolver.class, _generatorSettings._tableNameResolver);
         final DefaultSerializerProvider instance = provider.createInstance(config, factory);
         try {
             instance.acceptJsonFormatVisitor(type, visitor);
@@ -73,7 +80,7 @@ public final class SchemaGenerator {
                 log.trace(column.toString());
             }
         }
-        return new HyperSchema(columns, _generatorSettings._origin);
+        return new HyperSchema(columns, visitor.getTables(), _generatorSettings._origin);
     }
 
     private void _verifyType(final JavaType type, final DefaultSerializerProvider provider)
@@ -104,13 +111,19 @@ public final class SchemaGenerator {
 
         private final CellAddress _origin;
         private final ColumnNameResolver _columnNameResolver;
+        private final TableNameResolver _tableNameResolver;
 
         private GeneratorSettings with(final CellAddress origin) {
-            return _origin.equals(origin) ? this : new GeneratorSettings(origin, _columnNameResolver);
+            return _origin.equals(origin) ? this : new GeneratorSettings(origin, _columnNameResolver,
+                _tableNameResolver);
         }
 
         private GeneratorSettings with(final ColumnNameResolver resolver) {
-            return _columnNameResolver.equals(resolver) ? this : new GeneratorSettings(_origin, resolver);
+            return _columnNameResolver.equals(resolver) ? this : new GeneratorSettings(_origin, resolver, _tableNameResolver);
+        }
+
+        private GeneratorSettings with(final TableNameResolver resolver) {
+            return _tableNameResolver.equals(resolver) ? this : new GeneratorSettings(_origin, _columnNameResolver, resolver);
         }
     }
 }
