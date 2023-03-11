@@ -45,7 +45,7 @@ public class Person implements Serializable {
     @JsonDeserialize(converter = String2List.class)
     private List<String> properties;
 
-    @JsonIgnore
+//    @JsonIgnore
     private List<Ext> properties2;
 
 //    @JsonIgnore

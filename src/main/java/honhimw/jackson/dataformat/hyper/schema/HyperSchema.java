@@ -15,6 +15,7 @@
 package honhimw.jackson.dataformat.hyper.schema;
 
 import com.fasterxml.jackson.core.FormatSchema;
+import com.fasterxml.jackson.databind.JavaType;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.util.CellAddress;
@@ -66,6 +67,21 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
         return _origin.getColumn();
     }
 
+    public int columnIndexOfCurrentSheet(final Class<?> clazz, String name) {
+        Table table = _tables.stream().filter(t -> t.getType().getRawClass().equals(clazz))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("sheet table is not exists"));
+        List<Column> tableColumns = table.getColumns();
+        ColumnPointer tablePointer = table.getPointer();
+        ColumnPointer pointer = tablePointer.resolve(name);
+        for (int i = 0; i < tableColumns.size(); i++) {
+            if (tableColumns.get(i).matches(pointer)) {
+                return i + getOriginColumn();
+            }
+        }
+        return -1;
+    }
+
     public int columnIndexOfCurrentSheet(final ColumnPointer pointer) {
         Table table = currentTable(pointer);
         List<Column> tableColumns = table.getColumns();
@@ -78,8 +94,9 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
     }
 
     public Table currentTable(final ColumnPointer pointer) {
-        return  _tables.stream().filter(t -> t.matches(pointer.getParent())).findFirst()
-            .orElseThrow(() -> new IllegalStateException("sheet table is not exists"));
+        return  _tables.stream().filter(t -> t.matches(pointer.getParent()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("sheet " + pointer + " table is not exists"));
     }
 
     public int columnIndexOf(final ColumnPointer pointer) {

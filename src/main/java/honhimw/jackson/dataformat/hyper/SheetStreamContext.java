@@ -15,12 +15,11 @@
 package honhimw.jackson.dataformat.hyper;
 
 import com.fasterxml.jackson.core.JsonStreamContext;
-import com.fasterxml.jackson.databind.JavaType;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
-import honhimw.jackson.dataformat.hyper.schema.Table;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.poi.ss.util.CellAddress;
 
@@ -64,11 +63,11 @@ public abstract class SheetStreamContext extends JsonStreamContext {
     }
 
     public SheetStreamContext createChildArrayContext() {
-        return createChildArrayContext(-1);
+        return createChildArrayContext(null, -1);
     }
 
-    public SheetStreamContext createChildArrayContext(final int size) {
-        return new ArrayContext(this, size);
+    public SheetStreamContext createChildArrayContext(final Object forValue, final int size) {
+        return new ArrayContext(this, forValue, size);
     }
 
     public SheetStreamContext createChildObjectContext(Object forValue) {
@@ -183,9 +182,14 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         private int _step = DEFAULT_STEP;
 
-        ArrayContext(final SheetStreamContext parent, final int size) {
+        private Range _range;
+
+        private final Object _currentValue;
+
+        ArrayContext(final SheetStreamContext parent, final Object currentValue, final int size) {
             super(TYPE_ARRAY, parent);
             _size = size;
+            this._currentValue = currentValue;
         }
 
         @Override
@@ -196,14 +200,18 @@ public abstract class SheetStreamContext extends JsonStreamContext {
             return _parent.currentPointer().resolveArray();
         }
 
+        public void setRange(Range range) {
+            this._range = range;
+        }
+
         @Override
         public Range contentRows() {
-            return new Range(0, 0);
+            return _range;
         }
 
         @Override
         public int getRow() {
-            return _parent.getRow() + _index;
+            return _parent.getRow();
         }
 
         @Override
@@ -213,17 +221,10 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         @Override
         public void writeValue() {
-            _index += _step;
-            _step = DEFAULT_STEP;
-            _size = _index + 1;
         }
 
         @Override
         public SheetStreamContext clearAndGetParent() {
-            final SheetStreamContext parent = super.getParent(StepAware.class::isInstance);
-            if (parent != null) {
-                ((StepAware) parent).setStep(_step + getRow() - parent.getRow());
-            }
             return super.clearAndGetParent();
         }
 
@@ -301,10 +302,23 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         @Override
         public void writeValue() {
-            _index = _schema.columnIndexOfCurrentSheet(currentPointer());
+            _index = _schema.columnIndexOfCurrentSheet(_currentValue.getClass(), _name);
             if (_size == 0) {
                 _size = 1;
             }
+        }
+
+        @Override
+        public SheetStreamContext clearAndGetParent() {
+            if (_parent instanceof ArrayContext arrayContext) {
+                Range r = contentRows();
+                if (Objects.isNull(arrayContext.contentRows())) {
+                    arrayContext.setRange(new Range(r.start(), r.end()));
+                } else {
+                    arrayContext.setRange(new Range(arrayContext.contentRows().start(), r.end()));
+                }
+            }
+            return super.clearAndGetParent();
         }
     }
 }
