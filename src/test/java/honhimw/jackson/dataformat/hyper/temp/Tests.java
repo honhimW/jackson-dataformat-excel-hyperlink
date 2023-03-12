@@ -23,7 +23,7 @@ public class Tests {
     @Test
     @SneakyThrows
     public void excelMapper() {
-        Collection<Person> generate = MockUtils.generate(Person.class, 20);
+        Collection<Person> generate = MockUtils.generate(Person.class, 10);
         HyperMapper mapper = new HyperMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         generate.forEach(person -> person.setProperties(List.of("hello", "world")));
@@ -31,13 +31,18 @@ public class Tests {
             ThreadLocalRandom.current().nextInt(2,5)));
         p2.add("hello");
         p2.add(123);
+        p2.add(List.of("a", "b"));
         generate.forEach(person -> person.setProperties2(p2));
         generate.forEach(person -> person.setName(null));
         File file = new File("E:\\temp\\1234.xlsx");
         mapper.writeValue(file, generate, Person.class);
 
-//        List<Person> people = mapper.readValues(file, Person.class);
-//        people.forEach(System.out::println);
+        List<Person> people = mapper.readValues(file, Person.class);
+        List<Person> origin = new ArrayList<>(generate);
+        for (int i = 0; i < 10; i++) {
+            System.out.println(people.get(i));
+            System.out.println(origin.get(i).equals(people.get(i)));
+        }
     }
 
 }

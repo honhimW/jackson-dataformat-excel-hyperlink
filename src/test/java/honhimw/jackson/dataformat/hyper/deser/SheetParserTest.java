@@ -15,7 +15,7 @@
 package honhimw.jackson.dataformat.hyper.deser;
 
 import com.fasterxml.jackson.core.JsonToken;
-import honhimw.jackson.dataformat.hyper.exception.SheetStreamReadException;
+import honhimw.jackson.dataformat.hyper.exception.BookStreamReadException;
 import honhimw.jackson.dataformat.hyper.HyperMapper;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ class SheetParserTest implements FixtureAs {
     @Test
     void noSchema() throws Exception {
         assertThatThrownBy(parser::nextToken)
-                .isInstanceOf(SheetStreamReadException.class)
+                .isInstanceOf(BookStreamReadException.class)
                 .hasMessageContaining("No schema of type '%s' set, can not parse", HyperSchema.SCHEMA_TYPE);
     }
 

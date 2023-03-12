@@ -57,31 +57,10 @@ class HyperMapperTest implements FixtureAs {
             assertThat(value).isEqualTo(Entry.VALUES);
         }
 
-        @Test
-        void readValuesWithSheetName() throws Exception {
-            final SheetInput<File> src = SheetInput.source(fixtureAsFile("entries.xlsx"), "Entries");
-            final List<Entry> value = mapper.readValues(src, Entry.class);
-            assertThat(value).isEqualTo(Entry.VALUES);
-        }
     }
 
     @Nested
     class ReadFailingTest {
-        @Test
-        void readValuesNoSheet() throws Exception {
-            final SheetInput<File> src = SheetInput.source(fixtureAsFile("entries.xlsx"), "NoSheet");
-            assertThatThrownBy(() -> mapper.readValues(src, Entry.class))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageStartingWith("No sheet for");
-        }
-
-        @Test
-        void readValuesOutOfRange() throws Exception {
-            final SheetInput<File> src = SheetInput.source(fixtureAsFile("entries.xlsx"), 1);
-            assertThatThrownBy(() -> mapper.readValues(src, Entry.class))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("out of range");
-        }
     }
 
     @Nested
@@ -115,8 +94,7 @@ class HyperMapperTest implements FixtureAs {
             final SheetOutput<File> output = SheetOutput.target(out, "Entries");
             mapper.writeValue(output, Entry.VALUES, Entry.class);
             try (XSSFWorkbook workbook = new XSSFWorkbook(out)) {
-                final XSSFSheet sheet = workbook.getSheet("Entries");
-                final List<Entry> actual = mapper.readValues(sheet, Entry.class);
+                final List<Entry> actual = mapper.readValues(workbook, Entry.class);
                 assertThat(actual).isEqualTo(Entry.VALUES).isNotSameAs(Entry.VALUES);
             }
         }

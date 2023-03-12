@@ -19,14 +19,22 @@ import com.fasterxml.jackson.core.base.ParserMinimalBase;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.databind.JavaType;
+import honhimw.jackson.dataformat.hyper.poi.RetainSheetNames;
+import honhimw.jackson.dataformat.hyper.poi.ss.POIBookReader;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.PackageVersion;
 import honhimw.jackson.dataformat.hyper.SheetStreamContext;
-import honhimw.jackson.dataformat.hyper.exception.SheetStreamReadException;
+import honhimw.jackson.dataformat.hyper.exception.BookStreamReadException;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
+import honhimw.jackson.dataformat.hyper.schema.Table;
+import java.util.Objects;
+import java.util.regex.Matcher;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.util.CellAddress;
 
 import java.io.File;
@@ -42,7 +50,7 @@ import java.util.LinkedList;
 public final class SheetParser extends ParserMinimalBase {
 
     private final IOContext _ioContext;
-    private final SheetReader _reader;
+    private final BookReader _reader;
     private final Deque<JsonToken> _nextTokens;
     private final int _formatFeatures;
     private boolean _closed;
@@ -52,7 +60,7 @@ public final class SheetParser extends ParserMinimalBase {
     private CellAddress _reference;
     private CellValue _value;
 
-    public SheetParser(final IOContext ctxt, final int features, final ObjectCodec codec, final int formatFeatures, final SheetReader reader) {
+    public SheetParser(final IOContext ctxt, final int features, final ObjectCodec codec, final int formatFeatures, final BookReader reader) {
         super(features);
         _ioContext = ctxt;
         _objectCodec = codec;
@@ -120,9 +128,10 @@ public final class SheetParser extends ParserMinimalBase {
                 _parsingContext = _parsingContext.clearAndGetParent();
                 break;
             case FIELD_NAME:
-                final Column column = _schema.getColumn(_reference);
-                final ColumnPointer pointer = _parsingContext.relativePointer(column.getPointer());
-                _parsingContext.setCurrentName(pointer.head().name());
+                final Column column = _schema.getColumn(_reader.getCell().getSheet().getSheetName(), _reference);
+                _parsingContext.setCurrentName(column.getName());
+//                final ColumnPointer pointer = _parsingContext.relativePointer(column.getPointer());
+//                _parsingContext.setCurrentName(pointer.head().name());
                 break;
             case VALUE_EMBEDDED_OBJECT:
             case VALUE_STRING:
@@ -133,7 +142,7 @@ public final class SheetParser extends ParserMinimalBase {
             case VALUE_NULL:
                 break;
             case NOT_AVAILABLE:
-                throw SheetStreamReadException.unexpected(this, token);
+                throw BookStreamReadException.unexpected(this, token);
         }
         _currToken = token;
         return _currToken;
@@ -157,38 +166,55 @@ public final class SheetParser extends ParserMinimalBase {
             return;
         }
         switch (token) {
-            case SHEET_DATA_START:
-                _nextTokens.add(JsonToken.START_ARRAY);
-                break;
-            case ROW_START:
+            case SHEET_DATA_START -> _nextTokens.add(JsonToken.START_ARRAY);
+            case ROW_START -> {
                 _reference = new CellAddress(_reader.getRow(), -1);
                 _nextTokens.add(JsonToken.START_OBJECT);
-                break;
-            case CELL_VALUE:
+            }
+            case CELL_VALUE -> {
                 _reference = _reader.getReference();
                 _value = _reader.getCellValue();
-                final Column column = _schema.getColumn(_reference);
-                final ColumnPointer pointer = _parsingContext.relativePointer(column.getPointer().getParent());
-                for (final ColumnPointer p : pointer) {
-                    if (p.isParent()) {
-                        _nextTokens.add(JsonToken.END_OBJECT);
+                String sheetName = _reader.getCell().getSheet().getSheetName();
+                if (RetainSheetNames.LIST.equals(sheetName)) {
+                    Hyperlink hyperlink = _reader.getCell().getHyperlink();
+                    if (Objects.nonNull(hyperlink)) {
+                        Matcher matcher = POIBookReader.pattern.matcher(hyperlink.getAddress());
+                        if (matcher.find()) {
+                            String sheet = matcher.group("sheet");
+                            if (RetainSheetNames.LIST.equals(sheet)) {
+                                _nextTokens.add(JsonToken.START_ARRAY);
+                            } else {
+                                _nextTokens.add(JsonToken.START_OBJECT);
+                            }
+                        }
+                    } else {
+                        _nextTokens.add(_scalarValueToken());
+                    }
+                } else {
+                    final Column column = _schema.getColumn(sheetName, _reference);
+                    if (column.isLeaf()) {
+                        _nextTokens.add(JsonToken.FIELD_NAME);
+                        _nextTokens.add(_scalarValueToken());
+                    } else if (column.isArray()) {
+                        _nextTokens.add(JsonToken.FIELD_NAME);
+                        _nextTokens.add(JsonToken.START_ARRAY);
                     } else {
                         _nextTokens.add(JsonToken.FIELD_NAME);
                         _nextTokens.add(JsonToken.START_OBJECT);
                     }
                 }
-                _nextTokens.add(JsonToken.FIELD_NAME);
-                _nextTokens.add(_scalarValueToken());
-                break;
-            case ROW_END:
-                final int depth = _parsingContext.currentPointer().depth();
-                for (int i = 0; i < depth; i++) {
-                    _nextTokens.add(JsonToken.END_OBJECT);
+            }
+            case ROW_END -> {
+                SheetStreamContext temp = _parsingContext;
+                if (temp.getParent() != null && !temp.getParent().inRoot()) {
+                    if (temp.inArray()) {
+                        _nextTokens.add(JsonToken.END_ARRAY);
+                    } else if (temp.inObject()) {
+                        _nextTokens.add(JsonToken.END_OBJECT);
+                    }
                 }
-                break;
-            case SHEET_DATA_END:
-                _nextTokens.add(JsonToken.END_ARRAY);
-                break;
+            }
+            case SHEET_DATA_END -> _nextTokens.add(JsonToken.END_ARRAY);
         }
     }
 
@@ -202,6 +228,7 @@ public final class SheetParser extends ParserMinimalBase {
                 token = _reader.next();
             }
         }
+
         if (token == SheetToken.CELL_VALUE) {
             while (!_schema.isInColumnBounds(_reader.getColumn())) {
                 token = _reader.next();
@@ -226,7 +253,7 @@ public final class SheetParser extends ParserMinimalBase {
             case FORMULA:
             case ERROR:
         }
-        throw SheetStreamReadException.unexpected(this, type);
+        throw BookStreamReadException.unexpected(this, type);
     }
 
     private void _handleEmptyObject() {
@@ -381,7 +408,7 @@ public final class SheetParser extends ParserMinimalBase {
 
     private void _checkSchemaSet() throws IOException {
         if (_schema == null) {
-            throw new SheetStreamReadException(this, "No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not parse");
+            throw new BookStreamReadException(this, "No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not parse");
         }
     }
 

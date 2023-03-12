@@ -55,6 +55,16 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
         return getColumn(reference);
     }
 
+    public Column getColumn(final String tableName, final CellAddress reference) {
+        Table table = getTable(tableName);
+        return table.getColumns().get(reference.getColumn() - getOriginColumn());
+    }
+
+    public Column getColumn(final Class<?> clazz, final CellAddress reference) {
+        Table table = getTable(clazz);
+        return table.getColumns().get(reference.getColumn() - getOriginColumn());
+    }
+
     public Column getColumn(final CellAddress reference) {
         return _columns.get(reference.getColumn() - getOriginColumn());
     }
@@ -97,6 +107,16 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
         return -1;
     }
 
+    public Table getTable(final String name) {
+        return _tables.stream().filter(t -> t.getName().equals(name))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("sheet table " + name + " is not exists"));
+    }
+    public Table getTable(final Class<?> clazz) {
+        return _tables.stream().filter(t -> t.getType().getRawClass().equals(clazz))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("sheet table " + clazz.getSimpleName() + " is not exists"));
+    }
     public Table currentTable(final ColumnPointer pointer) {
         return  _tables.stream().filter(t -> t.matches(pointer.getParent()))
             .findFirst()
@@ -132,7 +152,8 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
     }
 
     public boolean isInColumnBounds(final int col) {
-        return getOriginColumn() <= col && col < getOriginColumn() + _columns.size();
+//        return getOriginColumn() <= col && col < getOriginColumn() + _columns.size();
+        return getOriginColumn() <= col;
     }
 
     private void setupTables() {

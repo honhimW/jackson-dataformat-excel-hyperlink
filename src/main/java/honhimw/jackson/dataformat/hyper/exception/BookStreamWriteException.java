@@ -28,31 +28,19 @@
 
 package honhimw.jackson.dataformat.hyper.exception;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.core.util.RequestPayload;
-import honhimw.jackson.dataformat.hyper.deser.SheetParser;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.exc.StreamWriteException;
 
 @SuppressWarnings("java:S110")
-public final class SheetStreamReadException extends StreamReadException {
+public final class BookStreamWriteException extends StreamWriteException {
 
-    public SheetStreamReadException(final JsonParser p, final String msg) {
-        super(p, msg);
-    }
-
-    public static SheetStreamReadException unexpected(final SheetParser p, final Object value) {
-        return new SheetStreamReadException(p, "Unexpected value: " + value);
+    public BookStreamWriteException(final String msg, final JsonGenerator g) {
+        super(msg, g);
     }
 
     @Override
-    public SheetStreamReadException withParser(final JsonParser p) {
-        _processor = p;
-        return this;
-    }
-
-    @Override
-    public SheetStreamReadException withRequestPayload(final RequestPayload payload) {
-        _requestPayload = payload;
+    public StreamWriteException withGenerator(final JsonGenerator g) {
+        _processor = g;
         return this;
     }
 }

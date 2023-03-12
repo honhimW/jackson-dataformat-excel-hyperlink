@@ -40,6 +40,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 
 @SuppressWarnings("java:S2177")
@@ -185,16 +186,6 @@ public final class HyperMapper extends ObjectMapper {
     /**********************************************************
      */
 
-    public SheetParser createParser(final Sheet src) {
-        _assertNotNull("src", src);
-        return (SheetParser) _deserializationConfig.initialize(tokenStreamFactory().createParser(src));
-    }
-
-    public SheetParser createParser(final SheetInput<?> src) throws IOException {
-        _assertNotNull("src", src);
-        return (SheetParser) _deserializationConfig.initialize(tokenStreamFactory().createParser(src));
-    }
-
     @Override
     public SheetParser createParser(final File src) throws IOException {
         return (SheetParser) super.createParser(src);
@@ -288,14 +279,6 @@ public final class HyperMapper extends ObjectMapper {
     /**********************************************************
      */
 
-    public <T> T readValue(final Sheet src, final Class<T> valueType) throws IOException {
-        return sheetReaderFor(valueType).readValue(src);
-    }
-
-    public <T> T readValue(final SheetInput<?> src, final Class<T> valueType) throws IOException {
-        return sheetReaderFor(valueType).readValue(src);
-    }
-
     @Override
     public <T> T readValue(final File src, final Class<T> valueType) throws IOException {
         return sheetReaderFor(valueType).readValue(src);
@@ -306,13 +289,7 @@ public final class HyperMapper extends ObjectMapper {
         return sheetReaderFor(valueType).readValue(src);
     }
 
-    public <T> List<T> readValues(final Sheet src, final Class<T> valueType) throws IOException {
-        try (MappingIterator<T> iterator = sheetReaderFor(valueType).readValues(src)) {
-            return iterator.readAll();
-        }
-    }
-
-    public <T> List<T> readValues(final SheetInput<?> src, final Class<T> valueType) throws IOException {
+    public <T> List<T> readValues(final Workbook src, final Class<T> valueType) throws IOException {
         try (MappingIterator<T> iterator = sheetReaderFor(valueType).readValues(src)) {
             return iterator.readAll();
         }

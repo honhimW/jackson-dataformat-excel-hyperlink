@@ -12,10 +12,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.ListUtils;
 
 /**
  * @author hon_him
@@ -23,7 +25,6 @@ import lombok.NoArgsConstructor;
  */
 
 @Data
-@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Person implements Serializable {
@@ -37,6 +38,7 @@ public class Person implements Serializable {
     private String title;
 
     @JsonProperty(index = 2)
+    @JsonPropertyDescription("身高")
     private Double height;
 
     private Boolean gender;
@@ -54,6 +56,27 @@ public class Person implements Serializable {
     private Ext ext2;
     private Ext ext3;
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Person person = (Person) o;
+        return Objects.equals(id, person.id) && Objects.equals(name, person.name)
+            && Objects.equals(title, person.title) && Objects.equals(height, person.height)
+            && Objects.equals(gender, person.gender) && Objects.equals(ext, person.ext)
+            && Objects.equals(ext2, person.ext2) && Objects.equals(ext3, person.ext3)
+            && ListUtils.isEqualList(properties, ((Person) o).properties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, title, height, gender, properties, properties2, ext, ext2, ext3);
+    }
+
     @Data
     @EqualsAndHashCode(callSuper = false)
     @NoArgsConstructor
@@ -61,7 +84,8 @@ public class Person implements Serializable {
     public static class Ext implements Serializable {
         @JsonProperty(index = 0)
         private String address;
-        @JsonProperty(index = 1)
+        @JsonProperty(index = 3)
+        @JsonPropertyDescription("工作")
         private Double job;
 
         @JsonProperty(index = 2)

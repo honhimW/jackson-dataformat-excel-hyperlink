@@ -12,13 +12,20 @@
  * limitations under the License.
  */
 
-package honhimw.jackson.dataformat.hyper.deser;
+package honhimw.jackson.dataformat.hyper.poi.ss;
 
-public enum SheetToken {
-    SHEET_DATA_START,
-    ROW_START,
-    CELL_VALUE,
-    HYPER_LINK,
-    ROW_END,
-    SHEET_DATA_END
+import honhimw.jackson.dataformat.hyper.deser.SheetReaderTestBase;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.Test;
+
+class POIBookReaderTest extends SheetReaderTestBase {
+
+    @Test
+    void test() throws Exception {
+        final Workbook workbook = new XSSFWorkbook(transitionalSource);
+        reader = new POIBookReader(workbook);
+        testSheetReader();
+    }
 }

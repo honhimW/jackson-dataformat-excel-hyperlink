@@ -15,12 +15,13 @@
 package honhimw.jackson.dataformat.hyper.deser;
 
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellAddress;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-public interface SheetReader extends AutoCloseable, Iterator<SheetToken> {
+public interface BookReader extends AutoCloseable, Iterator<SheetToken> {
 
     SpreadsheetVersion getSpreadsheetVersion();
 
@@ -29,6 +30,8 @@ public interface SheetReader extends AutoCloseable, Iterator<SheetToken> {
     CellAddress getReference();
 
     CellValue getCellValue();
+
+    Cell getCell();
 
     int getRow();
 

@@ -25,9 +25,9 @@ import com.fasterxml.jackson.databind.deser.std.DelegatingDeserializer;
 import com.fasterxml.jackson.databind.util.Annotations;
 import java.io.IOException;
 
-public final class DataGridBeanDeserializer extends DelegatingDeserializer {
+public final class SimpleBeanDeserializer extends DelegatingDeserializer {
 
-    public DataGridBeanDeserializer(final JsonDeserializer<?> d) {
+    public SimpleBeanDeserializer(final JsonDeserializer<?> d) {
         super(d);
     }
 
@@ -47,8 +47,7 @@ public final class DataGridBeanDeserializer extends DelegatingDeserializer {
     public static final class Modifier extends BeanDeserializerModifier {
         @Override
         public JsonDeserializer<?> modifyDeserializer(final DeserializationConfig config, final BeanDescription beanDesc, final JsonDeserializer<?> deserializer) {
-            final Annotations annotations = beanDesc.getClassAnnotations();
-            return new DataGridBeanDeserializer(deserializer);
+            return new SimpleBeanDeserializer(deserializer);
         }
     }
 }

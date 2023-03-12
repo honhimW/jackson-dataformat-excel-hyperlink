@@ -27,7 +27,7 @@ public class SheetReaderTestBase implements FixtureAs {
 
     protected final InputStream transitionalSource = fixtureAsStream("entries-headless.xlsx");
     protected final InputStream strictSource = fixtureAsStream("entries-headless-strict.xlsx");
-    protected SheetReader reader;
+    protected BookReader reader;
 
     protected void testSheetReader() throws Exception {
         assertNext(SheetToken.SHEET_DATA_START);

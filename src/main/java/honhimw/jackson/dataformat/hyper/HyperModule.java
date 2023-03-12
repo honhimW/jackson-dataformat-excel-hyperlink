@@ -15,7 +15,7 @@
 package honhimw.jackson.dataformat.hyper;
 
 import com.fasterxml.jackson.core.Version;
-import honhimw.jackson.dataformat.hyper.deser.DataGridBeanDeserializer.Modifier;
+import honhimw.jackson.dataformat.hyper.deser.SimpleBeanDeserializer.Modifier;
 
 final class HyperModule extends com.fasterxml.jackson.databind.Module {
 

@@ -18,11 +18,11 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.io.IOContext;
 import honhimw.jackson.dataformat.hyper.deser.SheetInput;
 import honhimw.jackson.dataformat.hyper.deser.SheetParser;
-import honhimw.jackson.dataformat.hyper.deser.SheetReader;
+import honhimw.jackson.dataformat.hyper.deser.BookReader;
 import honhimw.jackson.dataformat.hyper.poi.ooxml.PackageUtil;
-import honhimw.jackson.dataformat.hyper.poi.ooxml.SSMLSheetReader;
+import honhimw.jackson.dataformat.hyper.poi.ooxml.SSMLBookReader;
 import honhimw.jackson.dataformat.hyper.poi.ooxml.SSMLWorkbook;
-import honhimw.jackson.dataformat.hyper.poi.ss.POISheetReader;
+import honhimw.jackson.dataformat.hyper.poi.ss.POIBookReader;
 import honhimw.jackson.dataformat.hyper.poi.ss.POIBookWriter;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
@@ -123,33 +123,23 @@ public final class HyperFactory extends JsonFactory {
     /**********************************************************
      */
 
-    public SheetParser createParser(final Sheet src) {
+    public SheetParser createParser(final Workbook src) {
         final IOContext ctxt = _createContext(_createContentReference(src), false);
-        return _createParser(new POISheetReader(src), ctxt);
-    }
-
-    @SuppressWarnings("unchecked")
-    public SheetParser createParser(final SheetInput<?> src) throws IOException {
-        final SheetInput<?> source = _preferRawAsFile(src);
-        final boolean resourceManaged = src != source;
-        final IOContext ctxt = _createContext(_createContentReference(source), resourceManaged);
-        final SheetReader reader;
-        if (source.isFile()) {
-            reader = _createFileSheetReader((SheetInput<File>) source);
-        } else {
-            reader = _createInputStreamSheetReader((SheetInput<InputStream>) source);
-        }
-        return _createParser(reader, ctxt);
+        return _createParser(new POIBookReader(src), ctxt);
     }
 
     @Override
     public SheetParser createParser(final File src) throws IOException {
-        return createParser(SheetInput.source(src));
+        final IOContext ctxt = _createContext(_createContentReference(src), true);
+        final BookReader reader = _createFileSheetReader(src);
+        return _createParser(reader, ctxt);
     }
 
     @Override
     public SheetParser createParser(final InputStream src) throws IOException {
-        return createParser(SheetInput.source(src));
+        final IOContext ctxt = _createContext(_createContentReference(src), true);
+        final BookReader reader = _createInputStreamSheetReader(src);
+        return _createParser(reader, ctxt);
     }
 
     /*
@@ -186,38 +176,28 @@ public final class HyperFactory extends JsonFactory {
     /**********************************************************
      */
 
-    private SheetParser _createParser(final SheetReader reader, final IOContext ctxt) {
+    private SheetParser _createParser(final BookReader reader, final IOContext ctxt) {
         return new SheetParser(ctxt, _parserFeatures, _objectCodec, _sheetParserFeatures, reader);
     }
 
-    private SheetReader _createFileSheetReader(final SheetInput<File> src) throws IOException {
-        if (PackageUtil.isOOXML(src.getRaw())) {
-            return _createSSMLSheetReader(SSMLWorkbook.create(src.getRaw()), src);
-        }
-        return _createPOISheetReader(WorkbookFactory.create(src.getRaw()), src);
+    private BookReader _createFileSheetReader(final File src) throws IOException {
+        return _createPOISheetReader(WorkbookFactory.create(src));
     }
 
-    private SheetReader _createInputStreamSheetReader(final SheetInput<InputStream> src) throws IOException {
-        if (PackageUtil.isOOXML(src.getRaw())) {
-            return _createSSMLSheetReader(SSMLWorkbook.create(src.getRaw()), src);
-        }
-        return _createPOISheetReader(WorkbookFactory.create(src.getRaw()), src);
+    private BookReader _createInputStreamSheetReader(final InputStream src) throws IOException {
+        return _createPOISheetReader(WorkbookFactory.create(src));
     }
 
-    private SSMLSheetReader _createSSMLSheetReader(final SSMLWorkbook workbook, final SheetInput<?> src) {
+    private SSMLBookReader _createSSMLSheetReader(final SSMLWorkbook workbook, final SheetInput<?> src) {
         final PackagePart worksheetPart = src.isNamed() ? workbook.getWorksheetPart(src.getName()) : workbook.getWorksheetPartAt(src.getIndex());
         if (worksheetPart == null) {
             throw new IllegalArgumentException("No sheet for " + src);
         }
-        return new SSMLSheetReader(worksheetPart, workbook);
+        return new SSMLBookReader(worksheetPart, workbook);
     }
 
-    private POISheetReader _createPOISheetReader(final Workbook workbook, final SheetInput<?> src) {
-        final Sheet sheet = src.isNamed() ? workbook.getSheet(src.getName()) : workbook.getSheetAt(src.getIndex());
-        if (sheet == null) {
-            throw new IllegalArgumentException("No sheet for " + src);
-        }
-        return new POISheetReader(sheet);
+    private POIBookReader _createPOISheetReader(final Workbook workbook) {
+        return new POIBookReader(workbook);
     }
 
     @SuppressWarnings("unchecked")

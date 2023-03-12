@@ -27,6 +27,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.poi.ss.usermodel.Workbook;
 
 public final class HyperReader extends ObjectReader {
 
@@ -109,11 +110,7 @@ public final class HyperReader extends ObjectReader {
     /**********************************************************
      */
 
-    public SheetParser createParser(final Sheet src) {
-        return (SheetParser) _config.initialize(parserFactory().createParser(src), _schema);
-    }
-
-    public SheetParser createParser(final SheetInput<?> src) throws IOException {
+    public SheetParser createParser(final Workbook src) {
         return (SheetParser) _config.initialize(parserFactory().createParser(src), _schema);
     }
 
@@ -123,13 +120,7 @@ public final class HyperReader extends ObjectReader {
     /**********************************************************
      */
 
-    public <T> T readValue(final Sheet src) throws IOException {
-        try (MappingIterator<T> iterator = readValues(src)) {
-            return iterator.hasNext() ? iterator.next() : null;
-        }
-    }
-
-    public <T> T readValue(final SheetInput<?> src) throws IOException {
+    public <T> T readValue(final Workbook src) throws IOException {
         try (MappingIterator<T> iterator = readValues(src)) {
             return iterator.hasNext() ? iterator.next() : null;
         }
@@ -156,12 +147,7 @@ public final class HyperReader extends ObjectReader {
      */
 
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
-    public <T> SheetMappingIterator<T> readValues(final Sheet src) throws IOException {
-        return (SheetMappingIterator<T>) _bindAndReadValues(_considerFilter(createParser(src), true));
-    }
-
-    @SuppressWarnings({"unchecked", "RedundantSuppression"})
-    public <T> SheetMappingIterator<T> readValues(final SheetInput<?> src) throws IOException {
+    public <T> SheetMappingIterator<T> readValues(final Workbook src) throws IOException {
         return (SheetMappingIterator<T>) _bindAndReadValues(_considerFilter(createParser(src), true));
     }
 

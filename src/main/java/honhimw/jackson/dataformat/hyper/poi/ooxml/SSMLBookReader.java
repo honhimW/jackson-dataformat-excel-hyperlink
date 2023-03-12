@@ -14,7 +14,7 @@
 
 package honhimw.jackson.dataformat.hyper.poi.ooxml;
 
-import honhimw.jackson.dataformat.hyper.deser.SheetReader;
+import honhimw.jackson.dataformat.hyper.deser.BookReader;
 import honhimw.jackson.dataformat.hyper.deser.SheetToken;
 import honhimw.jackson.dataformat.hyper.deser.CellValue;
 import honhimw.jackson.dataformat.hyper.poi.ooxml.XmlElementReader.Matcher;
@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaError;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.util.CellAddress;
@@ -36,7 +37,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @Slf4j
-public final class SSMLSheetReader implements SheetReader {
+public final class SSMLBookReader implements BookReader {
 
     private static final Matcher START_SHEET_DATA = Matcher.startElementOf(CTSheetData.type);
     private static final Matcher END_SHEET_DATA = Matcher.endElementOf(CTSheetData.type);
@@ -54,7 +55,7 @@ public final class SSMLSheetReader implements SheetReader {
     private int _rowIndex = -1;
     private int _columnIndex = -1;
 
-    public SSMLSheetReader(final PackagePart worksheetPart, final SSMLWorkbook workbook) {
+    public SSMLBookReader(final PackagePart worksheetPart, final SSMLWorkbook workbook) {
         _sheet = worksheetPart;
         _workbook = workbook;
         try {
@@ -117,6 +118,11 @@ public final class SSMLSheetReader implements SheetReader {
             default:
                 throw new IllegalStateException();
         }
+    }
+
+    @Override
+    public Cell getCell() {
+        return null;
     }
 
     @Override

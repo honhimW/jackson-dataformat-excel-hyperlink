@@ -252,16 +252,20 @@ public abstract class SheetStreamContext extends JsonStreamContext {
         ObjectContext(final SheetStreamContext parent, final Object currentValue) {
             super(TYPE_OBJECT, parent);
             this._currentValue = currentValue;
-            AtomicInteger atomicInteger;
+            if (Objects.nonNull(_currentValue)) {
+                AtomicInteger atomicInteger;
 
-            if (_tableRows.containsKey(_currentValue.getClass())) {
-                atomicInteger = _tableRows.get(_currentValue.getClass());
-                atomicInteger.incrementAndGet();
+                if (_tableRows.containsKey(_currentValue.getClass())) {
+                    atomicInteger = _tableRows.get(_currentValue.getClass());
+                    atomicInteger.incrementAndGet();
+                } else {
+                    atomicInteger = new AtomicInteger(_schema.getDataRow());
+                    _tableRows.put(_currentValue.getClass(), atomicInteger);
+                }
+                row = atomicInteger.get();
             } else {
-                atomicInteger = new AtomicInteger(_schema.getDataRow());
-                _tableRows.put(_currentValue.getClass(), atomicInteger);
+                row = -1;
             }
-            row = atomicInteger.get();
         }
 
         @Override

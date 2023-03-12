@@ -12,21 +12,27 @@
  * limitations under the License.
  */
 
-package honhimw.jackson.dataformat.hyper.poi.ss;
+package honhimw.jackson.dataformat.hyper.poi.ooxml;
 
 import honhimw.jackson.dataformat.hyper.deser.SheetReaderTestBase;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.openxml4j.opc.PackagePart;
 import org.junit.jupiter.api.Test;
 
-class POISheetReaderTest extends SheetReaderTestBase {
+class SSMLBookReaderTest extends SheetReaderTestBase {
 
     @Test
-    void test() throws Exception {
-        final Workbook workbook = new XSSFWorkbook(transitionalSource);
-        final Sheet sheet = workbook.getSheetAt(0);
-        reader = new POISheetReader(sheet);
+    void testTransitional() throws Exception {
+        final SSMLWorkbook workbook = SSMLWorkbook.create(transitionalSource);
+        final PackagePart worksheetPart = workbook.getWorksheetPartAt(0);
+        reader = new SSMLBookReader(worksheetPart, workbook);
+        testSheetReader();
+    }
+
+    @Test
+    void testStrict() throws Exception {
+        final SSMLWorkbook workbook = SSMLWorkbook.create(strictSource);
+        final PackagePart worksheetPart = workbook.getWorksheetPartAt(0);
+        reader = new SSMLBookReader(worksheetPart, workbook);
         testSheetReader();
     }
 }

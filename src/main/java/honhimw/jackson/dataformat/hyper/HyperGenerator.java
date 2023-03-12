@@ -31,14 +31,11 @@ package honhimw.jackson.dataformat.hyper;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.IOContext;
-import honhimw.jackson.dataformat.hyper.SheetStreamContext.ArrayContext;
-import honhimw.jackson.dataformat.hyper.SheetStreamContext.ObjectContext;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
-import honhimw.jackson.dataformat.hyper.exception.SheetStreamWriteException;
+import honhimw.jackson.dataformat.hyper.exception.BookStreamWriteException;
 import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
 import honhimw.jackson.dataformat.hyper.ser.BookWriter;
 import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -120,6 +117,9 @@ public final class HyperGenerator extends GeneratorBase {
         _outputContext = _closeStruct(END_ARRAY);
         if (_outputContext.inObject()) {
             _writer.switchSheet(_outputContext.getCurrentValue().getClass());
+            _writer.setReference(_outputContext.currentReference());
+            _writer.link(List.class, null, row + 1);
+        } else if (_outputContext.inArray()) {
             _writer.setReference(_outputContext.currentReference());
             _writer.link(List.class, null, row + 1);
         }
@@ -311,7 +311,7 @@ public final class HyperGenerator extends GeneratorBase {
 
     private void _checkSchemaSet() throws IOException {
         if (_schema == null) {
-            throw new SheetStreamWriteException("No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not generate", this);
+            throw new BookStreamWriteException("No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not generate", this);
         }
     }
 }

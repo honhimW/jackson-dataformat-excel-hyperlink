@@ -14,8 +14,11 @@
 
 package honhimw.jackson.dataformat.hyper.poi.ss;
 
+import static honhimw.jackson.dataformat.hyper.poi.RetainSheetNames.*;
+
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.databind.JavaType;
+import honhimw.jackson.dataformat.hyper.poi.RetainSheetNames;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
@@ -48,7 +51,7 @@ public final class POIBookWriter implements BookWriter {
 
     private static final int MAX_COLUMN_WIDTH = 255 * 256;
 
-    private static final Set<String> RETAIN_SHEET_NAMES = Set.of("List", "Set", "Map", "Object");
+    private static final Set<String> RETAIN_SHEET_NAMES = Set.of(LIST, SET, MAP, OBJECT);
 
     private final Workbook _workbook;
     private final Map<Class<?>, Sheet> _sheetMap = new HashMap<>();
