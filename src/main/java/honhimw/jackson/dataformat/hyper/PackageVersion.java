@@ -30,8 +30,8 @@ import java.util.jar.JarFile;
 
 public final class PackageVersion implements Versioned {
 
-    public static final String GROUP_ID = "io.github.scndry";
-    public static final String ARTIFACT_ID = "jackson-dataformat-spreadsheet";
+    public static final String GROUP_ID = "io.github.honhimw";
+    public static final String ARTIFACT_ID = "jackson-dataformat-hyperlink";
     @SuppressWarnings("java:S1845")
     public static final Version VERSION = parseVersion();
 

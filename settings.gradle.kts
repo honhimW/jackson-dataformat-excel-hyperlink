@@ -12,5 +12,5 @@
  * limitations under the License.
  */
 
-rootProject.name = "jackson-dataformat-spreadsheet"
+rootProject.name = "jackson-dataformat-hyperlink"
 

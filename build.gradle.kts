@@ -17,11 +17,11 @@ plugins {
     id("maven-publish")
 }
 
-group = "io.github.scndry"
+group = "io.github.honhimw"
 version = "0.0.1-SNAPSHOT"
-description = "Support for reading and writing Spreadsheet via Jackson abstractions."
+description = "Support for reading and writing Excel-Hyperlink via Jackson abstractions."
 
-val title = "Jackson dataformat: Spreadsheet"
+val title = "Jackson dataformat: HyperLink"
 val jacksonVersion = "2.14.1"
 val poiVersion = "5.2.3"
 val snapshots = version.toString().endsWith("SNAPSHOT")
@@ -68,7 +68,7 @@ publishing {
             pom {
                 name.set(title)
                 description.set(project.description)
-                url.set("https://github.com/scndry/jackson-dataformat-spreadsheet")
+//                url.set("https://github.com/scndry/jackson-dataformat-spreadsheet")
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
@@ -81,12 +81,16 @@ publishing {
                         email.set("scndryan@gmail.com")
                         url.set("https://scndry.github.io")
                     }
+                    developer {
+                        name.set("honhimw")
+                        email.set("honhimw@outlook.com")
+                    }
                 }
-                scm {
-                    connection.set("scm:git:git://github.com/scndry/jackson-dataformat-spreadsheet.git")
-                    developerConnection.set("scm:git:ssh://github.com/scndry/jackson-dataformat-spreadsheet.git")
-                    url.set("https://github.com/scndry/jackson-dataformat-spreadsheet")
-                }
+//                scm {
+//                    connection.set("scm:git:git://github.com/scndry/jackson-dataformat-spreadsheet.git")
+//                    developerConnection.set("scm:git:ssh://github.com/scndry/jackson-dataformat-spreadsheet.git")
+//                    url.set("https://github.com/scndry/jackson-dataformat-spreadsheet")
+//                }
             }
         }
     }
