@@ -19,20 +19,16 @@ import com.fasterxml.jackson.core.base.ParserMinimalBase;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.databind.JavaType;
 import honhimw.jackson.dataformat.hyper.poi.RetainSheetNames;
 import honhimw.jackson.dataformat.hyper.poi.ss.POIBookReader;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.PackageVersion;
-import honhimw.jackson.dataformat.hyper.SheetStreamContext;
+import honhimw.jackson.dataformat.hyper.BookStreamContext;
 import honhimw.jackson.dataformat.hyper.exception.BookStreamReadException;
-import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
-import honhimw.jackson.dataformat.hyper.schema.Table;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.util.CellAddress;
@@ -47,7 +43,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 @Slf4j
-public final class SheetParser extends ParserMinimalBase {
+public final class BookParser extends ParserMinimalBase {
 
     private final IOContext _ioContext;
     private final BookReader _reader;
@@ -56,11 +52,11 @@ public final class SheetParser extends ParserMinimalBase {
     private boolean _closed;
     private ObjectCodec _objectCodec;
     private HyperSchema _schema;
-    private SheetStreamContext _parsingContext;
+    private BookStreamContext _parsingContext;
     private CellAddress _reference;
     private CellValue _value;
 
-    public SheetParser(final IOContext ctxt, final int features, final ObjectCodec codec, final int formatFeatures, final BookReader reader) {
+    public BookParser(final IOContext ctxt, final int features, final ObjectCodec codec, final int formatFeatures, final BookReader reader) {
         super(features);
         _ioContext = ctxt;
         _objectCodec = codec;
@@ -92,7 +88,7 @@ public final class SheetParser extends ParserMinimalBase {
     @Override
     public void setSchema(final FormatSchema schema) {
         _schema = (HyperSchema) schema;
-        _parsingContext = SheetStreamContext.createRootContext(_schema);
+        _parsingContext = BookStreamContext.createRootContext(_schema);
     }
 
     @Override
@@ -205,7 +201,7 @@ public final class SheetParser extends ParserMinimalBase {
                 }
             }
             case ROW_END -> {
-                SheetStreamContext temp = _parsingContext;
+                BookStreamContext temp = _parsingContext;
                 if (temp.getParent() != null && !temp.getParent().inRoot()) {
                     if (temp.inArray()) {
                         _nextTokens.add(JsonToken.END_ARRAY);
@@ -296,8 +292,8 @@ public final class SheetParser extends ParserMinimalBase {
             _reader.close();
         }
         final Object content = _ioContext.contentReference().getRawContent();
-        if (content instanceof SheetInput) {
-            final SheetInput<?> input = (SheetInput<?>) content;
+        if (content instanceof BookInput) {
+            final BookInput<?> input = (BookInput<?>) content;
             if (_ioContext.isResourceManaged() && input.isFile()) {
                 Files.deleteIfExists(((File) input.getRaw()).toPath());
             }
@@ -310,7 +306,7 @@ public final class SheetParser extends ParserMinimalBase {
     }
 
     @Override
-    public SheetStreamContext getParsingContext() {
+    public BookStreamContext getParsingContext() {
         return _parsingContext;
     }
 

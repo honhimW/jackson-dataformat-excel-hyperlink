@@ -20,9 +20,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.DataFormatReaders;
-import honhimw.jackson.dataformat.hyper.deser.SheetInput;
-import honhimw.jackson.dataformat.hyper.deser.SheetParser;
-import org.apache.poi.ss.usermodel.Sheet;
+import honhimw.jackson.dataformat.hyper.deser.BookParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,9 +86,9 @@ public final class HyperReader extends ObjectReader {
     }
 
     @Override
-    protected <T> SheetMappingIterator<T> _newIterator(final JsonParser p, final DeserializationContext ctxt,
+    protected <T> BookMappingIterator<T> _newIterator(final JsonParser p, final DeserializationContext ctxt,
                                                        final JsonDeserializer<?> deser, final boolean parserManaged) {
-        return new SheetMappingIterator<>(_valueType, p, ctxt, deser, parserManaged, _valueToUpdate);
+        return new BookMappingIterator<>(_valueType, p, ctxt, deser, parserManaged, _valueToUpdate);
     }
 
     /*
@@ -110,8 +108,8 @@ public final class HyperReader extends ObjectReader {
     /**********************************************************
      */
 
-    public SheetParser createParser(final Workbook src) {
-        return (SheetParser) _config.initialize(parserFactory().createParser(src), _schema);
+    public BookParser createParser(final Workbook src) {
+        return (BookParser) _config.initialize(parserFactory().createParser(src), _schema);
     }
 
     /*
@@ -147,20 +145,20 @@ public final class HyperReader extends ObjectReader {
      */
 
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
-    public <T> SheetMappingIterator<T> readValues(final Workbook src) throws IOException {
-        return (SheetMappingIterator<T>) _bindAndReadValues(_considerFilter(createParser(src), true));
+    public <T> BookMappingIterator<T> readValues(final Workbook src) throws IOException {
+        return (BookMappingIterator<T>) _bindAndReadValues(_considerFilter(createParser(src), true));
     }
 
     @Override
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
-    public <T> SheetMappingIterator<T> readValues(final File src) throws IOException {
-        return (SheetMappingIterator<T>) super.readValues(src);
+    public <T> BookMappingIterator<T> readValues(final File src) throws IOException {
+        return (BookMappingIterator<T>) super.readValues(src);
     }
 
     @Override
     @SuppressWarnings({"unchecked", "RedundantSuppression"})
-    public <T> SheetMappingIterator<T> readValues(final InputStream src) throws IOException {
-        return (SheetMappingIterator<T>) super.readValues(src);
+    public <T> BookMappingIterator<T> readValues(final InputStream src) throws IOException {
+        return (BookMappingIterator<T>) super.readValues(src);
     }
 
     /*

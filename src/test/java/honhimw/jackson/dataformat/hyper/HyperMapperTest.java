@@ -14,9 +14,7 @@
 
 package honhimw.jackson.dataformat.hyper;
 
-import honhimw.jackson.dataformat.hyper.deser.SheetInput;
-import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
+import honhimw.jackson.dataformat.hyper.ser.BookOutput;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -91,7 +89,7 @@ class HyperMapperTest implements FixtureAs {
 
         @Test
         void writeValuesWithSheetName() throws Exception {
-            final SheetOutput<File> output = SheetOutput.target(out, "Entries");
+            final BookOutput<File> output = BookOutput.target(out, "Entries");
             mapper.writeValue(output, Entry.VALUES, Entry.class);
             try (XSSFWorkbook workbook = new XSSFWorkbook(out)) {
                 final List<Entry> actual = mapper.readValues(workbook, Entry.class);

@@ -16,7 +16,7 @@ package honhimw.jackson.dataformat.hyper;
 
 import java.io.File;
 
-public interface SheetContent<T> {
+public interface BookContent<T> {
 
     T getRaw();
 

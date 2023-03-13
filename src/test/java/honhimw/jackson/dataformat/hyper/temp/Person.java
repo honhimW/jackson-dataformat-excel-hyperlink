@@ -135,7 +135,7 @@ public class Person implements Serializable {
 
         @Override
         public String convert(final List<String> value) {
-            return String.join("'", value);
+            return String.join(";", value);
         }
 
         @Override

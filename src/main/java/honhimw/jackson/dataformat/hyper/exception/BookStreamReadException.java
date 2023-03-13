@@ -31,7 +31,7 @@ package honhimw.jackson.dataformat.hyper.exception;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.util.RequestPayload;
-import honhimw.jackson.dataformat.hyper.deser.SheetParser;
+import honhimw.jackson.dataformat.hyper.deser.BookParser;
 
 @SuppressWarnings("java:S110")
 public final class BookStreamReadException extends StreamReadException {
@@ -40,7 +40,7 @@ public final class BookStreamReadException extends StreamReadException {
         super(p, msg);
     }
 
-    public static BookStreamReadException unexpected(final SheetParser p, final Object value) {
+    public static BookStreamReadException unexpected(final BookParser p, final Object value) {
         return new BookStreamReadException(p, "Unexpected value: " + value);
     }
 

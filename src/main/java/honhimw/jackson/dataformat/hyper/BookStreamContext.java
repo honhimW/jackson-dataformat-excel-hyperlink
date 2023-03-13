@@ -24,7 +24,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.poi.ss.util.CellAddress;
 
-public abstract class SheetStreamContext extends JsonStreamContext {
+public abstract class BookStreamContext extends JsonStreamContext {
 
     protected static final int INITIAL_INDEX = -1;
     protected final HyperSchema _schema;
@@ -32,22 +32,22 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
     protected static final Map<Class<?>, AtomicInteger> _tableRows = new HashMap<>();
 
-    protected SheetStreamContext(final int type, final HyperSchema schema) {
+    protected BookStreamContext(final int type, final HyperSchema schema) {
         super(type, INITIAL_INDEX);
         _schema = schema;
     }
 
-    public static SheetStreamContext createRootContext(final HyperSchema schema) {
+    public static BookStreamContext createRootContext(final HyperSchema schema) {
         return new RootContext(schema);
     }
 
     @Override
-    public SheetStreamContext getParent() {
+    public BookStreamContext getParent() {
         return null;
     }
 
     @SuppressWarnings("java:S1172") // Unused method parameters should be removed
-    public SheetStreamContext getParent(final Matcher matcher) {
+    public BookStreamContext getParent(final Matcher matcher) {
         return null;
     }
 
@@ -59,19 +59,19 @@ public abstract class SheetStreamContext extends JsonStreamContext {
     public void setCurrentName(final String name) {
     }
 
-    public SheetStreamContext clearAndGetParent() {
+    public BookStreamContext clearAndGetParent() {
         return getParent();
     }
 
-    public SheetStreamContext createChildArrayContext() {
+    public BookStreamContext createChildArrayContext() {
         return createChildArrayContext(null, -1);
     }
 
-    public SheetStreamContext createChildArrayContext(final Object forValue, final int size) {
+    public BookStreamContext createChildArrayContext(final Object forValue, final int size) {
         return new ArrayContext(this, forValue, size);
     }
 
-    public SheetStreamContext createChildObjectContext(Object forValue) {
+    public BookStreamContext createChildObjectContext(Object forValue) {
         return new ObjectContext(this, forValue);
     }
 
@@ -106,10 +106,10 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
     interface Matcher {
 
-        boolean matches(SheetStreamContext context);
+        boolean matches(BookStreamContext context);
     }
 
-    static final class RootContext extends SheetStreamContext implements StepAware {
+    static final class RootContext extends BookStreamContext implements StepAware {
 
         private int _step = DEFAULT_STEP;
 
@@ -150,27 +150,27 @@ public abstract class SheetStreamContext extends JsonStreamContext {
         }
     }
 
-    abstract static class ChildContext extends SheetStreamContext {
+    abstract static class ChildContext extends BookStreamContext {
 
-        protected final SheetStreamContext _parent;
+        protected final BookStreamContext _parent;
 
-        ChildContext(final int type, final SheetStreamContext parent) {
+        ChildContext(final int type, final BookStreamContext parent) {
             super(type, parent._schema);
             _parent = parent;
         }
 
         @Override
-        public SheetStreamContext getParent() {
+        public BookStreamContext getParent() {
             return _parent;
         }
 
         @Override
-        public SheetStreamContext getParent(final Matcher matcher) {
+        public BookStreamContext getParent(final Matcher matcher) {
             return matcher.matches(_parent) ? _parent : _parent.getParent(matcher);
         }
 
         @Override
-        public SheetStreamContext clearAndGetParent() {
+        public BookStreamContext clearAndGetParent() {
             _parent._size += _size - 1;
             return super.clearAndGetParent();
         }
@@ -185,7 +185,7 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         private final int row;
 
-        ArrayContext(final SheetStreamContext parent, final Object currentValue, final int size) {
+        ArrayContext(final BookStreamContext parent, final Object currentValue, final int size) {
             super(TYPE_ARRAY, parent);
             _size = size;
             this._currentValue = currentValue;
@@ -226,7 +226,7 @@ public abstract class SheetStreamContext extends JsonStreamContext {
         }
 
         @Override
-        public SheetStreamContext clearAndGetParent() {
+        public BookStreamContext clearAndGetParent() {
             return super.clearAndGetParent();
         }
 
@@ -249,7 +249,7 @@ public abstract class SheetStreamContext extends JsonStreamContext {
 
         private final int row;
 
-        ObjectContext(final SheetStreamContext parent, final Object currentValue) {
+        ObjectContext(final BookStreamContext parent, final Object currentValue) {
             super(TYPE_OBJECT, parent);
             this._currentValue = currentValue;
             if (Objects.nonNull(_currentValue)) {

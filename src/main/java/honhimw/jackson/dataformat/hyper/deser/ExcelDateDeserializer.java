@@ -29,7 +29,7 @@ public final class ExcelDateDeserializer<T> extends JsonDeserializer<T> {
 
     @Override
     public T deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-        final boolean date1904 = ((SheetParser) p).isDate1904();
+        final boolean date1904 = ((BookParser) p).isDate1904();
         return function.apply(p.getDoubleValue(), date1904);
     }
 }

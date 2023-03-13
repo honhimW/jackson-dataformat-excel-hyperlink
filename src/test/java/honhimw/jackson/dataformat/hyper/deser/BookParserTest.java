@@ -29,10 +29,10 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class SheetParserTest implements FixtureAs {
+class BookParserTest implements FixtureAs {
 
     HyperMapper mapper;
-    SheetParser parser;
+    BookParser parser;
 
     @BeforeEach
     void setUp() throws Exception {

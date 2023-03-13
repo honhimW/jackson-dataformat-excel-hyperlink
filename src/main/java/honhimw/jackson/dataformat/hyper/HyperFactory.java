@@ -16,8 +16,8 @@ package honhimw.jackson.dataformat.hyper;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.io.IOContext;
-import honhimw.jackson.dataformat.hyper.deser.SheetInput;
-import honhimw.jackson.dataformat.hyper.deser.SheetParser;
+import honhimw.jackson.dataformat.hyper.deser.BookInput;
+import honhimw.jackson.dataformat.hyper.deser.BookParser;
 import honhimw.jackson.dataformat.hyper.deser.BookReader;
 import honhimw.jackson.dataformat.hyper.poi.ooxml.PackageUtil;
 import honhimw.jackson.dataformat.hyper.poi.ooxml.SSMLBookReader;
@@ -25,10 +25,9 @@ import honhimw.jackson.dataformat.hyper.poi.ooxml.SSMLWorkbook;
 import honhimw.jackson.dataformat.hyper.poi.ss.POIBookReader;
 import honhimw.jackson.dataformat.hyper.poi.ss.POIBookWriter;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
-import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
+import honhimw.jackson.dataformat.hyper.ser.BookOutput;
 import honhimw.jackson.dataformat.hyper.ser.BookWriter;
 import org.apache.poi.openxml4j.opc.PackagePart;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.util.TempFile;
@@ -45,7 +44,7 @@ import java.nio.file.StandardCopyOption;
 public final class HyperFactory extends JsonFactory {
 
     public static final String FORMAT_NAME = "hyper";
-    public static final int DEFAULT_SHEET_PARSER_FEATURE_FLAGS = SheetParser.Feature.collectDefaults();
+    public static final int DEFAULT_SHEET_PARSER_FEATURE_FLAGS = BookParser.Feature.collectDefaults();
 
     private final transient WorkbookProvider _workbookProvider;
     private int _sheetParserFeatures;
@@ -103,16 +102,16 @@ public final class HyperFactory extends JsonFactory {
     /**********************************************************
      */
 
-    public HyperFactory configure(final SheetParser.Feature f, final boolean state) {
+    public HyperFactory configure(final BookParser.Feature f, final boolean state) {
         return state ? enable(f) : disable(f);
     }
 
-    public HyperFactory enable(final SheetParser.Feature f) {
+    public HyperFactory enable(final BookParser.Feature f) {
         _sheetParserFeatures |= f.getMask();
         return this;
     }
 
-    public HyperFactory disable(final SheetParser.Feature f) {
+    public HyperFactory disable(final BookParser.Feature f) {
         _sheetParserFeatures &= ~f.getMask();
         return this;
     }
@@ -123,20 +122,20 @@ public final class HyperFactory extends JsonFactory {
     /**********************************************************
      */
 
-    public SheetParser createParser(final Workbook src) {
+    public BookParser createParser(final Workbook src) {
         final IOContext ctxt = _createContext(_createContentReference(src), false);
         return _createParser(new POIBookReader(src), ctxt);
     }
 
     @Override
-    public SheetParser createParser(final File src) throws IOException {
+    public BookParser createParser(final File src) throws IOException {
         final IOContext ctxt = _createContext(_createContentReference(src), true);
         final BookReader reader = _createFileSheetReader(src);
         return _createParser(reader, ctxt);
     }
 
     @Override
-    public SheetParser createParser(final InputStream src) throws IOException {
+    public BookParser createParser(final InputStream src) throws IOException {
         final IOContext ctxt = _createContext(_createContentReference(src), true);
         final BookReader reader = _createInputStreamSheetReader(src);
         return _createParser(reader, ctxt);
@@ -148,8 +147,8 @@ public final class HyperFactory extends JsonFactory {
     /**********************************************************
      */
 
-    public HyperGenerator createGenerator(final SheetOutput<?> out) throws IOException {
-        final SheetOutput<OutputStream> output = _rawAsOutputStream(out);
+    public HyperGenerator createGenerator(final BookOutput<?> out) throws IOException {
+        final BookOutput<OutputStream> output = _rawAsOutputStream(out);
         final boolean resourceManaged = out != output;
         final IOContext ctxt = _createContext(_createContentReference(output), resourceManaged);
         return _createGenerator(_createSheetWriter(output), ctxt);
@@ -157,17 +156,17 @@ public final class HyperFactory extends JsonFactory {
 
     @Override
     public HyperGenerator createGenerator(final File out, final JsonEncoding enc) throws IOException {
-        return createGenerator(SheetOutput.target(out));
+        return createGenerator(BookOutput.target(out));
     }
 
     @Override
     public HyperGenerator createGenerator(final OutputStream out, final JsonEncoding enc) throws IOException {
-        return createGenerator(SheetOutput.target(out));
+        return createGenerator(BookOutput.target(out));
     }
 
     @Override
     public HyperGenerator createGenerator(final OutputStream out) throws IOException {
-        return createGenerator(SheetOutput.target(out));
+        return createGenerator(BookOutput.target(out));
     }
 
     /*
@@ -176,8 +175,8 @@ public final class HyperFactory extends JsonFactory {
     /**********************************************************
      */
 
-    private SheetParser _createParser(final BookReader reader, final IOContext ctxt) {
-        return new SheetParser(ctxt, _parserFeatures, _objectCodec, _sheetParserFeatures, reader);
+    private BookParser _createParser(final BookReader reader, final IOContext ctxt) {
+        return new BookParser(ctxt, _parserFeatures, _objectCodec, _sheetParserFeatures, reader);
     }
 
     private BookReader _createFileSheetReader(final File src) throws IOException {
@@ -188,7 +187,7 @@ public final class HyperFactory extends JsonFactory {
         return _createPOISheetReader(WorkbookFactory.create(src));
     }
 
-    private SSMLBookReader _createSSMLSheetReader(final SSMLWorkbook workbook, final SheetInput<?> src) {
+    private SSMLBookReader _createSSMLSheetReader(final SSMLWorkbook workbook, final BookInput<?> src) {
         final PackagePart worksheetPart = src.isNamed() ? workbook.getWorksheetPart(src.getName()) : workbook.getWorksheetPartAt(src.getIndex());
         if (worksheetPart == null) {
             throw new IllegalArgumentException("No sheet for " + src);
@@ -201,16 +200,16 @@ public final class HyperFactory extends JsonFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private SheetInput<?> _preferRawAsFile(final SheetInput<?> src) throws IOException {
+    private BookInput<?> _preferRawAsFile(final BookInput<?> src) throws IOException {
         if (src.isFile()) return src;
-        final InputStream raw = ((SheetInput<InputStream>) src).getRaw();
+        final InputStream raw = ((BookInput<InputStream>) src).getRaw();
         if (!PackageUtil.isOOXML(raw)) return src;
         final File file = TempFile.createTempFile("sheet-input", ".xlsx");
         Files.copy(raw, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
         if (isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
             raw.close();
         }
-        return src.isNamed() ? SheetInput.source(file, src.getName()) : SheetInput.source(file, src.getIndex());
+        return src.isNamed() ? BookInput.source(file, src.getName()) : BookInput.source(file, src.getIndex());
     }
 
     /*
@@ -224,7 +223,7 @@ public final class HyperFactory extends JsonFactory {
     }
 
     @SuppressWarnings("resource")
-    private BookWriter _createSheetWriter(final SheetOutput<?> out) throws IOException {
+    private BookWriter _createSheetWriter(final BookOutput<?> out) throws IOException {
         final Workbook workbook = _workbookProvider.create();
 //        final Sheet sheet;
 //        if (out.isNamed()) {
@@ -236,9 +235,9 @@ public final class HyperFactory extends JsonFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private SheetOutput<OutputStream> _rawAsOutputStream(final SheetOutput<?> out) throws IOException {
-        if (!out.isFile()) return (SheetOutput<OutputStream>) out;
+    private BookOutput<OutputStream> _rawAsOutputStream(final BookOutput<?> out) throws IOException {
+        if (!out.isFile()) return (BookOutput<OutputStream>) out;
         final OutputStream raw = Files.newOutputStream(((File) out.getRaw()).toPath());
-        return out.isNamed() ? SheetOutput.target(raw, out.getName()) : SheetOutput.target(raw);
+        return out.isNamed() ? BookOutput.target(raw, out.getName()) : BookOutput.target(raw);
     }
 }

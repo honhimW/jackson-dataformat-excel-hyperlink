@@ -22,8 +22,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.SerializationConfig;
-import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
-import org.apache.poi.ss.usermodel.Sheet;
+import honhimw.jackson.dataformat.hyper.ser.BookOutput;
 
 import java.io.IOException;
 
@@ -87,7 +86,7 @@ public final class HyperWriter extends ObjectWriter {
     /**********************************************************
      */
 
-    public HyperGenerator createGenerator(final SheetOutput<?> out) throws IOException {
+    public HyperGenerator createGenerator(final BookOutput<?> out) throws IOException {
         _assertNotNull("out", out);
         return (HyperGenerator) _configureGenerator(generatorFactory().createGenerator(out));
     }
@@ -98,11 +97,11 @@ public final class HyperWriter extends ObjectWriter {
     /**********************************************************
      */
 
-    public SequenceWriter writeValues(final SheetOutput<?> out) throws IOException {
+    public SequenceWriter writeValues(final BookOutput<?> out) throws IOException {
         return _newSequenceWriter(false, createGenerator(out), true);
     }
 
-    public SequenceWriter writeValuesAsArray(final SheetOutput<?> out) throws IOException {
+    public SequenceWriter writeValuesAsArray(final BookOutput<?> out) throws IOException {
         return _newSequenceWriter(true, createGenerator(out), true);
     }
 
@@ -112,7 +111,7 @@ public final class HyperWriter extends ObjectWriter {
     /**********************************************************
      */
 
-    public void writeValue(final SheetOutput<?> out, final Object value) throws IOException {
+    public void writeValue(final BookOutput<?> out, final Object value) throws IOException {
         _writeValueAndClose(createGenerator(out), value);
     }
 

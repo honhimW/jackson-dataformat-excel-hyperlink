@@ -43,7 +43,7 @@ public final class SheetLocation extends JsonLocation {
     @Override
     public String sourceDescription() {
         final Object content = _contentReference.getRawContent();
-        if (content instanceof SheetInput) {
+        if (content instanceof BookInput) {
             return content.toString();
         }
         return super.sourceDescription();

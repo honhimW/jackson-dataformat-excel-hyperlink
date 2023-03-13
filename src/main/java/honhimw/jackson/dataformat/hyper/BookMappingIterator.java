@@ -20,19 +20,19 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.MappingIterator;
 import honhimw.jackson.dataformat.hyper.deser.SheetLocation;
-import honhimw.jackson.dataformat.hyper.deser.SheetParser;
+import honhimw.jackson.dataformat.hyper.deser.BookParser;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 
-public final class SheetMappingIterator<T> extends MappingIterator<T> {
+public final class BookMappingIterator<T> extends MappingIterator<T> {
 
-    SheetMappingIterator(final JavaType type, final JsonParser p, final DeserializationContext ctxt,
+    BookMappingIterator(final JavaType type, final JsonParser p, final DeserializationContext ctxt,
                          final JsonDeserializer<?> deser, final boolean managedParser, final Object valueToUpdate) {
         super(type, p, ctxt, deser, managedParser, valueToUpdate);
     }
 
     @Override
-    public SheetParser getParser() {
-        return (SheetParser) super.getParser();
+    public BookParser getParser() {
+        return (BookParser) super.getParser();
     }
 
     @Override

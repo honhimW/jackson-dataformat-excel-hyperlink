@@ -14,7 +14,7 @@
 
 package honhimw.jackson.dataformat.hyper.ser;
 
-import honhimw.jackson.dataformat.hyper.SheetContent;
+import honhimw.jackson.dataformat.hyper.BookContent;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -25,29 +25,29 @@ import java.io.OutputStream;
 @Getter
 @ToString
 @EqualsAndHashCode
-public final class SheetOutput<T> implements SheetContent<T> {
+public final class BookOutput<T> implements BookContent<T> {
 
     private final T raw;
     private final String name;
 
-    private SheetOutput(final T raw, final String name) {
+    private BookOutput(final T raw, final String name) {
         this.raw = raw;
         this.name = name;
     }
 
-    public static SheetOutput<File> target(final File raw) {
-        return new SheetOutput<>(raw, null);
+    public static BookOutput<File> target(final File raw) {
+        return new BookOutput<>(raw, null);
     }
 
-    public static SheetOutput<File> target(final File raw, final String sheetName) {
-        return new SheetOutput<>(raw, sheetName);
+    public static BookOutput<File> target(final File raw, final String sheetName) {
+        return new BookOutput<>(raw, sheetName);
     }
 
-    public static SheetOutput<OutputStream> target(final OutputStream raw) {
-        return new SheetOutput<>(raw, null);
+    public static BookOutput<OutputStream> target(final OutputStream raw) {
+        return new BookOutput<>(raw, null);
     }
 
-    public static SheetOutput<OutputStream> target(final OutputStream raw, final String sheetName) {
-        return new SheetOutput<>(raw, sheetName);
+    public static BookOutput<OutputStream> target(final OutputStream raw, final String sheetName) {
+        return new BookOutput<>(raw, sheetName);
     }
 }

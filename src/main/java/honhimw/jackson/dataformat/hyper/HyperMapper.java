@@ -28,19 +28,19 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
-import honhimw.jackson.dataformat.hyper.deser.SheetInput;
-import honhimw.jackson.dataformat.hyper.deser.SheetParser;
+import honhimw.jackson.dataformat.hyper.deser.BookParser;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
 import honhimw.jackson.dataformat.hyper.schema.generator.TableNameResolver;
-import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
+import honhimw.jackson.dataformat.hyper.ser.BookOutput;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellAddress;
 
 @SuppressWarnings("java:S2177")
@@ -158,7 +158,7 @@ public final class HyperMapper extends ObjectMapper {
     /**********************************************************
      */
 
-    public HyperGenerator createGenerator(final SheetOutput<?> out) throws IOException {
+    public HyperGenerator createGenerator(final BookOutput<?> out) throws IOException {
         _assertNotNull("out", out);
         final HyperGenerator g = tokenStreamFactory().createGenerator(out);
         _serializationConfig.initialize(g);
@@ -187,13 +187,13 @@ public final class HyperMapper extends ObjectMapper {
      */
 
     @Override
-    public SheetParser createParser(final File src) throws IOException {
-        return (SheetParser) super.createParser(src);
+    public BookParser createParser(final File src) throws IOException {
+        return (BookParser) super.createParser(src);
     }
 
     @Override
-    public SheetParser createParser(final InputStream in) throws IOException {
-        return (SheetParser) super.createParser(in);
+    public BookParser createParser(final InputStream in) throws IOException {
+        return (BookParser) super.createParser(in);
     }
 
     /*
@@ -202,20 +202,20 @@ public final class HyperMapper extends ObjectMapper {
     /**********************************************************
      */
 
-    public HyperMapper configure(final SheetParser.Feature f, final boolean state) {
+    public HyperMapper configure(final BookParser.Feature f, final boolean state) {
         tokenStreamFactory().configure(f, state);
         return this;
     }
 
-    public HyperMapper enable(final SheetParser.Feature... features) {
-        for (SheetParser.Feature f : features) {
+    public HyperMapper enable(final BookParser.Feature... features) {
+        for (BookParser.Feature f : features) {
             tokenStreamFactory().enable(f);
         }
         return this;
     }
 
-    public HyperMapper disable(final SheetParser.Feature... features) {
-        for (SheetParser.Feature f : features) {
+    public HyperMapper disable(final BookParser.Feature... features) {
+        for (BookParser.Feature f : features) {
             tokenStreamFactory().disable(f);
         }
         return this;
@@ -314,7 +314,7 @@ public final class HyperMapper extends ObjectMapper {
     /**********************************************************
      */
 
-    public void writeValue(final SheetOutput<?> out, final Object value) throws IOException {
+    public void writeValue(final BookOutput<?> out, final Object value) throws IOException {
         _verifyValueType(value);
         writeValue(out, value, value.getClass());
     }
@@ -331,7 +331,7 @@ public final class HyperMapper extends ObjectMapper {
         writeValue(out, value, value.getClass());
     }
 
-    public void writeValue(final SheetOutput<?> out, final Object value, final Class<?> valueType) throws IOException {
+    public void writeValue(final BookOutput<?> out, final Object value, final Class<?> valueType) throws IOException {
         sheetWriterFor(valueType).writeValue(out, value);
     }
 
@@ -350,6 +350,15 @@ public final class HyperMapper extends ObjectMapper {
 
     public byte[] writeValueAsBytes(final Object value, final Class<?> valueType) throws JsonProcessingException {
         return sheetWriterFor(valueType).writeValueAsBytes(value);
+    }
+
+    public Workbook writeValueAsBook(final Object value) throws IOException {
+        return writeValueAsBook(value, value.getClass());
+    }
+
+    public Workbook writeValueAsBook(final Object value, final Class<?> valueType) throws IOException {
+        ByteArrayInputStream baips = new ByteArrayInputStream(writeValueAsBytes(value, valueType));
+        return WorkbookFactory.create(baips);
     }
 
     /*
@@ -426,17 +435,17 @@ public final class HyperMapper extends ObjectMapper {
             super(mapper);
         }
 
-        public Builder enable(final SheetParser.Feature... features) {
+        public Builder enable(final BookParser.Feature... features) {
             _mapper.enable(features);
             return _this();
         }
 
-        public Builder disable(final SheetParser.Feature... features) {
+        public Builder disable(final BookParser.Feature... features) {
             _mapper.disable(features);
             return _this();
         }
 
-        public Builder configure(final SheetParser.Feature feature, final boolean state) {
+        public Builder configure(final BookParser.Feature feature, final boolean state) {
             _mapper.configure(feature, state);
             return _this();
         }

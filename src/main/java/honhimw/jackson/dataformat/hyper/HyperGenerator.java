@@ -33,7 +33,7 @@ import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.exception.BookStreamWriteException;
-import honhimw.jackson.dataformat.hyper.ser.SheetOutput;
+import honhimw.jackson.dataformat.hyper.ser.BookOutput;
 import honhimw.jackson.dataformat.hyper.ser.BookWriter;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +58,7 @@ public final class HyperGenerator extends GeneratorBase {
     private final IOContext _ioContext;
     private final BookWriter _writer;
     private HyperSchema _schema;
-    private SheetStreamContext _outputContext;
+    private BookStreamContext _outputContext;
 
     public HyperGenerator(final IOContext ctxt, final int features, final ObjectCodec codec, final BookWriter writer) {
         super(features, codec);
@@ -72,7 +72,7 @@ public final class HyperGenerator extends GeneratorBase {
     }
 
     @Override
-    public SheetStreamContext getOutputContext() {
+    public BookStreamContext getOutputContext() {
         return _outputContext;
     }
 
@@ -92,7 +92,7 @@ public final class HyperGenerator extends GeneratorBase {
         _schema = (HyperSchema) schema;
         _writer.setSchema(_schema);
         _writer.writeHeaders();
-        _outputContext = SheetStreamContext.createRootContext(_schema);
+        _outputContext = BookStreamContext.createRootContext(_schema);
     }
 
     public boolean isDate1904() {
@@ -276,8 +276,8 @@ public final class HyperGenerator extends GeneratorBase {
         super.close();
         _writer.adjustColumnWidth();
         final Object content = _ioContext.contentReference().getRawContent();
-        if (content instanceof SheetOutput) {
-            final OutputStream out = ((SheetOutput<OutputStream>) content).getRaw();
+        if (content instanceof BookOutput) {
+            final OutputStream out = ((BookOutput<OutputStream>) content).getRaw();
             _writer.write(out);
             if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
                 _writer.close();
@@ -301,8 +301,8 @@ public final class HyperGenerator extends GeneratorBase {
         }
     }
 
-    private SheetStreamContext _closeStruct(final String typeMsg) {
-        final SheetStreamContext parent = _outputContext.clearAndGetParent();
+    private BookStreamContext _closeStruct(final String typeMsg) {
+        final BookStreamContext parent = _outputContext.clearAndGetParent();
         if (log.isTraceEnabled()) {
             log.trace("{} {} {}", typeMsg, parent.currentReference(), parent.pathAsPointer(true));
         }
