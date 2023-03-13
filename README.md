@@ -44,7 +44,7 @@ public static void main(String[]args){
 import java.io.Serializable;
 
 @JsonClassDescription("name for excel sheet")
-@ThisIsACustomAnnotation("name for excel column") // supported by using TableNameResolver.class
+@ThisIsACustomAnnotation("name for excel sheet") // supported by using TableNameResolver.class
 public class Person implements Serializable {
     
     @JsonPropertyDescription("name for excel column")
