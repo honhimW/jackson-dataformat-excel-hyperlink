@@ -3,6 +3,24 @@
 The project is forked from [scndry/jackson-dataformat-spreadsheet](https://github.com/scndry/jackson-dataformat-spreadsheet), which can dump data objects as (.xlsx) format, with Hyperlink links between objects. Structured data types (Class) correspond to a (Sheet), and array and class array types are dumped in a Sheet named “List”. It also supports reading/writing.
 
 ---
+## Excel-Hyperlink format
+
+The commonly used (.xlsx) format document for office suite spreadsheets, which consists of three basic parts: sheet, row, and cell.
+
+|                  | JSON       | JAVA                                | Excel-Hyperlink                                   |
+|------------------|------------|-------------------------------------|---------------------------------------------------|
+| object           | {}         | Type(.class)                        | sheet                                             |
+| property         | key        | property                            | sheet title row/column index                      |
+| array            | []         | array/Collection                    | sheet named "List" column index means array index |
+| string           | ""         | String                              | string type cell value                            |
+| numeric          | -1.1       | Number(int/short/long/float/double) | numeric type cell value                           |
+| boolean          | true/false | Boolean                             | boolean type cell value                           |
+| null             | null       | null                                | null/blank type cell value                        |
+| separator        | ,          | memory                              | cell                                              |
+| object reference | {}         | memory                              | Hyperlink                                         |
+| map              | native     | Map.class interface                 | not supported💀                                   |
+
+---
 ### Person
 | id  | name  | address(Object) | properties |
 |-----|-------|-----------------|------------|
