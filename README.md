@@ -54,7 +54,7 @@ public static void main(String[]args){
     mapper.writeValue(file, people);
 
     List<person> readDatas = mapper.readValues(file, Person.class);
-    Asserts.status(Objects.equals(people, readDatas), "suppose to be the same");
+    Asserts.status(Objects.equals(people, readDatas), "supposed to be the same");
 }
 ```
 
