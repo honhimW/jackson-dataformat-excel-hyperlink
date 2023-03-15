@@ -40,8 +40,8 @@ dependencies {
 }
 
 dependencies {
-    testImplementation("com.navercorp.fixturemonkey:fixture-monkey:0.4.9")
-    testImplementation("org.assertj:assertj-core:3.24.2")
+    testImplementation("com.navercorp.fixturemonkey:fixture-monkey:0.5.0")
+    testImplementation("org.assertj:assertj-core:3.24.4
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
     testImplementation("org.apache.commons:commons-lang3:3.12.0")
     testImplementation("commons-beanutils:commons-beanutils:1.9.4")
