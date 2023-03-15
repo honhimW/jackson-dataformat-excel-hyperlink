@@ -12,5 +12,19 @@
  * limitations under the License.
  */
 
-rootProject.name = "jackson-dataformat-hyperlink"
+package honhimw.jackson.dataformat.hyper.poi.ss;
 
+import honhimw.jackson.dataformat.hyper.deser.SheetReaderTestBase;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.Test;
+
+class POIBookReaderTest extends SheetReaderTestBase {
+
+    @Test
+    void test() throws Exception {
+        final Workbook workbook = new XSSFWorkbook(transitionalSource);
+        reader = new POIBookReader(workbook);
+        testSheetReader();
+    }
+}

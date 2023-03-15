@@ -12,5 +12,24 @@
  * limitations under the License.
  */
 
-rootProject.name = "jackson-dataformat-hyperlink"
+package honhimw.jackson.dataformat.hyper.support.fixture;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class NestedEntry {
+
+    Integer a;
+    Inner inner;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Inner {
+        Integer b;
+    }
+}

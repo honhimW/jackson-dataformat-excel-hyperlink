@@ -12,5 +12,13 @@
  * limitations under the License.
  */
 
-rootProject.name = "jackson-dataformat-hyperlink"
+package honhimw.jackson.dataformat.hyper.deser;
 
+public enum SheetToken {
+    SHEET_DATA_START,
+    ROW_START,
+    CELL_VALUE,
+    HYPER_LINK,
+    ROW_END,
+    SHEET_DATA_END
+}

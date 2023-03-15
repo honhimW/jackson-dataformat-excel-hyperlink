@@ -12,5 +12,16 @@
  * limitations under the License.
  */
 
-rootProject.name = "jackson-dataformat-hyperlink"
+package honhimw.jackson.dataformat.hyper;
 
+import org.apache.poi.ss.usermodel.Workbook;
+
+import java.io.IOException;
+
+/**
+ * Workbook Supplier
+ */
+public interface WorkbookProvider {
+
+    Workbook create() throws IOException;
+}
