@@ -126,8 +126,9 @@ public final class BookParser extends ParserMinimalBase {
                 break;
             case FIELD_NAME:
                 final Column column = _schema.getColumn(_reader.getCell().getSheet().getSheetName(), _reference);
-                final ColumnPointer pointer = _parsingContext.relativePointer(column.getPointer());
-                _parsingContext.setCurrentName(pointer.head().name());
+                _parsingContext.setCurrentName(column.getPointer().name());
+                // final ColumnPointer pointer = _parsingContext.relativePointer(column.getPointer());
+                // _parsingContext.setCurrentName(pointer.head().name());
                 break;
             case VALUE_EMBEDDED_OBJECT:
             case VALUE_STRING:
