@@ -108,10 +108,7 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
     }
 
     private String _columnValue(BeanProperty prop) {
-        return Optional.of(prop)
-            .map(beanProperty -> beanProperty.getAnnotation(JsonPropertyDescription.class))
-            .map(JsonPropertyDescription::value)
-            .orElseGet(prop::getName);
+        return prop.getName();
     }
 
     private void _checkTypeSupported(final JsonSerializer<Object> serializer) throws JsonMappingException {

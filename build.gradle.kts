@@ -1,3 +1,6 @@
+import org.gradle.internal.impldep.org.bouncycastle.util.encoders.UTF8
+import java.nio.charset.StandardCharsets
+
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,6 +108,10 @@ publishing {
             }
         }
     }
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = StandardCharsets.UTF_8.name()
 }
 
 tasks.withType<Test> {

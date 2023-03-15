@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.ser.SerializerFactory;
 import com.fasterxml.jackson.databind.util.ClassUtil;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
-import honhimw.jackson.dataformat.hyper.schema.Table;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
 import honhimw.jackson.dataformat.hyper.schema.generator.FormatVisitorWrapper;
 import honhimw.jackson.dataformat.hyper.schema.generator.TableNameResolver;
@@ -40,7 +39,7 @@ public final class SchemaGenerator {
     private final GeneratorSettings _generatorSettings;
 
     public SchemaGenerator() {
-        _generatorSettings = new GeneratorSettings(CellAddress.A1, ColumnNameResolver.NULL, TableNameResolver.DEFAULT);
+        _generatorSettings = new GeneratorSettings(CellAddress.A1, ColumnNameResolver.DEFAULT, TableNameResolver.DEFAULT);
     }
 
     private SchemaGenerator(final GeneratorSettings generatorSettings) {

@@ -25,6 +25,7 @@ import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.PackageVersion;
 import honhimw.jackson.dataformat.hyper.BookStreamContext;
 import honhimw.jackson.dataformat.hyper.exception.BookStreamReadException;
+import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -125,9 +126,8 @@ public final class BookParser extends ParserMinimalBase {
                 break;
             case FIELD_NAME:
                 final Column column = _schema.getColumn(_reader.getCell().getSheet().getSheetName(), _reference);
-                _parsingContext.setCurrentName(column.getName());
-//                final ColumnPointer pointer = _parsingContext.relativePointer(column.getPointer());
-//                _parsingContext.setCurrentName(pointer.head().name());
+                final ColumnPointer pointer = _parsingContext.relativePointer(column.getPointer());
+                _parsingContext.setCurrentName(pointer.head().name());
                 break;
             case VALUE_EMBEDDED_OBJECT:
             case VALUE_STRING:

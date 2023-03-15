@@ -14,11 +14,21 @@
 
 package honhimw.jackson.dataformat.hyper.schema.generator;
 
+import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.databind.JavaType;
 
 public interface TableNameResolver {
 
-    TableNameResolver DEFAULT = type -> type.getRawClass().getSimpleName();
+    TableNameResolver DEFAULT = type -> {
+        Class<?> rawClass = type.getRawClass();
+        if (rawClass.isAnnotationPresent(JsonClassDescription.class)) {
+            String value = rawClass.getAnnotation(JsonClassDescription.class).value();
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return rawClass.getSimpleName();
+    };
 
     String resolve(JavaType type);
 }

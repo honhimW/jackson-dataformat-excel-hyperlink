@@ -14,11 +14,21 @@
 
 package honhimw.jackson.dataformat.hyper.schema.generator;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.BeanProperty;
 
 public interface ColumnNameResolver {
 
-    ColumnNameResolver NULL = BeanProperty::getName;
+    ColumnNameResolver DEFAULT = prop -> {
+        JsonPropertyDescription annotation = prop.getAnnotation(JsonPropertyDescription.class);
+        if (annotation != null) {
+            String value = annotation.value();
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return prop.getName();
+    };
 
     String resolve(BeanProperty prop);
 }

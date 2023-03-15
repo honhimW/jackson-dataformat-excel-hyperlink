@@ -1,5 +1,6 @@
 package honhimw.jackson.dataformat.hyper.temp;
 
+import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
@@ -27,6 +28,7 @@ import org.apache.commons.collections4.ListUtils;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonClassDescription("人")
 public class Person implements Serializable {
 
     @JsonProperty(index = 0)
