@@ -1,13 +1,30 @@
+import org.gradle.internal.impldep.org.bouncycastle.util.encoders.UTF8
+import java.nio.charset.StandardCharsets
+
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 plugins {
     id("java-library")
     id("maven-publish")
 }
 
-group = "io.github.scndry"
+group = "io.github.honhimw"
 version = "0.0.1-SNAPSHOT"
-description = "Support for reading and writing Spreadsheet via Jackson abstractions."
+description = "Support for reading and writing Excel-Hyperlink via Jackson abstractions."
 
-val title = "Jackson dataformat: Spreadsheet"
+val title = "Jackson dataformat: HyperLink"
 val jacksonVersion = "2.14.2"
 val poiVersion = "5.2.3"
 val snapshots = version.toString().endsWith("SNAPSHOT")
@@ -23,12 +40,14 @@ dependencies {
 }
 
 dependencies {
-    testImplementation("com.navercorp.fixturemonkey:fixture-monkey:0.4.9")
-    testImplementation("org.assertj:assertj-core:3.23.1")
+    testImplementation("com.navercorp.fixturemonkey:fixture-monkey:0.5.0")
+    testImplementation("org.assertj:assertj-core:3.24.4
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
+    testImplementation("org.apache.commons:commons-lang3:3.12.0")
+    testImplementation("commons-beanutils:commons-beanutils:1.9.4")
     testRuntimeOnly("ch.qos.logback:logback-classic:1.3.5")
     testRuntimeOnly("org.apache.logging.log4j:log4j-to-slf4j:2.19.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
 }
 
 dependencies {
@@ -39,8 +58,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     withJavadocJar()
     withSourcesJar()
 }
@@ -52,7 +71,7 @@ publishing {
             pom {
                 name.set(title)
                 description.set(project.description)
-                url.set("https://github.com/scndry/jackson-dataformat-spreadsheet")
+//                url.set("https://github.com/scndry/jackson-dataformat-spreadsheet")
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
@@ -65,12 +84,16 @@ publishing {
                         email.set("scndryan@gmail.com")
                         url.set("https://scndry.github.io")
                     }
+                    developer {
+                        name.set("honhimw")
+                        email.set("honhimw@outlook.com")
+                    }
                 }
-                scm {
-                    connection.set("scm:git:git://github.com/scndry/jackson-dataformat-spreadsheet.git")
-                    developerConnection.set("scm:git:ssh://github.com/scndry/jackson-dataformat-spreadsheet.git")
-                    url.set("https://github.com/scndry/jackson-dataformat-spreadsheet")
-                }
+//                scm {
+//                    connection.set("scm:git:git://github.com/scndry/jackson-dataformat-spreadsheet.git")
+//                    developerConnection.set("scm:git:ssh://github.com/scndry/jackson-dataformat-spreadsheet.git")
+//                    url.set("https://github.com/scndry/jackson-dataformat-spreadsheet")
+//                }
             }
         }
     }
@@ -85,6 +108,10 @@ publishing {
             }
         }
     }
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = StandardCharsets.UTF_8.name()
 }
 
 tasks.withType<Test> {

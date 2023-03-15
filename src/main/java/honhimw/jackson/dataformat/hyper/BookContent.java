@@ -12,5 +12,21 @@
  * limitations under the License.
  */
 
-rootProject.name = "jackson-dataformat-hyperlink"
+package honhimw.jackson.dataformat.hyper;
 
+import java.io.File;
+
+public interface BookContent<T> {
+
+    T getRaw();
+
+    String getName();
+
+    default boolean isNamed() {
+        return getName() != null;
+    }
+
+    default boolean isFile() {
+        return getRaw() instanceof File;
+    }
+}
