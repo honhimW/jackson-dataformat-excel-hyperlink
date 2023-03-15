@@ -1,6 +1,5 @@
 package honhimw.jackson.dataformat.hyper.temp;
 
-import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import honhimw.jackson.dataformat.hyper.HyperMapper;
 import honhimw.jackson.dataformat.hyper.temp.Person.Ext;
@@ -51,8 +50,18 @@ public class Tests {
 
     @Test
     @SneakyThrows
+    public void one() {
+        HyperMapper mapper = new HyperMapper();
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        File file = new File("E:\\temp\\person.xlsx");
+        mapper.writeValue(file, List.of(Person.VALUE), Person.class);
+        Person person = mapper.readValue(file, Person.class);
+        System.out.println(person.toString());
+    }
+
+    @Test
+    @SneakyThrows
     public void inMemory() {
-        System.out.println(Person.class.getAnnotation(JsonClassDescription.class).value());
         List<Person> origin = new ArrayList<>(MockUtils.generate(Person.class, 10));
         HyperMapper mapper = new HyperMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);

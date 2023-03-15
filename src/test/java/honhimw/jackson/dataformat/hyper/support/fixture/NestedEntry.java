@@ -12,26 +12,24 @@
  * limitations under the License.
  */
 
-package support.fixture;
+package honhimw.jackson.dataformat.hyper.support.fixture;
 
-import com.fasterxml.jackson.annotation.JsonClassDescription;
-import java.util.Arrays;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldNameConstants;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldNameConstants
-public class Entry {
+public class NestedEntry {
 
-    public static final Entry VALUE = new Entry(1, 2);
-    public static final List<Entry> VALUES = Arrays.asList(new Entry(1, 2), new Entry(3, 4));
-    public static final Entry[] VALUES_ARRAY = new Entry[]{new Entry(1, 2), new Entry(3, 4)};
+    Integer a;
+    Inner inner;
 
-    int a;
-    int b;
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Inner {
+        Integer b;
+    }
 }

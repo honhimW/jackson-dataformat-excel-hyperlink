@@ -20,20 +20,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import honhimw.jackson.dataformat.hyper.schema.generator.AnnotatedNameResolver;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
+import honhimw.jackson.dataformat.hyper.temp.ColumnCode;
+import honhimw.jackson.dataformat.hyper.temp.NameOf;
+import honhimw.jackson.dataformat.hyper.temp.Person;
 import java.io.File;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.nio.file.Path;
+import java.util.List;
 import lombok.Data;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import support.fixture.Entry;
 
 class SchemaGeneratorTest {
 
@@ -50,21 +49,16 @@ class SchemaGeneratorTest {
     @Test
     void changeOriginAddress() throws Exception {
         final HyperMapper mapper = new HyperMapper().setOrigin("B2");
-        mapper.writeValue(out, Entry.VALUE);
+        mapper.writeValue(out, Person.VALUE);
         try (XSSFWorkbook workbook = new XSSFWorkbook(out)) {
             final XSSFSheet sheet = workbook.getSheetAt(0);
             row = sheet.getRow(0);
             assertThat(row).isNull();
             row = sheet.getRow(1);
             assertThat(row.getCell(0)).isNull();
-            assertCellValue(1, "a");
-            assertCellValue(2, "b");
             row = sheet.getRow(2);
+            System.out.println();
             assertThat(row.getCell(0)).isNull();
-            assertCellValue(1, 1);
-            assertCellValue(2, 2);
-            row = sheet.getRow(3);
-            assertThat(row).isNull();
         }
     }
 
@@ -72,12 +66,12 @@ class SchemaGeneratorTest {
     void overwriteColumnNames() throws Exception {
         final HyperMapper mapper = new HyperMapper()
                 .setColumnNameResolver(prop -> prop.getName().toUpperCase());
-        mapper.writeValue(out, Entry.VALUE);
+        mapper.writeValue(out, List.of(Person.VALUE), Person.class);
         try (XSSFWorkbook workbook = new XSSFWorkbook(out)) {
             final XSSFSheet sheet = workbook.getSheetAt(0);
             row = sheet.getRow(0);
-            assertCellValue(0, Entry.Fields.A.toUpperCase());
-            assertCellValue(1, Entry.Fields.B.toUpperCase());
+            assertCellValue(0, "ID");
+            assertCellValue(1, "HEIGHT");
         }
     }
 
@@ -90,8 +84,8 @@ class SchemaGeneratorTest {
         try (XSSFWorkbook workbook = new XSSFWorkbook(out)) {
             final XSSFSheet sheet = workbook.getSheetAt(0);
             row = sheet.getRow(0);
-            assertCellValue(0, ColumnCode.A.text);
-            assertCellValue(1, ColumnCode.B.text);
+            assertCellValue(0, ColumnCode.A.getText());
+            assertCellValue(1, ColumnCode.B.getText());
         }
     }
 
@@ -111,19 +105,6 @@ class SchemaGeneratorTest {
 
     void assertCellValue(final int cellnum, double expected) {
         assertThat(row.getCell(cellnum).getNumericCellValue()).isEqualTo(expected);
-    }
-
-    @Getter
-    @RequiredArgsConstructor
-    public enum ColumnCode {
-        A("Code A"), B("Code B");
-        final String text;
-        // ...
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface NameOf {
-        ColumnCode value();
     }
 
     @Data

@@ -15,7 +15,6 @@
 package honhimw.jackson.dataformat.hyper.poi.ss;
 
 import honhimw.jackson.dataformat.hyper.deser.SheetReaderTestBase;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;

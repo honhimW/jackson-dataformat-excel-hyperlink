@@ -5,10 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
+import honhimw.jackson.dataformat.hyper.temp.Person.Ext.More;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +29,15 @@ import org.apache.commons.collections4.ListUtils;
 @AllArgsConstructor
 @JsonClassDescription("人")
 public class Person implements Serializable {
+
+    public static final Person VALUE = new Person(0L, null, "hah", 200.00, false,
+        List.of("hello", "world"), List.of(1, "hello", new More("?", true)),
+        new Ext("haha", 2.1, new More("blablabla", false)),
+        new Ext("xixi", 2.2, new More("blablabla", false)),
+        new Ext("hehe", 2.3, new More("blablabla", false))
+    );
+
+    public static final List<Person> VALUES = List.of(VALUE);
 
     @JsonProperty(index = 0)
     private Long id;
@@ -53,7 +61,7 @@ public class Person implements Serializable {
     private List<Object> properties2;
 
 //    @JsonIgnore
-    @JsonProperty(index = 3)
+    @JsonProperty(index = 4)
     private Ext ext;
     private Ext ext2;
     private Ext ext3;
@@ -137,7 +145,7 @@ public class Person implements Serializable {
 
         @Override
         public String convert(final List<String> value) {
-            return String.join(";", value);
+            return String.join("'", value);
         }
 
         @Override

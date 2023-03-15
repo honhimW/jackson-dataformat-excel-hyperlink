@@ -14,14 +14,13 @@
 
 package honhimw.jackson.dataformat.hyper.deser;
 
-import support.FixtureAs;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import honhimw.jackson.dataformat.hyper.support.FixtureAs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.NoSuchElementException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class SheetReaderTestBase implements FixtureAs {
 

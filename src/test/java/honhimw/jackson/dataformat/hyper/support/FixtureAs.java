@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package support;
+package honhimw.jackson.dataformat.hyper.support;
 
 import java.io.File;
 import java.io.InputStream;

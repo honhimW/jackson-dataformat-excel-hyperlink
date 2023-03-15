@@ -14,20 +14,19 @@
 
 package honhimw.jackson.dataformat.hyper.deser;
 
-import com.fasterxml.jackson.core.JsonToken;
-import honhimw.jackson.dataformat.hyper.exception.BookStreamReadException;
-import honhimw.jackson.dataformat.hyper.HyperMapper;
-import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import support.FixtureAs;
-import support.fixture.Entry;
-import support.fixture.NestedEntry;
-
-import java.io.IOException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import com.fasterxml.jackson.core.JsonToken;
+import honhimw.jackson.dataformat.hyper.HyperMapper;
+import honhimw.jackson.dataformat.hyper.exception.BookStreamReadException;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
+import honhimw.jackson.dataformat.hyper.support.FixtureAs;
+import honhimw.jackson.dataformat.hyper.support.fixture.Entry;
+import honhimw.jackson.dataformat.hyper.support.fixture.NestedEntry;
+import java.io.IOException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class BookParserTest implements FixtureAs {
 
@@ -55,6 +54,7 @@ class BookParserTest implements FixtureAs {
 
     @Test
     void nestedEntry() throws Exception {
+        parser = mapper.createParser(fixtureAsFile("nested-entries.xlsx"));
         parser.setSchema(mapper.sheetSchemaFor(NestedEntry.class));
         testEntry(this::assertNestedEntry);
     }
