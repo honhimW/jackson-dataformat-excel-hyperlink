@@ -25,7 +25,7 @@ version = "0.0.1-SNAPSHOT"
 description = "Support for reading and writing Excel-Hyperlink via Jackson abstractions."
 
 val title = "Jackson dataformat: HyperLink"
-val jacksonVersion = "2.14.1"
+val jacksonVersion = "2.14.2"
 val poiVersion = "5.2.3"
 val snapshots = version.toString().endsWith("SNAPSHOT")
 
@@ -40,8 +40,8 @@ dependencies {
 }
 
 dependencies {
-    testImplementation("com.navercorp.fixturemonkey:fixture-monkey:0.4.9")
-    testImplementation("org.assertj:assertj-core:3.23.1")
+    testImplementation("com.navercorp.fixturemonkey:fixture-monkey:0.5.0")
+    testImplementation("org.assertj:assertj-core:3.24.4
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
     testImplementation("org.apache.commons:commons-lang3:3.12.0")
     testImplementation("commons-beanutils:commons-beanutils:1.9.4")
@@ -49,7 +49,7 @@ dependencies {
     testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     testRuntimeOnly("ch.qos.logback:logback-classic:1.3.5")
     testRuntimeOnly("org.apache.logging.log4j:log4j-to-slf4j:2.19.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
 }
 
 dependencies {
