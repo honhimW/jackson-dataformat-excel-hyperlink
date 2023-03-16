@@ -41,7 +41,8 @@ public final class SimpleBeanDeserializer extends DelegatingDeserializer {
 
     @Override
     protected JsonDeserializer<?> newDelegatingInstance(final JsonDeserializer<?> newDelegatee) {
-        throw new IllegalStateException("Internal error: should never get called");
+        return new SimpleBeanDeserializer(newDelegatee);
+//        throw new IllegalStateException("Internal error: should never get called");
     }
 
     public static final class Modifier extends BeanDeserializerModifier {

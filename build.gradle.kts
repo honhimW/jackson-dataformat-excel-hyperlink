@@ -45,6 +45,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
     testImplementation("org.apache.commons:commons-lang3:3.12.0")
     testImplementation("commons-beanutils:commons-beanutils:1.9.4")
+    testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
+    testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     testRuntimeOnly("ch.qos.logback:logback-classic:1.3.5")
     testRuntimeOnly("org.apache.logging.log4j:log4j-to-slf4j:2.19.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.1")

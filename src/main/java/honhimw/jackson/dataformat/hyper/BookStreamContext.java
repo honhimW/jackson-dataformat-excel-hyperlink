@@ -30,8 +30,6 @@ public abstract class BookStreamContext extends JsonStreamContext {
     protected final HyperSchema _schema;
     protected int _size;
 
-    protected static final Map<Class<?>, AtomicInteger> _tableRows = new HashMap<>();
-
     protected BookStreamContext(final int type, final HyperSchema schema) {
         super(type, INITIAL_INDEX);
         _schema = schema;
@@ -113,6 +111,8 @@ public abstract class BookStreamContext extends JsonStreamContext {
 
         private int _step = DEFAULT_STEP;
 
+        private final Map<Class<?>, AtomicInteger> _tableRows = new HashMap<>();
+
         RootContext(final HyperSchema schema) {
             super(TYPE_ROOT, schema);
         }
@@ -174,8 +174,19 @@ public abstract class BookStreamContext extends JsonStreamContext {
             _parent._size += _size - 1;
             return super.clearAndGetParent();
         }
-    }
 
+        protected Map<Class<?>, AtomicInteger> getTableRowsMap() {
+            BookStreamContext context = this;
+            while (context.getParent() != null) {
+                context = context.getParent();
+                if (context instanceof RootContext rootContext) {
+                    return rootContext._tableRows;
+                }
+            }
+            throw new IllegalStateException("not supposed to happen");
+        }
+
+    }
 
     static final class ArrayContext extends ChildContext implements StepAware {
 
@@ -191,13 +202,13 @@ public abstract class BookStreamContext extends JsonStreamContext {
             this._currentValue = currentValue;
             AtomicInteger atomicInteger;
 
-            if (_tableRows.containsKey(List.class)) {
-                atomicInteger = _tableRows.get(List.class);
+            if (getTableRowsMap().containsKey(List.class)) {
+                atomicInteger = getTableRowsMap().get(List.class);
                 atomicInteger.incrementAndGet();
             } else {
                 atomicInteger = new AtomicInteger(_schema.getOriginRow());
                 atomicInteger.decrementAndGet();
-                _tableRows.put(List.class, atomicInteger);
+                getTableRowsMap().put(List.class, atomicInteger);
             }
             row = atomicInteger.get();
         }
@@ -255,12 +266,12 @@ public abstract class BookStreamContext extends JsonStreamContext {
             if (Objects.nonNull(_currentValue)) {
                 AtomicInteger atomicInteger;
 
-                if (_tableRows.containsKey(_currentValue.getClass())) {
-                    atomicInteger = _tableRows.get(_currentValue.getClass());
+                if (getTableRowsMap().containsKey(_currentValue.getClass())) {
+                    atomicInteger = getTableRowsMap().get(_currentValue.getClass());
                     atomicInteger.incrementAndGet();
                 } else {
                     atomicInteger = new AtomicInteger(_schema.getDataRow());
-                    _tableRows.put(_currentValue.getClass(), atomicInteger);
+                    getTableRowsMap().put(_currentValue.getClass(), atomicInteger);
                 }
                 row = atomicInteger.get();
             } else {
