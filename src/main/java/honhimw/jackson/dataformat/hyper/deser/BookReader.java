@@ -14,6 +14,7 @@
 
 package honhimw.jackson.dataformat.hyper.deser;
 
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellAddress;
@@ -26,6 +27,8 @@ public interface BookReader extends AutoCloseable, Iterator<SheetToken> {
     SpreadsheetVersion getSpreadsheetVersion();
 
     boolean isDate1904();
+
+    void setSchema(HyperSchema schema);
 
     CellAddress getReference();
 

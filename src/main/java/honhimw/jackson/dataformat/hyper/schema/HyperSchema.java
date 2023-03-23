@@ -15,14 +15,13 @@
 package honhimw.jackson.dataformat.hyper.schema;
 
 import com.fasterxml.jackson.core.FormatSchema;
-import com.fasterxml.jackson.databind.JavaType;
-import java.util.Map;
-import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.util.CellAddress;
-
+import honhimw.jackson.dataformat.hyper.schema.visitor.BookReadVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.BookWriteVisitor;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Builder;
+import org.apache.poi.ss.util.CellAddress;
 
 public final class HyperSchema implements FormatSchema, Iterable<Column> {
 
@@ -30,11 +29,15 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
     private final List<Column> _columns;
     private final List<Table> _tables;
     private final CellAddress _origin;
+    private final BookWriteVisitor _bookWriteVisitor;
+    private final BookReadVisitor _bookReadVisitor;
 
-    public HyperSchema(final List<Column> _columns, final List<Table> _tables, final CellAddress _origin) {
+    public HyperSchema(final List<Column> _columns, final List<Table> _tables, final CellAddress _origin, final BookWriteVisitor bookWriteVisitor, final BookReadVisitor bookReadVisitor) {
         this._columns = _columns;
         this._tables = _tables;
         this._origin = _origin;
+        this._bookWriteVisitor = bookWriteVisitor;
+        this._bookReadVisitor = bookReadVisitor;
         setupTables();
     }
 
@@ -46,6 +49,14 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
     @Override
     public Iterator<Column> iterator() {
         return _columns.iterator();
+    }
+
+    public BookWriteVisitor getBookWriteVisitor() {
+        return _bookWriteVisitor;
+    }
+
+    public BookReadVisitor getBookReadVisitor() {
+        return _bookReadVisitor;
     }
 
     public Column findColumn(final CellAddress reference) {
@@ -112,11 +123,13 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("sheet table " + name + " is not exists"));
     }
+
     public Table getTable(final Class<?> clazz) {
         return _tables.stream().filter(t -> t.getType().getRawClass().equals(clazz))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("sheet table " + clazz.getSimpleName() + " is not exists"));
     }
+
     public Table currentTable(final ColumnPointer pointer) {
         return  _tables.stream().filter(t -> t.matches(pointer.getParent()))
             .findFirst()
@@ -163,6 +176,7 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
                     table.getColumns().add(column);
                 }
             }
+            table.setOrigin(_origin);
         }
     }
 

@@ -17,6 +17,7 @@ package honhimw.jackson.dataformat.hyper.ser;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellAddress;
 
 import java.io.IOException;
@@ -33,6 +34,10 @@ public interface BookWriter extends AutoCloseable {
     void setSchema(HyperSchema schema);
 
     void setReference(CellAddress reference);
+
+    void currentValue(Object value);
+
+    Cell getCell();
 
     void writeHeaders();
 

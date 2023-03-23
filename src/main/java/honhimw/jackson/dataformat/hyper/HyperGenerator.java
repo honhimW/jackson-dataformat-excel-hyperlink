@@ -107,7 +107,7 @@ public final class HyperGenerator extends GeneratorBase {
     @Override
     public void writeStartArray(final Object forValue, final int size) throws IOException {
         _verifyValueWrite(START_ARRAY);
-        _writer.switchSheet(List.class);
+        _openStruct(List.class, forValue);
         _outputContext = _outputContext.createChildArrayContext(forValue, size);
     }
 
@@ -133,7 +133,7 @@ public final class HyperGenerator extends GeneratorBase {
     @Override
     public void writeStartObject(final Object forValue) throws IOException {
         _verifyValueWrite(START_OBJECT);
-        _writer.switchSheet(forValue.getClass());
+        _openStruct(forValue.getClass(), forValue);
         _outputContext = _outputContext.createChildObjectContext(forValue);
     }
 
@@ -296,9 +296,14 @@ public final class HyperGenerator extends GeneratorBase {
         _checkSchemaSet();
         _outputContext.writeValue();
         _writer.setReference(_outputContext.currentReference());
+        _writer.currentValue(_outputContext.getCurrentValue());
         if (log.isTraceEnabled()) {
             log.trace("{} {} {}", typeMsg, _outputContext.currentReference(), _outputContext.pathAsPointer(true));
         }
+    }
+
+    private void _openStruct(final Class<?> type, Object value) {
+        _writer.switchSheet(type);
     }
 
     private BookStreamContext _closeStruct(final String typeMsg) {
