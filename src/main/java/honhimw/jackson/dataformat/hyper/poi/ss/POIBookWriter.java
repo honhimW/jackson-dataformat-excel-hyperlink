@@ -14,22 +14,23 @@
 
 package honhimw.jackson.dataformat.hyper.poi.ss;
 
-import static honhimw.jackson.dataformat.hyper.poi.RetainSheetNames.*;
+import static honhimw.jackson.dataformat.hyper.poi.RetainedSheets.LIST;
 
-import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.databind.JavaType;
-import honhimw.jackson.dataformat.hyper.poi.RetainSheetNames;
+import honhimw.jackson.dataformat.hyper.poi.RetainedSheets;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.schema.Table;
+import honhimw.jackson.dataformat.hyper.schema.visitor.BookWriteVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.RowWriteVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.SheetWriteVisitor;
 import honhimw.jackson.dataformat.hyper.ser.BookWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.common.usermodel.HyperlinkType;
@@ -49,19 +50,19 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 @Slf4j
 public final class POIBookWriter implements BookWriter {
 
-    private static final int MAX_COLUMN_WIDTH = 255 * 256;
-
-    private static final Set<String> RETAIN_SHEET_NAMES = Set.of(LIST, SET, MAP, OBJECT);
-
     private final Workbook _workbook;
     private final Map<Class<?>, Sheet> _sheetMap = new HashMap<>();
     private Sheet _sheet;
     private HyperSchema _schema;
     private CellAddress _reference;
-    private int _lastRow;
+
+    private BookWriteVisitor _bookWriteVisitor;
+    private SheetWriteVisitor _sheetWriteVisitor;
+    private RowWriteVisitor _rowWriteVisitor;
 
     public POIBookWriter(final Workbook _workbook) {
         this._workbook = _workbook;
+        this._bookWriteVisitor = new POIBookWriteVisitor();
     }
 
     @Override
@@ -70,8 +71,77 @@ public final class POIBookWriter implements BookWriter {
     }
 
     @Override
+    public void setSchema(final HyperSchema schema) {
+        this._schema = schema;
+        BookWriteVisitor bookWriteVisitor = _schema.getBookWriteVisitor();
+        if (bookWriteVisitor != null) {
+            bookWriteVisitor.init(_bookWriteVisitor);
+            this._bookWriteVisitor = bookWriteVisitor;
+        }
+        this._bookWriteVisitor.visitBook(_workbook, _schema);
+    }
+
+    @Override
     public void switchSheet(final Class<?> type) {
         this._sheet = _sheetMap.get(type);
+        Table table = null;
+        if (!RetainedSheets.isRetain(type)) {
+            table = _schema.getTable(type);
+        }
+        this._sheetWriteVisitor = _bookWriteVisitor.visitSheet(_sheet, table);
+    }
+
+    @Override
+    public void setReference(final CellAddress reference) {
+        this._reference = reference;
+    }
+
+    @Override
+    public void currentValue(final Object value) {
+        if (_sheet != null && _reference.getColumn() == _schema.getOriginColumn() && _schema.isInRowBounds(_reference.getRow())) {
+            _sheetWriteVisitor.visitRow(CellUtil.getRow(_reference.getRow(), _sheet), value);
+        }
+    }
+
+    @Override
+    public Cell getCell() {
+        final int row = _reference.getRow();
+        return CellUtil.getCell(CellUtil.getRow(row, _sheet), _reference.getColumn());
+    }
+
+    @Override
+    public void writeHeaders() {
+        for (final Table table : _schema.getTables()) {
+            writeHeader(table);
+        }
+        for (final Column column : _schema) {
+            if (column.isArray()) {
+                _sheetMap.put(List.class, _workbook.createSheet(LIST));
+                break;
+            }
+        }
+    }
+
+    private void writeHeader(Table table) {
+        final int row = _schema.getOriginRow();
+        JavaType type = table.getType();
+        Class<?> clazz = type.getRawClass();
+        if (!_sheetMap.containsKey(clazz)) {
+            String sheetName = table.getName();
+            RetainedSheets.assertUsable(sheetName);
+            Sheet sheet = _workbook.createSheet(sheetName);
+            _sheetMap.put(clazz, sheet);
+        }
+        switchSheet(clazz);
+        _rowWriteVisitor = _sheetWriteVisitor.visitHeaders(CellUtil.getRow(row, _sheet));
+        List<Column> columns = table.getColumns();
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            final int col = _schema.getOriginColumn() + i;
+            setReference(new CellAddress(row, col));
+            Cell cell = getCell();
+            _rowWriteVisitor.visitHeader(cell, column);
+        }
     }
 
     @Override
@@ -86,55 +156,6 @@ public final class POIBookWriter implements BookWriter {
             cell.setHyperlink(hyperlink);
             cell.setCellValue(text);
         });
-    }
-
-    @Override
-    public void setSchema(final HyperSchema schema) {
-        _schema = schema;
-    }
-
-    @Override
-    public void setReference(final CellAddress reference) {
-        _reference = reference;
-    }
-
-    @Override
-    public void writeHeaders() {
-        final int row = _schema.getOriginRow();
-        for (final Table table : _schema.getTables()) {
-            JavaType type = table.getType();
-            Class<?> clazz = type.getRawClass();
-            String sheetName = null;
-            if (!_sheetMap.containsKey(clazz)) {
-                if (clazz.isAnnotationPresent(JsonClassDescription.class)) {
-                    JsonClassDescription annotation = clazz.getAnnotation(JsonClassDescription.class);
-                    sheetName = annotation.value();
-                }
-                if (StringUtil.isBlank(sheetName)) {
-                    sheetName = clazz.getSimpleName();
-                }
-                if (RETAIN_SHEET_NAMES.contains(sheetName)) {
-                    throw new IllegalArgumentException(String.format("[%s] is retained, please rename the sheet", sheetName));
-                }
-                Sheet sheet = _workbook.createSheet(sheetName);
-                _sheetMap.put(clazz, sheet);
-                this._sheet = sheet;
-            } else {
-                this._sheet = _sheetMap.get(clazz);
-            }
-            List<Column> columns = table.getColumns();
-            for (int i = 0; i < columns.size(); i++) {
-                final int col = _schema.getOriginColumn() + i;
-                setReference(new CellAddress(row, col));
-                writeString(columns.get(i).getName());
-            }
-        }
-        for (final Column column : _schema) {
-            if (column.isArray()) {
-                _sheetMap.put(List.class, _workbook.createSheet("List"));
-                break;
-            }
-        }
     }
 
     @Override
@@ -158,10 +179,12 @@ public final class POIBookWriter implements BookWriter {
     }
 
     private <T> void  _write(final T value, final BiConsumer<Cell, T> consumer) {
-        final int row = _reference.getRow();
-        final Cell cell = CellUtil.getCell(CellUtil.getRow(row, _sheet), _reference.getColumn());
-        consumer.accept(cell, value);
-        _lastRow = Math.max(_lastRow, row);
+        final Cell cell = getCell();
+        Column column = null;
+        if (!RetainedSheets.isRetain(_sheet.getSheetName())) {
+            column = _schema.getColumn(_sheet.getSheetName(), _reference);
+        }
+        _rowWriteVisitor.visitCell(cell, column, value, consumer);
         if (log.isTraceEnabled()) {
             log.trace("{} {} {}", _reference, cell.getCellType(), cell);
         }
@@ -198,6 +221,7 @@ public final class POIBookWriter implements BookWriter {
     public void close() throws IOException {
         final Workbook workbook = _sheet.getWorkbook();
         workbook.close();
+        _bookWriteVisitor.visitEnd();
         if (workbook instanceof SXSSFWorkbook) {
             ((SXSSFWorkbook) workbook).dispose();
         }

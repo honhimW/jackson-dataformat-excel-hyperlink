@@ -86,20 +86,14 @@ public final class CellValue {
     }
 
     public String formatAsString() {
-        switch (_cellType) {
-            case BLANK:
-                return "<blank>";
-            case NUMERIC:
-                return String.valueOf(_numberValue);
-            case STRING:
-                return '"' + _textValue + '"';
-            case BOOLEAN:
-                return _booleanValue ? "TRUE" : "FALSE";
-            case ERROR:
-                return ErrorEval.getText(_errorCode);
-            default:
-                return "<error unexpected cell type " + _cellType + ">";
-        }
+        return switch (_cellType) {
+            case BLANK -> "<blank>";
+            case NUMERIC -> String.valueOf(_numberValue);
+            case STRING -> '"' + _textValue + '"';
+            case BOOLEAN -> _booleanValue ? "TRUE" : "FALSE";
+            case ERROR -> ErrorEval.getText(_errorCode);
+            default -> "<error unexpected cell type " + _cellType + ">";
+        };
 
     }
 }

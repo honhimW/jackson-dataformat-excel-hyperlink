@@ -17,7 +17,13 @@ package honhimw.jackson.dataformat.hyper.poi.ss;
 import honhimw.jackson.dataformat.hyper.deser.CellValue;
 import honhimw.jackson.dataformat.hyper.deser.BookReader;
 import honhimw.jackson.dataformat.hyper.deser.SheetToken;
-import honhimw.jackson.dataformat.hyper.poi.RetainSheetNames;
+import honhimw.jackson.dataformat.hyper.poi.RetainedSheets;
+import honhimw.jackson.dataformat.hyper.schema.Column;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
+import honhimw.jackson.dataformat.hyper.schema.Table;
+import honhimw.jackson.dataformat.hyper.schema.visitor.BookReadVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.RowReadVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.SheetReadVisitor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.SpreadsheetVersion;
-import org.apache.poi.ss.format.CellFormat;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
 
@@ -37,14 +42,17 @@ import java.util.NoSuchElementException;
 @Slf4j
 public final class POIBookReader implements BookReader {
 
-    public final static Pattern pattern = Pattern.compile("#(?<sheet>.*)!(?<first>\\d+):(?<last>\\d+)");
+    public final static Pattern HYPER_LINK_PATTERN = Pattern.compile("#(?<sheet>.*)!(?<first>\\d+):(?<last>\\d+)");
 
     private final Workbook _workbook;
-    private final DataFormatter _formatter = new DataFormatter();
     private final Map<String, Sheet> _sheetMap = new HashMap<>();
-    private final Sheet _mainSheet;
-    private final Iterator<Row> _mainRowIterator;
+    private HyperSchema _schema;
+    private Sheet _mainSheet;
+    private Iterator<Row> _mainRowIterator;
     private Iterator<Cell> _cellIterator;
+    private BookReadVisitor _bookReadVisitor;
+    private SheetReadVisitor _sheetReadVisitor;
+    private RowReadVisitor _rowReadVisitor;
     private SheetToken _next;
     private final Stack<Iterator<Cell>> _cellIteratorStack = new Stack<>();
     private Cell _cell;
@@ -74,30 +82,40 @@ public final class POIBookReader implements BookReader {
     }
 
     @Override
+    public void setSchema(HyperSchema schema) {
+        this._schema = schema;
+        final Table mainTable = _schema.getTables().get(0);
+        _mainSheet = _workbook.getSheet(mainTable.getName());
+        _workbook.sheetIterator().forEachRemaining(rows -> _sheetMap.put(rows.getSheetName(), rows));
+        _mainRowIterator = _mainSheet.rowIterator();
+        BookReadVisitor bookReadVisitor = _schema.getBookReadVisitor();
+        if (bookReadVisitor != null) {
+            accept(bookReadVisitor);
+        }
+        _bookReadVisitor.visitBook(_workbook, _schema);
+    }
+
+    private void accept(BookReadVisitor bookReadVisitor) {
+        _bookReadVisitor = new POIBookReadVisitor();
+        bookReadVisitor.init(_bookReadVisitor);
+        this._bookReadVisitor = bookReadVisitor;
+    }
+
+    @Override
     public CellAddress getReference() {
         return _cell == null ? null : _cell.getAddress();
     }
 
     @Override
-    public honhimw.jackson.dataformat.hyper.deser.CellValue getCellValue() {
-        if (_cell == null) return null;
-        final CellType type = CellFormat.ultimateType(_cell);
-        switch (type) {
-            case NUMERIC:
-                final double value = _cell.getNumericCellValue();
-                return new honhimw.jackson.dataformat.hyper.deser.CellValue(value, _formattedString(value, _cell.getCellStyle()));
-            case STRING:
-                return new honhimw.jackson.dataformat.hyper.deser.CellValue(_cell.getStringCellValue());
-            case BOOLEAN:
-                return honhimw.jackson.dataformat.hyper.deser.CellValue.valueOf(_cell.getBooleanCellValue());
-            case ERROR:
-                return CellValue.getError(_cell.getErrorCellValue());
-            case BLANK:
-                return null;
-            case _NONE:
-            case FORMULA:
+    public CellValue getCellValue() {
+        if (_cell == null) {
+            return null;
         }
-        throw new IllegalStateException("Unexpected cell value type: " + type);
+        Column column = null;
+        if (!RetainedSheets.isRetain(_cell.getSheet().getSheetName())) {
+            column = _schema.getColumn(_cell.getSheet().getSheetName(), _cell.getAddress());
+        }
+        return _rowReadVisitor.visitCell(_cell, column);
     }
 
     @Override
@@ -123,6 +141,7 @@ public final class POIBookReader implements BookReader {
     @Override
     public void close() throws IOException {
         _workbook.close();
+        _bookReadVisitor.visitEnd();
         _closed = true;
     }
 
@@ -133,16 +152,20 @@ public final class POIBookReader implements BookReader {
 
     @Override
     public SheetToken next() {
-        if (_next == null) throw new NoSuchElementException();
+        if (_next == null) {
+            throw new NoSuchElementException();
+        }
         final SheetToken token = _next;
         switch (token) {
             case SHEET_DATA_START -> {
+                _sheetReadVisitor = _bookReadVisitor.visitSheet(_mainSheet);
                 _next = _mainRowIterator.hasNext() ? SheetToken.ROW_START : SheetToken.SHEET_DATA_END;
             }
             case ROW_START -> {
                 final Row row = _mainRowIterator.next();
                 _rowIndex = row.getRowNum();
                 _cellIterator = row.cellIterator();
+                _rowReadVisitor = _sheetReadVisitor.visitRow(row);
                 _next = _cellIterator.hasNext() ? SheetToken.CELL_VALUE : SheetToken.ROW_END;
             }
             case CELL_VALUE -> {
@@ -151,12 +174,15 @@ public final class POIBookReader implements BookReader {
                 _next = _cellIterator.hasNext() ? SheetToken.CELL_VALUE : SheetToken.ROW_END;
                 Hyperlink hyperlink = _cell.getHyperlink();
                 if (Objects.nonNull(hyperlink)) {
-                    Matcher matcher = pattern.matcher(hyperlink.getAddress());
+                    Matcher matcher = HYPER_LINK_PATTERN.matcher(hyperlink.getAddress());
                     if (matcher.find()) {
                         String label = matcher.group("sheet");
                         String first = matcher.group("first");
                         int firstRow = Integer.parseInt(first);
-                        Row linkedRow = _sheetMap.get(label).getRow(firstRow - 1);
+                        Sheet sheet = _sheetMap.get(label);
+                        _sheetReadVisitor = _bookReadVisitor.visitSheet(sheet);
+                        Row linkedRow = sheet.getRow(firstRow - 1);
+                        _rowReadVisitor = _sheetReadVisitor.visitRow(linkedRow);
                         Iterator<Cell> cellIterator = linkedRow.cellIterator();
                         if (cellIterator.hasNext()) {
                             _cellIteratorStack.push(_cellIterator);
@@ -184,7 +210,10 @@ public final class POIBookReader implements BookReader {
                     _next = _mainRowIterator.hasNext() ? SheetToken.ROW_START : SheetToken.SHEET_DATA_END;
                 }
             }
-            case SHEET_DATA_END -> _next = null;
+            case SHEET_DATA_END -> {
+                _next = null;
+                _bookReadVisitor.visitEnd();
+            }
         }
         if (log.isTraceEnabled()) {
             if (token == SheetToken.CELL_VALUE) {
@@ -194,12 +223,5 @@ public final class POIBookReader implements BookReader {
             }
         }
         return token;
-    }
-
-    private String _formattedString(final double value, final CellStyle style) {
-        if (style != null && style.getDataFormatString() != null) {
-            return _formatter.formatRawCellContents(value, style.getDataFormat(), style.getDataFormatString());
-        }
-        return null;
     }
 }

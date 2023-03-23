@@ -207,10 +207,15 @@ public abstract class BookStreamContext extends JsonStreamContext {
                 atomicInteger.incrementAndGet();
             } else {
                 atomicInteger = new AtomicInteger(_schema.getOriginRow());
-                atomicInteger.decrementAndGet();
+                atomicInteger.incrementAndGet();
                 getTableRowsMap().put(List.class, atomicInteger);
             }
             row = atomicInteger.get();
+        }
+
+        @Override
+        public Object getCurrentValue() {
+            return _currentValue;
         }
 
         @Override

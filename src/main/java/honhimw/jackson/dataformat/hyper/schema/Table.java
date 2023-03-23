@@ -17,10 +17,9 @@ package honhimw.jackson.dataformat.hyper.schema;
 import com.fasterxml.jackson.databind.JavaType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.apache.poi.ss.util.CellAddress;
 
 @EqualsAndHashCode
 @ToString
@@ -30,11 +29,16 @@ public final class Table {
     private final String _name;
     private final JavaType _type;
     private final List<Column> _columns = new ArrayList<>();
+    private CellAddress _origin;
 
     public Table(final ColumnPointer _pointer, final String _name, final JavaType _type) {
         this._pointer = _pointer;
         this._name = _name;
         this._type = _type;
+    }
+
+    public void setOrigin(CellAddress origin) {
+        this._origin = origin;
     }
 
     public List<Column> getColumns() {
@@ -58,5 +62,9 @@ public final class Table {
 
     public JavaType getType() {
         return _type;
+    }
+
+    public Column getColumn(int index) {
+        return _columns.get(index - _origin.getColumn());
     }
 }

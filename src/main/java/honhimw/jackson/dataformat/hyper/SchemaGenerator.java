@@ -27,8 +27,11 @@ import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
 import honhimw.jackson.dataformat.hyper.schema.generator.FormatVisitorWrapper;
 import honhimw.jackson.dataformat.hyper.schema.generator.TableNameResolver;
+import honhimw.jackson.dataformat.hyper.schema.visitor.BookReadVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.BookWriteVisitor;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.CellAddress;
@@ -39,7 +42,13 @@ public final class SchemaGenerator {
     private final GeneratorSettings _generatorSettings;
 
     public SchemaGenerator() {
-        _generatorSettings = new GeneratorSettings(CellAddress.A1, ColumnNameResolver.DEFAULT, TableNameResolver.DEFAULT);
+        _generatorSettings = new GeneratorSettings(
+            CellAddress.A1,
+            ColumnNameResolver.DEFAULT,
+            TableNameResolver.DEFAULT,
+            new BookWriteVisitor() {},
+            new BookReadVisitor() {}
+        );
     }
 
     private SchemaGenerator(final GeneratorSettings generatorSettings) {
@@ -56,6 +65,14 @@ public final class SchemaGenerator {
 
     public SchemaGenerator withTableNameResolver(final TableNameResolver resolver) {
         return new SchemaGenerator(_generatorSettings.with(resolver));
+    }
+
+    public SchemaGenerator withBookWriteVisitor(final BookWriteVisitor visitor) {
+        return new SchemaGenerator(_generatorSettings.with(visitor));
+    }
+
+    public SchemaGenerator withBookReadVisitor(final BookReadVisitor visitor) {
+        return new SchemaGenerator(_generatorSettings.with(visitor));
     }
 
     HyperSchema generate(final JavaType type, final DefaultSerializerProvider provider,
@@ -79,7 +96,8 @@ public final class SchemaGenerator {
                 log.trace(column.toString());
             }
         }
-        return new HyperSchema(columns, visitor.getTables(), _generatorSettings._origin);
+        return new HyperSchema(columns, visitor.getTables(), _generatorSettings._origin,
+            _generatorSettings._bookWriteVisitor, _generatorSettings._bookReadVisitor);
     }
 
     private void _verifyType(final JavaType type, final DefaultSerializerProvider provider)
@@ -105,24 +123,49 @@ public final class SchemaGenerator {
         return InvalidDefinitionException.from((JsonGenerator) null, msg, type).withCause(cause);
     }
 
-    @RequiredArgsConstructor
+    @AllArgsConstructor
     static final class GeneratorSettings {
 
-        private final CellAddress _origin;
-        private final ColumnNameResolver _columnNameResolver;
-        private final TableNameResolver _tableNameResolver;
+        private CellAddress _origin;
+        private ColumnNameResolver _columnNameResolver;
+        private TableNameResolver _tableNameResolver;
+        private BookWriteVisitor _bookWriteVisitor;
+        private BookReadVisitor _bookReadVisitor;
 
         private GeneratorSettings with(final CellAddress origin) {
-            return _origin.equals(origin) ? this : new GeneratorSettings(origin, _columnNameResolver,
-                _tableNameResolver);
+            GeneratorSettings copied = copy();
+            copied._origin = origin;
+            return copied;
         }
 
         private GeneratorSettings with(final ColumnNameResolver resolver) {
-            return _columnNameResolver.equals(resolver) ? this : new GeneratorSettings(_origin, resolver, _tableNameResolver);
+            GeneratorSettings copied = copy();
+            copied._columnNameResolver = resolver;
+            return copied;
         }
 
         private GeneratorSettings with(final TableNameResolver resolver) {
-            return _tableNameResolver.equals(resolver) ? this : new GeneratorSettings(_origin, _columnNameResolver, resolver);
+            GeneratorSettings copied = copy();
+            copied._tableNameResolver = resolver;
+            return copied;
         }
+
+        private GeneratorSettings with(final BookWriteVisitor resolver) {
+            GeneratorSettings copied = copy();
+            copied._bookWriteVisitor = resolver;
+            return copied;
+        }
+
+        private GeneratorSettings with(final BookReadVisitor resolver) {
+            GeneratorSettings copied = copy();
+            copied._bookReadVisitor = resolver;
+            return copied;
+        }
+
+        public GeneratorSettings copy() {
+            return new GeneratorSettings(_origin, _columnNameResolver, _tableNameResolver, _bookWriteVisitor, _bookReadVisitor);
+        }
+
+
     }
 }

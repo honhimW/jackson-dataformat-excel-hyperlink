@@ -1,6 +1,8 @@
 package honhimw.jackson.dataformat.hyper.temp;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -8,6 +10,15 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import honhimw.jackson.dataformat.hyper.ExcelDateModule;
 import honhimw.jackson.dataformat.hyper.HyperMapper;
+import honhimw.jackson.dataformat.hyper.deser.CellValue;
+import honhimw.jackson.dataformat.hyper.schema.Column;
+import honhimw.jackson.dataformat.hyper.schema.Table;
+import honhimw.jackson.dataformat.hyper.schema.visitor.BookReadVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.BookWriteVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.RowReadVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.RowWriteVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.SheetReadVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.SheetWriteVisitor;
 import honhimw.jackson.dataformat.hyper.temp.Person.Ext;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -18,12 +29,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.SneakyThrows;
+import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -75,6 +87,50 @@ public class Tests {
     public void one() {
         HyperMapper mapper = new HyperMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        mapper.acceptWriteVisitor(new BookWriteVisitor() {
+            @Override
+            public SheetWriteVisitor visitSheet(final Sheet sheet, final Table table) {
+                SheetWriteVisitor sheetWriteVisitor = super.visitSheet(sheet, table);
+                System.out.println("write sheet: " + sheet.getSheetName());
+                SheetWriteVisitor sheetWriteVisitor1 = new SheetWriteVisitor(sheetWriteVisitor) {
+                    @Override
+                    public RowWriteVisitor visitRow(final Row row, final Object value) {
+                        System.out.println("object: " + value);
+                        return super.visitRow(row, value);
+                    }
+                };
+                return sheetWriteVisitor1;
+            }
+
+            @Override
+            public void visitEnd() {
+                System.out.println("write done");
+            }
+        });
+        mapper.acceptReadVisitor(new BookReadVisitor() {
+            @Override
+            public SheetReadVisitor visitSheet(final Sheet sheet) {
+                SheetReadVisitor sheetReadVisitor = super.visitSheet(sheet);
+                System.out.println("read sheet: " + sheet.getSheetName());
+
+                return new SheetReadVisitor(sheetReadVisitor) {
+                    @Override
+                    public RowReadVisitor visitRow(final Row row) {
+                        System.out.println("read row: " + row.getRowNum());
+                        RowReadVisitor rowReadVisitor = super.visitRow(row);
+
+                        return new RowReadVisitor(rowReadVisitor) {
+                            @Override
+                            public CellValue visitCell(final Cell cell, final Column column) {
+                                CellValue cellValue = super.visitCell(cell, column);
+                                System.out.println((Objects.isNull(column) ? cell.getColumnIndex() : column.getName()) + ": " + cellValue);
+                                return cellValue;
+                            }
+                        };
+                    }
+                };
+            }
+        });
         File file = new File("E:\\temp\\person.xlsx");
         mapper.writeValue(file, List.of(Person.VALUE), Person.class);
         Person person = mapper.readValue(file, Person.class);

@@ -19,13 +19,12 @@ import com.fasterxml.jackson.core.base.ParserMinimalBase;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
-import honhimw.jackson.dataformat.hyper.poi.RetainSheetNames;
+import honhimw.jackson.dataformat.hyper.poi.RetainedSheets;
 import honhimw.jackson.dataformat.hyper.poi.ss.POIBookReader;
 import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.PackageVersion;
 import honhimw.jackson.dataformat.hyper.BookStreamContext;
 import honhimw.jackson.dataformat.hyper.exception.BookStreamReadException;
-import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -90,6 +89,7 @@ public final class BookParser extends ParserMinimalBase {
     public void setSchema(final FormatSchema schema) {
         _schema = (HyperSchema) schema;
         _parsingContext = BookStreamContext.createRootContext(_schema);
+        _reader.setSchema(_schema);
     }
 
     @Override
@@ -127,8 +127,8 @@ public final class BookParser extends ParserMinimalBase {
             case FIELD_NAME:
                 final Column column = _schema.getColumn(_reader.getCell().getSheet().getSheetName(), _reference);
                 _parsingContext.setCurrentName(column.getPointer().name());
-                // final ColumnPointer pointer = _parsingContext.relativePointer(column.getPointer());
-                // _parsingContext.setCurrentName(pointer.head().name());
+//                final ColumnPointer pointer = _parsingContext.relativePointer(column.getPointer());
+//                _parsingContext.setCurrentName(pointer.head().name());
                 break;
             case VALUE_EMBEDDED_OBJECT:
             case VALUE_STRING:
@@ -172,13 +172,13 @@ public final class BookParser extends ParserMinimalBase {
                 _reference = _reader.getReference();
                 _value = _reader.getCellValue();
                 String sheetName = _reader.getCell().getSheet().getSheetName();
-                if (RetainSheetNames.LIST.equals(sheetName)) {
+                if (RetainedSheets.LIST.equals(sheetName)) {
                     Hyperlink hyperlink = _reader.getCell().getHyperlink();
                     if (Objects.nonNull(hyperlink)) {
-                        Matcher matcher = POIBookReader.pattern.matcher(hyperlink.getAddress());
+                        Matcher matcher = POIBookReader.HYPER_LINK_PATTERN.matcher(hyperlink.getAddress());
                         if (matcher.find()) {
                             String sheet = matcher.group("sheet");
-                            if (RetainSheetNames.LIST.equals(sheet)) {
+                            if (RetainedSheets.LIST.equals(sheet)) {
                                 _nextTokens.add(JsonToken.START_ARRAY);
                             } else {
                                 _nextTokens.add(JsonToken.START_OBJECT);

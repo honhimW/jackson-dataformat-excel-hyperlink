@@ -18,6 +18,7 @@ import honhimw.jackson.dataformat.hyper.deser.BookReader;
 import honhimw.jackson.dataformat.hyper.deser.SheetToken;
 import honhimw.jackson.dataformat.hyper.deser.CellValue;
 import honhimw.jackson.dataformat.hyper.poi.ooxml.XmlElementReader.Matcher;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 import org.apache.poi.openxml4j.opc.PackagePart;
@@ -76,6 +77,11 @@ public final class SSMLBookReader implements BookReader {
     @Override
     public SpreadsheetVersion getSpreadsheetVersion() {
         return SpreadsheetVersion.EXCEL2007;
+    }
+
+    @Override
+    public void setSchema(final HyperSchema schema) {
+
     }
 
     @Override

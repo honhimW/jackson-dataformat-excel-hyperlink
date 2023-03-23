@@ -32,6 +32,8 @@ import honhimw.jackson.dataformat.hyper.deser.BookParser;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
 import honhimw.jackson.dataformat.hyper.schema.generator.TableNameResolver;
+import honhimw.jackson.dataformat.hyper.schema.visitor.BookReadVisitor;
+import honhimw.jackson.dataformat.hyper.schema.visitor.BookWriteVisitor;
 import honhimw.jackson.dataformat.hyper.ser.BookOutput;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -259,6 +261,16 @@ public final class HyperMapper extends ObjectMapper {
     public HyperMapper setTableNameResolver(final TableNameResolver resolver) {
         _assertNotNull("tableNameResolver", resolver);
         return setSchemaGenerator(_schemaGenerator.withTableNameResolver(resolver));
+    }
+
+    public HyperMapper acceptWriteVisitor(final BookWriteVisitor visitor) {
+        _assertNotNull("BookWriteVisitor", visitor);
+        return setSchemaGenerator(_schemaGenerator.withBookWriteVisitor(visitor));
+    }
+
+    public HyperMapper acceptReadVisitor(final BookReadVisitor visitor) {
+        _assertNotNull("BookReadVisitor", visitor);
+        return setSchemaGenerator(_schemaGenerator.withBookReadVisitor(visitor));
     }
 
     /*
