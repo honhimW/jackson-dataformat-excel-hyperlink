@@ -73,3 +73,52 @@ public class Person implements Serializable {
     private String remark;
 }
 ```
+
+### ReadVisitor/WriteVisitor
+```java
+HyperMapper mapper = new HyperMapper();
+mapper.acceptWriteVisitor(new BookWriteVisitor() {
+    @Override
+    public SheetWriteVisitor visitSheet(final Sheet sheet, final Table table) {
+        SheetWriteVisitor sheetWriteVisitor = super.visitSheet(sheet, table);
+        System.out.println("write sheet: " + sheet.getSheetName());
+        SheetWriteVisitor sheetWriteVisitor1 = new SheetWriteVisitor(sheetWriteVisitor) {
+            @Override
+            public RowWriteVisitor visitRow(final Row row, final Object value) {
+                System.out.println("object: " + value);
+                return super.visitRow(row, value);
+            }
+        };
+        return sheetWriteVisitor1;
+    }
+
+    @Override
+    public void visitEnd() {
+        System.out.println("write done");
+    }
+});
+mapper.acceptReadVisitor(new BookReadVisitor() {
+    @Override
+    public SheetReadVisitor visitSheet(final Sheet sheet) {
+        SheetReadVisitor sheetReadVisitor = super.visitSheet(sheet);
+        System.out.println("read sheet: " + sheet.getSheetName());
+
+        return new SheetReadVisitor(sheetReadVisitor) {
+            @Override
+            public RowReadVisitor visitRow(final Row row) {
+                System.out.println("read row: " + row.getRowNum());
+                RowReadVisitor rowReadVisitor = super.visitRow(row);
+
+                return new RowReadVisitor(rowReadVisitor) {
+                    @Override
+                    public CellValue visitCell(final Cell cell, final Column column) {
+                        CellValue cellValue = super.visitCell(cell, column);
+                        System.out.println((Objects.isNull(column) ? cell.getColumnIndex() : column.getName()) + ": " + cellValue);
+                        return cellValue;
+                    }
+                };
+            }
+        };
+    }
+});
+```
