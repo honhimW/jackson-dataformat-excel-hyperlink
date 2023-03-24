@@ -1,6 +1,3 @@
-import org.gradle.internal.impldep.org.bouncycastle.util.encoders.UTF8
-import java.nio.charset.StandardCharsets
-
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +11,8 @@ import java.nio.charset.StandardCharsets
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import java.nio.charset.StandardCharsets
 
 plugins {
     id("java-library")
