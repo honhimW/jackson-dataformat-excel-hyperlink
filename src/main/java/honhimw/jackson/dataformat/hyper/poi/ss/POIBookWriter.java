@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.SpreadsheetVersion;
@@ -73,10 +74,9 @@ public final class POIBookWriter implements BookWriter {
     @Override
     public void setSchema(final HyperSchema schema) {
         this._schema = schema;
-        BookWriteVisitor bookWriteVisitor = _schema.getBookWriteVisitor();
+        Function<BookWriteVisitor, BookWriteVisitor> bookWriteVisitor = _schema.getBookWriteVisitor();
         if (bookWriteVisitor != null) {
-            bookWriteVisitor.init(_bookWriteVisitor);
-            this._bookWriteVisitor = bookWriteVisitor;
+            this._bookWriteVisitor = bookWriteVisitor.apply(new POIBookWriteVisitor());
         }
         this._bookWriteVisitor.visitBook(_workbook, _schema);
     }

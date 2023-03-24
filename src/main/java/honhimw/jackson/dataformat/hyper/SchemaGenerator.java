@@ -31,6 +31,7 @@ import honhimw.jackson.dataformat.hyper.schema.visitor.BookReadVisitor;
 import honhimw.jackson.dataformat.hyper.schema.visitor.BookWriteVisitor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,8 +47,8 @@ public final class SchemaGenerator {
             CellAddress.A1,
             ColumnNameResolver.DEFAULT,
             TableNameResolver.DEFAULT,
-            new BookWriteVisitor() {},
-            new BookReadVisitor() {}
+            bookWriteVisitor -> bookWriteVisitor,
+            bookReadVisitor -> bookReadVisitor
         );
     }
 
@@ -67,12 +68,12 @@ public final class SchemaGenerator {
         return new SchemaGenerator(_generatorSettings.with(resolver));
     }
 
-    public SchemaGenerator withBookWriteVisitor(final BookWriteVisitor visitor) {
-        return new SchemaGenerator(_generatorSettings.with(visitor));
+    public SchemaGenerator withBookWriteVisitor(final Function<BookWriteVisitor, BookWriteVisitor> visitorBuilder) {
+        return new SchemaGenerator(_generatorSettings.withWriteVisitor(visitorBuilder));
     }
 
-    public SchemaGenerator withBookReadVisitor(final BookReadVisitor visitor) {
-        return new SchemaGenerator(_generatorSettings.with(visitor));
+    public SchemaGenerator withBookReadVisitor(final Function<BookReadVisitor, BookReadVisitor> visitorBuilder) {
+        return new SchemaGenerator(_generatorSettings.withReadVisitor(visitorBuilder));
     }
 
     HyperSchema generate(final JavaType type, final DefaultSerializerProvider provider,
@@ -129,8 +130,8 @@ public final class SchemaGenerator {
         private CellAddress _origin;
         private ColumnNameResolver _columnNameResolver;
         private TableNameResolver _tableNameResolver;
-        private BookWriteVisitor _bookWriteVisitor;
-        private BookReadVisitor _bookReadVisitor;
+        private Function<BookWriteVisitor, BookWriteVisitor> _bookWriteVisitor;
+        private Function<BookReadVisitor, BookReadVisitor> _bookReadVisitor;
 
         private GeneratorSettings with(final CellAddress origin) {
             GeneratorSettings copied = copy();
@@ -150,15 +151,15 @@ public final class SchemaGenerator {
             return copied;
         }
 
-        private GeneratorSettings with(final BookWriteVisitor resolver) {
+        private GeneratorSettings withWriteVisitor(final Function<BookWriteVisitor, BookWriteVisitor> visitorBuilder) {
             GeneratorSettings copied = copy();
-            copied._bookWriteVisitor = resolver;
+            copied._bookWriteVisitor = visitorBuilder;
             return copied;
         }
 
-        private GeneratorSettings with(final BookReadVisitor resolver) {
+        private GeneratorSettings withReadVisitor(final Function<BookReadVisitor, BookReadVisitor> visitorBuilder) {
             GeneratorSettings copied = copy();
-            copied._bookReadVisitor = resolver;
+            copied._bookReadVisitor = visitorBuilder;
             return copied;
         }
 

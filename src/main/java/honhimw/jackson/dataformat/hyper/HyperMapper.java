@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.function.Function;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellAddress;
@@ -263,14 +264,14 @@ public final class HyperMapper extends ObjectMapper {
         return setSchemaGenerator(_schemaGenerator.withTableNameResolver(resolver));
     }
 
-    public HyperMapper acceptWriteVisitor(final BookWriteVisitor visitor) {
-        _assertNotNull("BookWriteVisitor", visitor);
-        return setSchemaGenerator(_schemaGenerator.withBookWriteVisitor(visitor));
+    public HyperMapper acceptWriteVisitor(final Function<BookWriteVisitor, BookWriteVisitor> visitorBuilder) {
+        _assertNotNull("BookWriteVisitor", visitorBuilder);
+        return setSchemaGenerator(_schemaGenerator.withBookWriteVisitor(visitorBuilder));
     }
 
-    public HyperMapper acceptReadVisitor(final BookReadVisitor visitor) {
-        _assertNotNull("BookReadVisitor", visitor);
-        return setSchemaGenerator(_schemaGenerator.withBookReadVisitor(visitor));
+    public HyperMapper acceptReadVisitor(final Function<BookReadVisitor, BookReadVisitor> visitorBuilder) {
+        _assertNotNull("BookReadVisitor", visitorBuilder);
+        return setSchemaGenerator(_schemaGenerator.withBookReadVisitor(visitorBuilder));
     }
 
     /*

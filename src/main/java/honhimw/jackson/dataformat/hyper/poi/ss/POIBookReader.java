@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
@@ -88,17 +89,11 @@ public final class POIBookReader implements BookReader {
         _mainSheet = _workbook.getSheet(mainTable.getName());
         _workbook.sheetIterator().forEachRemaining(rows -> _sheetMap.put(rows.getSheetName(), rows));
         _mainRowIterator = _mainSheet.rowIterator();
-        BookReadVisitor bookReadVisitor = _schema.getBookReadVisitor();
+        Function<BookReadVisitor, BookReadVisitor> bookReadVisitor = _schema.getBookReadVisitor();
         if (bookReadVisitor != null) {
-            accept(bookReadVisitor);
+            this._bookReadVisitor = bookReadVisitor.apply(new POIBookReadVisitor());
         }
         _bookReadVisitor.visitBook(_workbook, _schema);
-    }
-
-    private void accept(BookReadVisitor bookReadVisitor) {
-        _bookReadVisitor = new POIBookReadVisitor();
-        bookReadVisitor.init(_bookReadVisitor);
-        this._bookReadVisitor = bookReadVisitor;
     }
 
     @Override

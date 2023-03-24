@@ -98,7 +98,7 @@ public class Tests {
     public void one() {
         HyperMapper mapper = new HyperMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        mapper.acceptWriteVisitor(new BookWriteVisitor() {
+        mapper.acceptWriteVisitor(bookWriteVisitor -> new BookWriteVisitor(bookWriteVisitor) {
             @Override
             public SheetWriteVisitor visitSheet(final Sheet sheet, final Table table) {
                 SheetWriteVisitor sheetWriteVisitor = super.visitSheet(sheet, table);
@@ -118,7 +118,7 @@ public class Tests {
                 System.out.println("write done");
             }
         });
-        mapper.acceptReadVisitor(new BookReadVisitor() {
+        mapper.acceptReadVisitor(bookReadVisitor -> new BookReadVisitor(bookReadVisitor) {
             @Override
             public SheetReadVisitor visitSheet(final Sheet sheet) {
                 SheetReadVisitor sheetReadVisitor = super.visitSheet(sheet);

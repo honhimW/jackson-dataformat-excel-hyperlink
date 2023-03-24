@@ -19,8 +19,8 @@ import honhimw.jackson.dataformat.hyper.schema.visitor.BookReadVisitor;
 import honhimw.jackson.dataformat.hyper.schema.visitor.BookWriteVisitor;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.Builder;
 import org.apache.poi.ss.util.CellAddress;
 
 public final class HyperSchema implements FormatSchema, Iterable<Column> {
@@ -29,10 +29,12 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
     private final List<Column> _columns;
     private final List<Table> _tables;
     private final CellAddress _origin;
-    private final BookWriteVisitor _bookWriteVisitor;
-    private final BookReadVisitor _bookReadVisitor;
+    private final Function<BookWriteVisitor, BookWriteVisitor> _bookWriteVisitor;
+    private final Function<BookReadVisitor, BookReadVisitor> _bookReadVisitor;
 
-    public HyperSchema(final List<Column> _columns, final List<Table> _tables, final CellAddress _origin, final BookWriteVisitor bookWriteVisitor, final BookReadVisitor bookReadVisitor) {
+    public HyperSchema(final List<Column> _columns, final List<Table> _tables, final CellAddress _origin,
+        final Function<BookWriteVisitor, BookWriteVisitor> bookWriteVisitor,
+        final Function<BookReadVisitor, BookReadVisitor> bookReadVisitor) {
         this._columns = _columns;
         this._tables = _tables;
         this._origin = _origin;
@@ -51,11 +53,11 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
         return _columns.iterator();
     }
 
-    public BookWriteVisitor getBookWriteVisitor() {
+    public Function<BookWriteVisitor, BookWriteVisitor> getBookWriteVisitor() {
         return _bookWriteVisitor;
     }
 
-    public BookReadVisitor getBookReadVisitor() {
+    public Function<BookReadVisitor, BookReadVisitor> getBookReadVisitor() {
         return _bookReadVisitor;
     }
 
@@ -131,7 +133,7 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
     }
 
     public Table currentTable(final ColumnPointer pointer) {
-        return  _tables.stream().filter(t -> t.matches(pointer.getParent()))
+        return _tables.stream().filter(t -> t.matches(pointer.getParent()))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("sheet " + pointer + " table is not exists"));
     }
