@@ -39,7 +39,7 @@ final class POIRowWriteVisitor extends RowWriteVisitor {
     }
 
     @Override
-    public  <T> void visitCell(final Cell cell, final Column column, final T value,
+    public <T> void visitCell(final Cell cell, final Column column, final T value,
         final BiConsumer<Cell, T> consumer) {
         consumer.accept(cell, value);
     }

@@ -14,16 +14,8 @@
 
 package honhimw.jackson.dataformat.hyper.poi.ooxml;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.xmlbeans.*;
-import org.apache.xmlbeans.impl.common.StaxHelper;
+import static org.apache.poi.schemas.ooxml.system.ooxml.TypeSystemHolder.typeSystem;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.events.*;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,8 +24,27 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
-
-import static org.apache.poi.schemas.ooxml.system.ooxml.TypeSystemHolder.typeSystem;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.EndDocument;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.StartDocument;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.xmlbeans.SchemaProperty;
+import org.apache.xmlbeans.SchemaType;
+import org.apache.xmlbeans.SchemaTypeLoaderException;
+import org.apache.xmlbeans.XmlAnySimpleType;
+import org.apache.xmlbeans.XmlCursor;
+import org.apache.xmlbeans.XmlObject;
+import org.apache.xmlbeans.XmlOptions;
+import org.apache.xmlbeans.impl.common.StaxHelper;
 
 @Slf4j
 final class XmlElementReader implements AutoCloseable {
@@ -71,9 +82,12 @@ final class XmlElementReader implements AutoCloseable {
         }
     }
 
-    private static SchemaType _findElementType(final InputStream src, final XMLInputFactory factory) throws XMLStreamException {
+    private static SchemaType _findElementType(final InputStream src, final XMLInputFactory factory)
+        throws XMLStreamException {
         final XMLStreamReader reader = factory.createXMLStreamReader(src);
-        while (!reader.isStartElement()) reader.next();
+        while (!reader.isStartElement()) {
+            reader.next();
+        }
         final QName name = _transitionalName(reader.getName());
         typeSystem.findType(name);
         SchemaType type = typeSystem.findDocumentType(name);
@@ -171,12 +185,15 @@ final class XmlElementReader implements AutoCloseable {
     private void _append(final QName name, final XmlObject object) {
         final XmlObject parent = _deque.getFirst();
         try (final XmlCursor cursor = object.newCursor();
-             final XmlCursor parentCursor = parent.newCursor()) {
+            final XmlCursor parentCursor = parent.newCursor()) {
             parentCursor.toEndToken();
             parentCursor.beginElement(name);
             while (cursor.hasNextToken()) {
-                if (cursor.isStartdoc()) cursor.toNextToken();
-                else cursor.moveXml(parentCursor);
+                if (cursor.isStartdoc()) {
+                    cursor.toNextToken();
+                } else {
+                    cursor.moveXml(parentCursor);
+                }
             }
         }
     }
@@ -214,7 +231,9 @@ final class XmlElementReader implements AutoCloseable {
                 final Attribute attribute = (Attribute) attrs.next();
                 final QName attributeName = attribute.getName();
                 final SchemaProperty attributeProperty = type.getAttributeProperty(attributeName);
-                if (attributeProperty == null) continue;
+                if (attributeProperty == null) {
+                    continue;
+                }
                 cursor.insertAttributeWithValue(attributeName, attribute.getValue());
             }
         }

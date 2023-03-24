@@ -14,25 +14,26 @@
 
 package honhimw.jackson.dataformat.hyper.deser;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.Base64Variant;
+import com.fasterxml.jackson.core.FormatFeature;
+import com.fasterxml.jackson.core.FormatSchema;
+import com.fasterxml.jackson.core.JsonLocation;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
+import honhimw.jackson.dataformat.hyper.BookStreamContext;
+import honhimw.jackson.dataformat.hyper.PackageVersion;
+import honhimw.jackson.dataformat.hyper.exception.BookStreamReadException;
 import honhimw.jackson.dataformat.hyper.poi.RetainedSheets;
 import honhimw.jackson.dataformat.hyper.poi.ss.POIBookReader;
 import honhimw.jackson.dataformat.hyper.schema.Column;
-import honhimw.jackson.dataformat.hyper.PackageVersion;
-import honhimw.jackson.dataformat.hyper.BookStreamContext;
-import honhimw.jackson.dataformat.hyper.exception.BookStreamReadException;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Hyperlink;
-import org.apache.poi.ss.util.CellAddress;
-
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -41,6 +42,12 @@ import java.nio.file.Files;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.ss.util.CellAddress;
 
 @Slf4j
 public final class BookParser extends ParserMinimalBase {
@@ -56,7 +63,8 @@ public final class BookParser extends ParserMinimalBase {
     private CellAddress _reference;
     private CellValue _value;
 
-    public BookParser(final IOContext ctxt, final int features, final ObjectCodec codec, final int formatFeatures, final BookReader reader) {
+    public BookParser(final IOContext ctxt, final int features, final ObjectCodec codec, final int formatFeatures,
+        final BookReader reader) {
         super(features);
         _ioContext = ctxt;
         _objectCodec = codec;
@@ -229,7 +237,9 @@ public final class BookParser extends ParserMinimalBase {
         if (token == SheetToken.CELL_VALUE) {
             while (!_schema.isInColumnBounds(_reader.getColumn())) {
                 token = _reader.next();
-                if (token != SheetToken.CELL_VALUE) break;
+                if (token != SheetToken.CELL_VALUE) {
+                    break;
+                }
             }
         }
         return token;
@@ -254,7 +264,9 @@ public final class BookParser extends ParserMinimalBase {
     }
 
     private void _handleEmptyObject() {
-        if (_nextTokens.size() != 2) return;
+        if (_nextTokens.size() != 2) {
+            return;
+        }
         final Iterator<JsonToken> iterator = _nextTokens.iterator();
         if (iterator.next() == JsonToken.START_OBJECT && iterator.next() == JsonToken.END_OBJECT) {
             _nextTokens.clear();
@@ -405,7 +417,8 @@ public final class BookParser extends ParserMinimalBase {
 
     private void _checkSchemaSet() throws IOException {
         if (_schema == null) {
-            throw new BookStreamReadException(this, "No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not parse");
+            throw new BookStreamReadException(this,
+                "No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not parse");
         }
     }
 

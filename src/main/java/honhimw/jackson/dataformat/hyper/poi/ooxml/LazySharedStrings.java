@@ -15,6 +15,9 @@
 package honhimw.jackson.dataformat.hyper.poi.ooxml;
 
 import honhimw.jackson.dataformat.hyper.poi.ooxml.XmlElementReader.Matcher;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.xssf.model.SharedStrings;
@@ -22,10 +25,6 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRElt;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRst;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSst;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 final class LazySharedStrings implements SharedStrings {
 

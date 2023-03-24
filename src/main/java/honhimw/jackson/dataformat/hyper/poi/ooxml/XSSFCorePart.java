@@ -14,6 +14,10 @@
 
 package honhimw.jackson.dataformat.hyper.poi.ooxml;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -22,15 +26,11 @@ import org.apache.poi.openxml4j.opc.PackageRelationship;
 import org.apache.poi.openxml4j.opc.PackageRelationshipCollection;
 import org.apache.poi.xssf.usermodel.XSSFRelation;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.util.regex.Pattern;
-
 @Slf4j
 final class XSSFCorePart {
 
-    private static final Pattern TRANSITIONAL_NS_PATTERN = Pattern.compile("http://schemas\\.openxmlformats\\.org/(\\w+)/2006/(\\w+)");
+    private static final Pattern TRANSITIONAL_NS_PATTERN = Pattern.compile(
+        "http://schemas\\.openxmlformats\\.org/(\\w+)/2006/(\\w+)");
     private final PackagePart _part;
     private final boolean _strictFormat;
 
@@ -52,7 +52,9 @@ final class XSSFCorePart {
     }
 
     public PackagePart getRelatedPart(final PackageRelationship rel) {
-        if (!_part.isRelationshipExists(rel)) return null;
+        if (!_part.isRelationshipExists(rel)) {
+            return null;
+        }
         try {
             return _part.getRelatedPart(rel);
         } catch (InvalidFormatException e) {

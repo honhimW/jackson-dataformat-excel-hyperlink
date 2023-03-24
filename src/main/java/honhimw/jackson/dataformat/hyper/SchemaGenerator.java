@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.CellAddress;
 
@@ -164,7 +163,8 @@ public final class SchemaGenerator {
         }
 
         public GeneratorSettings copy() {
-            return new GeneratorSettings(_origin, _columnNameResolver, _tableNameResolver, _bookWriteVisitor, _bookReadVisitor);
+            return new GeneratorSettings(_origin, _columnNameResolver, _tableNameResolver, _bookWriteVisitor,
+                _bookReadVisitor);
         }
 
 

@@ -15,12 +15,11 @@
 package honhimw.jackson.dataformat.hyper.deser;
 
 import honhimw.jackson.dataformat.hyper.BookContent;
+import java.io.File;
+import java.io.InputStream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-
-import java.io.File;
-import java.io.InputStream;
 
 @Getter
 @ToString

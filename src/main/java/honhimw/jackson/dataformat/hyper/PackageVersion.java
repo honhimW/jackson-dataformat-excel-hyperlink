@@ -17,7 +17,6 @@ package honhimw.jackson.dataformat.hyper;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.Versioned;
 import com.fasterxml.jackson.core.util.VersionUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
@@ -47,9 +46,13 @@ public final class PackageVersion implements Versioned {
 
     private static String determineVersion() throws IOException, URISyntaxException {
         final String version = PackageVersion.class.getPackage().getImplementationVersion();
-        if (version != null) return version;
+        if (version != null) {
+            return version;
+        }
         final CodeSource source = PackageVersion.class.getProtectionDomain().getCodeSource();
-        if (source == null) return null;
+        if (source == null) {
+            return null;
+        }
         try (JarFile jarFile = getJarFile(source)) {
             return jarFile.getManifest().getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION);
         }

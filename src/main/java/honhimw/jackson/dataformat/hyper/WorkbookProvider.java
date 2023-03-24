@@ -14,9 +14,8 @@
 
 package honhimw.jackson.dataformat.hyper;
 
-import org.apache.poi.ss.usermodel.Workbook;
-
 import java.io.IOException;
+import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  * Workbook Supplier

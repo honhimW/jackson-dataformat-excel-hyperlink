@@ -23,13 +23,12 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import honhimw.jackson.dataformat.hyper.ser.BookOutput;
-
 import java.io.IOException;
 
 public final class HyperWriter extends ObjectWriter {
 
     HyperWriter(final HyperMapper mapper, final SerializationConfig config,
-                      final JavaType rootType, final PrettyPrinter pp) {
+        final JavaType rootType, final PrettyPrinter pp) {
         super(mapper, config, rootType, pp);
     }
 
@@ -42,7 +41,7 @@ public final class HyperWriter extends ObjectWriter {
     }
 
     private HyperWriter(final HyperWriter base, final SerializationConfig config,
-                              final GeneratorSettings genSettings, final Prefetch prefetch) {
+        final GeneratorSettings genSettings, final Prefetch prefetch) {
         super(base, config, genSettings, prefetch);
     }
 

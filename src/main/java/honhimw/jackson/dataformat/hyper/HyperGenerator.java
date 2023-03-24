@@ -28,20 +28,23 @@
 
 package honhimw.jackson.dataformat.hyper;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.Base64Variant;
+import com.fasterxml.jackson.core.FormatSchema;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.StreamWriteFeature;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.IOContext;
-import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.exception.BookStreamWriteException;
+import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.ser.BookOutput;
 import honhimw.jackson.dataformat.hyper.ser.BookWriter;
-import java.util.List;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public final class HyperGenerator extends GeneratorBase {
@@ -88,7 +91,9 @@ public final class HyperGenerator extends GeneratorBase {
 
     @Override
     public void setSchema(final FormatSchema schema) {
-        if (_schema != null) return;
+        if (_schema != null) {
+            return;
+        }
         _schema = (HyperSchema) schema;
         _writer.setSchema(_schema);
         _writer.writeHeaders();
@@ -207,7 +212,8 @@ public final class HyperGenerator extends GeneratorBase {
     }
 
     @Override
-    public void writeBinary(final Base64Variant bv, final byte[] data, final int offset, final int len) throws IOException {
+    public void writeBinary(final Base64Variant bv, final byte[] data, final int offset, final int len)
+        throws IOException {
         _reportUnsupportedOperation();
     }
 
@@ -316,7 +322,8 @@ public final class HyperGenerator extends GeneratorBase {
 
     private void _checkSchemaSet() throws IOException {
         if (_schema == null) {
-            throw new BookStreamWriteException("No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not generate", this);
+            throw new BookStreamWriteException(
+                "No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not generate", this);
         }
     }
 }

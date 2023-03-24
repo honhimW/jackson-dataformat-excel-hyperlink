@@ -15,13 +15,12 @@
 package honhimw.jackson.dataformat.hyper.schema.generator;
 
 import com.fasterxml.jackson.databind.BeanProperty;
-import lombok.RequiredArgsConstructor;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.function.Function;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public final class AnnotatedNameResolver<A extends Annotation> implements ColumnNameResolver {
@@ -36,7 +35,7 @@ public final class AnnotatedNameResolver<A extends Annotation> implements Column
 
     public static <A extends Annotation, T>
     AnnotatedNameResolver<A> forAttribute(final Class<A> type, final String attribute,
-                                          final Function<T, String> nameMapper) {
+        final Function<T, String> nameMapper) {
         return new AnnotatedNameResolver<>(type, annotation -> {
             try {
                 final Method method = type.getMethod(attribute);
@@ -61,7 +60,7 @@ public final class AnnotatedNameResolver<A extends Annotation> implements Column
         final A ann = prop.getAnnotation(_type);
         if (ann == null) {
             final String msg = String.format("Annotation `@%s` must not be null for %s",
-                    _type.getSimpleName(), prop);
+                _type.getSimpleName(), prop);
             throw new IllegalArgumentException(msg);
         }
         return _nameMapper.apply(ann);

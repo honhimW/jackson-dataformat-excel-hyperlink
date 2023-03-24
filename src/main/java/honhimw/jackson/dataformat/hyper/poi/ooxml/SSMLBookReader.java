@@ -15,10 +15,14 @@
 package honhimw.jackson.dataformat.hyper.poi.ooxml;
 
 import honhimw.jackson.dataformat.hyper.deser.BookReader;
-import honhimw.jackson.dataformat.hyper.deser.SheetToken;
 import honhimw.jackson.dataformat.hyper.deser.CellValue;
+import honhimw.jackson.dataformat.hyper.deser.SheetToken;
 import honhimw.jackson.dataformat.hyper.poi.ooxml.XmlElementReader.Matcher;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 import org.apache.poi.openxml4j.opc.PackagePart;
@@ -30,12 +34,13 @@ import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.xmlbeans.SchemaType;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.*;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCell;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCellFormula;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRow;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetData;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.STCellFormulaType;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.STCellType;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.WorksheetDocument;
 
 @Slf4j
 public final class SSMLBookReader implements BookReader {
@@ -96,7 +101,9 @@ public final class SSMLBookReader implements BookReader {
 
     @Override
     public CellValue getCellValue() {
-        if (_cell == null) return null;
+        if (_cell == null) {
+            return null;
+        }
         final String value = _cell.getV();
         final CTCellFormula formula = _cell.getF();
         final STCellType.Enum cellType = _cell.getT();
@@ -119,7 +126,8 @@ public final class SSMLBookReader implements BookReader {
             case STCellType.INT_STR:
                 return new CellValue(value);
             case STCellType.INT_INLINE_STR:
-                final XSSFRichTextString text = _cell.isSetIs() ? new XSSFRichTextString(_cell.getIs()) : new XSSFRichTextString(value);
+                final XSSFRichTextString text =
+                    _cell.isSetIs() ? new XSSFRichTextString(_cell.getIs()) : new XSSFRichTextString(value);
                 return new CellValue(text.toString());
             default:
                 throw new IllegalStateException();
@@ -162,7 +170,9 @@ public final class SSMLBookReader implements BookReader {
 
     @Override
     public SheetToken next() {
-        if (_next == null) throw new NoSuchElementException();
+        if (_next == null) {
+            throw new NoSuchElementException();
+        }
         final SheetToken token = _next;
         switch (token) {
             case SHEET_DATA_START:
@@ -172,20 +182,20 @@ public final class SSMLBookReader implements BookReader {
                 final CTRow row = _reader.current();
                 _rowIndex = (int) row.getR() - 1;
                 _next = Objects.requireNonNull(_reader.nextUntil(START_CELL, END_ROW))
-                        .isEndElement() ? SheetToken.ROW_END : SheetToken.CELL_VALUE;
+                    .isEndElement() ? SheetToken.ROW_END : SheetToken.CELL_VALUE;
                 break;
             case CELL_VALUE:
                 _cell = _reader.collect();
                 _reference = new CellAddress(_cell.getR());
                 _columnIndex = _reference.getColumn();
                 _next = Objects.requireNonNull(_reader.nextUntil(START_CELL, END_ROW))
-                        .isEndElement() ? SheetToken.ROW_END : SheetToken.CELL_VALUE;
+                    .isEndElement() ? SheetToken.ROW_END : SheetToken.CELL_VALUE;
                 break;
             case ROW_END:
                 _cell = null;
                 _reference = null;
                 _next = Objects.requireNonNull(_reader.nextUntil(START_ROW, END_SHEET_DATA))
-                        .isEndElement() ? SheetToken.SHEET_DATA_END : SheetToken.ROW_START;
+                    .isEndElement() ? SheetToken.SHEET_DATA_END : SheetToken.ROW_START;
                 break;
             case SHEET_DATA_END:
                 _next = null;

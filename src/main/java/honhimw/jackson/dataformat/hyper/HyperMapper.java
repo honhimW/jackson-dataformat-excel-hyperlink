@@ -102,8 +102,8 @@ public final class HyperMapper extends ObjectMapper {
 
     @Override
     protected HyperReader _newReader(final DeserializationConfig config, final JavaType valueType,
-                                           final Object valueToUpdate, final FormatSchema schema,
-                                           final InjectableValues injectableValues) {
+        final Object valueToUpdate, final FormatSchema schema,
+        final InjectableValues injectableValues) {
         return new HyperReader(this, config, valueType, valueToUpdate, schema, injectableValues);
     }
 
@@ -119,7 +119,7 @@ public final class HyperMapper extends ObjectMapper {
 
     @Override
     protected HyperWriter _newWriter(final SerializationConfig config, final JavaType rootType,
-                                           final PrettyPrinter pp) {
+        final PrettyPrinter pp) {
         return new HyperWriter(this, config, rootType, pp);
     }
 
@@ -425,7 +425,8 @@ public final class HyperMapper extends ObjectMapper {
      */
 
     public HyperSchema sheetSchemaFor(final Class<?> type) throws JsonMappingException {
-        return _schemaGenerator.generate(constructType(type), _serializerProvider(_serializationConfig), _serializerFactory);
+        return _schemaGenerator.generate(constructType(type), _serializerProvider(_serializationConfig),
+            _serializerFactory);
     }
 
     /*
@@ -438,7 +439,8 @@ public final class HyperMapper extends ObjectMapper {
         // Type can NOT be a Collection or array type
         final JavaType type = constructType(value.getClass());
         if (type.isArrayType() || type.isCollectionLikeType()) {
-            throw new IllegalArgumentException("`valueType` MUST be specified to write a value of a Collection or array type");
+            throw new IllegalArgumentException(
+                "`valueType` MUST be specified to write a value of a Collection or array type");
         }
     }
 

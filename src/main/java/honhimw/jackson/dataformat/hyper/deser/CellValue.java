@@ -29,7 +29,8 @@ public final class CellValue {
     private final String _textValue;
     private final int _errorCode;
 
-    private CellValue(final CellType cellType, final double numberValue, final boolean booleanValue, final String textValue, final int errorCode) {
+    private CellValue(final CellType cellType, final double numberValue, final boolean booleanValue,
+        final String textValue, final int errorCode) {
         _cellType = cellType;
         _numberValue = numberValue;
         _booleanValue = booleanValue;

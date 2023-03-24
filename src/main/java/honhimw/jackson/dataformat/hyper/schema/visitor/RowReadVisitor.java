@@ -36,6 +36,7 @@ public abstract class RowReadVisitor {
 
     /**
      * read value
+     *
      * @param cell   to be read
      * @param column column-level schema
      * @return value holder

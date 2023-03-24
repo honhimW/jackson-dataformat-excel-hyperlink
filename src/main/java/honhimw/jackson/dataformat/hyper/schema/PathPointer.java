@@ -14,13 +14,12 @@
 
 package honhimw.jackson.dataformat.hyper.schema;
 
-import lombok.EqualsAndHashCode;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode
 final class PathPointer implements ColumnPointer {
@@ -78,7 +77,9 @@ final class PathPointer implements ColumnPointer {
     @Override
     public ColumnPointer getParent() {
         final Path parent = _path.getParent();
-        if (parent == null) return EMPTY;
+        if (parent == null) {
+            return EMPTY;
+        }
         return new PathPointer(parent);
     }
 

@@ -43,9 +43,11 @@ public interface RetainedSheets {
             throw new IllegalArgumentException(String.format("[%s] is retained, please rename the sheet", name));
         }
     }
+
     static void assertUsable(Class<?> type) {
         if (isRetain(type.getSimpleName())) {
-            throw new IllegalArgumentException(String.format("[%s] is retained, please rename the sheet", type.getSimpleName()));
+            throw new IllegalArgumentException(
+                String.format("[%s] is retained, please rename the sheet", type.getSimpleName()));
         }
     }
 

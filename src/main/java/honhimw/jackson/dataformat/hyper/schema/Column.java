@@ -29,6 +29,7 @@ public final class Column {
     public Column(final ColumnPointer pointer, final String name, final JavaType type) {
         this(pointer, name, type, true);
     }
+
     public Column(final ColumnPointer pointer, final String name, final JavaType type, boolean leaf) {
         this._pointer = pointer;
         this._name = name;
@@ -74,9 +75,9 @@ public final class Column {
     @Override
     public String toString() {
         return new StringJoiner(", ", Column.class.getSimpleName() + "[", "]")
-                .add("pointer=" + _pointer)
-                .add("name=" + _name)
-                .add("type=" + _type)
-                .toString();
+            .add("pointer=" + _pointer)
+            .add("name=" + _name)
+            .add("type=" + _type)
+            .toString();
     }
 }

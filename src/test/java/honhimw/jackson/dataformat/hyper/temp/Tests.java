@@ -119,6 +119,8 @@ public class Tests {
             }
         });
         mapper.acceptReadVisitor(bookReadVisitor -> new BookReadVisitor(bookReadVisitor) {
+            List<Object> list = new ArrayList<>();
+
             @Override
             public SheetReadVisitor visitSheet(final Sheet sheet) {
                 SheetReadVisitor sheetReadVisitor = super.visitSheet(sheet);
@@ -127,6 +129,7 @@ public class Tests {
                 return new SheetReadVisitor(sheetReadVisitor) {
                     @Override
                     public RowReadVisitor visitRow(final Row row) {
+                        list.add(row);
                         System.out.println("read row: " + row.getRowNum());
                         RowReadVisitor rowReadVisitor = super.visitRow(row);
 
@@ -140,6 +143,12 @@ public class Tests {
                         };
                     }
                 };
+            }
+
+            @Override
+            public void visitEnd() {
+                System.out.println("read rows number = " + list.size());
+                super.visitEnd();
             }
         });
         File file = new File("E:\\temp\\person.xlsx");

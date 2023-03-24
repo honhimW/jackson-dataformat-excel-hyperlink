@@ -17,13 +17,12 @@ package honhimw.jackson.dataformat.hyper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import honhimw.jackson.dataformat.hyper.deser.ExcelDateDeserializer;
 import honhimw.jackson.dataformat.hyper.ser.ExcelDateSerializer;
-import org.apache.poi.ss.usermodel.DateUtil;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.function.BiFunction;
+import org.apache.poi.ss.usermodel.DateUtil;
 
 public final class ExcelDateModule extends SimpleModule {
 
@@ -34,7 +33,8 @@ public final class ExcelDateModule extends SimpleModule {
 
     private void addExcelDateDeserializers() {
         final BiFunction<Double, Boolean, LocalDateTime> getLocalDateTime = DateUtil::getLocalDateTime;
-        final BiFunction<Double, Boolean, LocalDate> getLocalDate = getLocalDateTime.andThen(LocalDateTime::toLocalDate);
+        final BiFunction<Double, Boolean, LocalDate> getLocalDate = getLocalDateTime.andThen(
+            LocalDateTime::toLocalDate);
         addDeserializer(Date.class, new ExcelDateDeserializer<>(DateUtil::getJavaDate));
         addDeserializer(Calendar.class, new ExcelDateDeserializer<>(DateUtil::getJavaCalendar));
         addDeserializer(LocalDate.class, new ExcelDateDeserializer<>(getLocalDate));

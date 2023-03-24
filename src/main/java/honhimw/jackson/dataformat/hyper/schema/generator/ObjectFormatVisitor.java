@@ -14,7 +14,6 @@
 
 package honhimw.jackson.dataformat.hyper.schema.generator;
 
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.JavaType;
@@ -32,7 +31,6 @@ import honhimw.jackson.dataformat.hyper.schema.Column;
 import honhimw.jackson.dataformat.hyper.schema.ColumnPointer;
 import honhimw.jackson.dataformat.hyper.schema.Table;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.stream.BaseStream;
 import lombok.extern.slf4j.Slf4j;
 
@@ -124,11 +122,15 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
     }
 
     private void _reportBadDefinition(final InvalidDefinitionException e) throws InvalidDefinitionException {
-        if (!BeanUtil.isJava8TimeClass(e.getType().getRawClass())) throw e;
-        if (log.isTraceEnabled()) log.trace(e.getMessage());
+        if (!BeanUtil.isJava8TimeClass(e.getType().getRawClass())) {
+            throw e;
+        }
+        if (log.isTraceEnabled()) {
+            log.trace(e.getMessage());
+        }
         final String msg = "Java 8 date/time type " + ClassUtil.getTypeDescription(e.getType())
-                + " not supported by default: register Module `" + ExcelDateModule.class.getName()
-                + "` or add Module \"com.fasterxml.jackson.datatype:jackson-datatype-jsr310\" to enable handling";
+            + " not supported by default: register Module `" + ExcelDateModule.class.getName()
+            + "` or add Module \"com.fasterxml.jackson.datatype:jackson-datatype-jsr310\" to enable handling";
         throw InvalidDefinitionException.from((JsonGenerator) e.getProcessor(), msg, e.getType());
     }
 }

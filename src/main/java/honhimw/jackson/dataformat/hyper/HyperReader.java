@@ -18,10 +18,15 @@ import com.fasterxml.jackson.core.FormatSchema;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.InjectableValues;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.deser.DataFormatReaders;
 import honhimw.jackson.dataformat.hyper.deser.BookParser;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,16 +39,16 @@ public final class HyperReader extends ObjectReader {
     }
 
     HyperReader(final HyperMapper mapper, final DeserializationConfig config, final JavaType valueType,
-                      final Object valueToUpdate, final FormatSchema schema,
-                      final InjectableValues injectableValues) {
+        final Object valueToUpdate, final FormatSchema schema,
+        final InjectableValues injectableValues) {
         super(mapper, config, valueType, valueToUpdate, schema, injectableValues);
     }
 
     @SuppressWarnings("java:S107")
     private HyperReader(final HyperReader base, final DeserializationConfig config, final JavaType valueType,
-                              final JsonDeserializer<Object> rootDeser, final Object valueToUpdate,
-                              final FormatSchema schema, final InjectableValues injectableValues,
-                              final DataFormatReaders dataFormatReaders) {
+        final JsonDeserializer<Object> rootDeser, final Object valueToUpdate,
+        final FormatSchema schema, final InjectableValues injectableValues,
+        final DataFormatReaders dataFormatReaders) {
         super(base, config, valueType, rootDeser, valueToUpdate, schema, injectableValues, dataFormatReaders);
     }
 
@@ -78,16 +83,16 @@ public final class HyperReader extends ObjectReader {
 
     @Override
     protected HyperReader _new(final ObjectReader base, final DeserializationConfig config, final JavaType valueType,
-                                     final JsonDeserializer<Object> rootDeser, final Object valueToUpdate,
-                                     final FormatSchema schema, final InjectableValues injectableValues,
-                                     final DataFormatReaders dataFormatReaders) {
+        final JsonDeserializer<Object> rootDeser, final Object valueToUpdate,
+        final FormatSchema schema, final InjectableValues injectableValues,
+        final DataFormatReaders dataFormatReaders) {
         return new HyperReader((HyperReader) base, config, valueType,
-                rootDeser, valueToUpdate, schema, injectableValues, dataFormatReaders);
+            rootDeser, valueToUpdate, schema, injectableValues, dataFormatReaders);
     }
 
     @Override
     protected <T> BookMappingIterator<T> _newIterator(final JsonParser p, final DeserializationContext ctxt,
-                                                       final JsonDeserializer<?> deser, final boolean parserManaged) {
+        final JsonDeserializer<?> deser, final boolean parserManaged) {
         return new BookMappingIterator<>(_valueType, p, ctxt, deser, parserManaged, _valueToUpdate);
     }
 

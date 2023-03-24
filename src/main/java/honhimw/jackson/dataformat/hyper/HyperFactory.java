@@ -14,7 +14,11 @@
 
 package honhimw.jackson.dataformat.hyper;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.FormatSchema;
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.io.IOContext;
 import honhimw.jackson.dataformat.hyper.deser.BookInput;
 import honhimw.jackson.dataformat.hyper.deser.BookParser;
@@ -27,18 +31,17 @@ import honhimw.jackson.dataformat.hyper.poi.ss.POIBookWriter;
 import honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import honhimw.jackson.dataformat.hyper.ser.BookOutput;
 import honhimw.jackson.dataformat.hyper.ser.BookWriter;
-import org.apache.poi.openxml4j.opc.PackagePart;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.util.TempFile;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import org.apache.poi.openxml4j.opc.PackagePart;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.util.TempFile;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 @SuppressWarnings("java:S2177")
 public final class HyperFactory extends JsonFactory {
@@ -188,7 +191,8 @@ public final class HyperFactory extends JsonFactory {
     }
 
     private SSMLBookReader _createSSMLSheetReader(final SSMLWorkbook workbook, final BookInput<?> src) {
-        final PackagePart worksheetPart = src.isNamed() ? workbook.getWorksheetPart(src.getName()) : workbook.getWorksheetPartAt(src.getIndex());
+        final PackagePart worksheetPart =
+            src.isNamed() ? workbook.getWorksheetPart(src.getName()) : workbook.getWorksheetPartAt(src.getIndex());
         if (worksheetPart == null) {
             throw new IllegalArgumentException("No sheet for " + src);
         }
@@ -201,9 +205,13 @@ public final class HyperFactory extends JsonFactory {
 
     @SuppressWarnings("unchecked")
     private BookInput<?> _preferRawAsFile(final BookInput<?> src) throws IOException {
-        if (src.isFile()) return src;
+        if (src.isFile()) {
+            return src;
+        }
         final InputStream raw = ((BookInput<InputStream>) src).getRaw();
-        if (!PackageUtil.isOOXML(raw)) return src;
+        if (!PackageUtil.isOOXML(raw)) {
+            return src;
+        }
         final File file = TempFile.createTempFile("sheet-input", ".xlsx");
         Files.copy(raw, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
         if (isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
@@ -236,7 +244,9 @@ public final class HyperFactory extends JsonFactory {
 
     @SuppressWarnings("unchecked")
     private BookOutput<OutputStream> _rawAsOutputStream(final BookOutput<?> out) throws IOException {
-        if (!out.isFile()) return (BookOutput<OutputStream>) out;
+        if (!out.isFile()) {
+            return (BookOutput<OutputStream>) out;
+        }
         final OutputStream raw = Files.newOutputStream(((File) out.getRaw()).toPath());
         return out.isNamed() ? BookOutput.target(raw, out.getName()) : BookOutput.target(raw);
     }

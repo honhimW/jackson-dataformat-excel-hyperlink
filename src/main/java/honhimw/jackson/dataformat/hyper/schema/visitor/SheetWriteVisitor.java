@@ -37,6 +37,7 @@ public abstract class SheetWriteVisitor {
 
     /**
      * called once-per-sheet
+     *
      * @param row where the headers to be wrote
      */
     public RowWriteVisitor visitHeaders(Row row) {
@@ -48,6 +49,7 @@ public abstract class SheetWriteVisitor {
 
     /**
      * beginning of object/array
+     *
      * @param row   the row to be wrote
      * @param value object/array
      */

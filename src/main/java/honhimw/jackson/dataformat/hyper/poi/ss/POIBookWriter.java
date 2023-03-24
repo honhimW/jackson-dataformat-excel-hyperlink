@@ -98,7 +98,8 @@ public final class POIBookWriter implements BookWriter {
 
     @Override
     public void currentValue(final Object value) {
-        if (_sheet != null && _reference.getColumn() == _schema.getOriginColumn() && _schema.isInRowBounds(_reference.getRow())) {
+        if (_sheet != null && _reference.getColumn() == _schema.getOriginColumn() && _schema.isInRowBounds(
+            _reference.getRow())) {
             _sheetWriteVisitor.visitRow(CellUtil.getRow(_reference.getRow(), _sheet), value);
         }
     }
@@ -178,7 +179,7 @@ public final class POIBookWriter implements BookWriter {
         _write(null, (cell, o) -> cell.setBlank());
     }
 
-    private <T> void  _write(final T value, final BiConsumer<Cell, T> consumer) {
+    private <T> void _write(final T value, final BiConsumer<Cell, T> consumer) {
         final Cell cell = getCell();
         Column column = null;
         if (!RetainedSheets.isRetain(_sheet.getSheetName())) {

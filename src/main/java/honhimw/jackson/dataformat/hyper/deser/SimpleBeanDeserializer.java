@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.std.DelegatingDeserializer;
-import com.fasterxml.jackson.databind.util.Annotations;
 import java.io.IOException;
 
 public final class SimpleBeanDeserializer extends DelegatingDeserializer {
@@ -46,8 +45,10 @@ public final class SimpleBeanDeserializer extends DelegatingDeserializer {
     }
 
     public static final class Modifier extends BeanDeserializerModifier {
+
         @Override
-        public JsonDeserializer<?> modifyDeserializer(final DeserializationConfig config, final BeanDescription beanDesc, final JsonDeserializer<?> deserializer) {
+        public JsonDeserializer<?> modifyDeserializer(final DeserializationConfig config,
+            final BeanDescription beanDesc, final JsonDeserializer<?> deserializer) {
             return new SimpleBeanDeserializer(deserializer);
         }
     }
