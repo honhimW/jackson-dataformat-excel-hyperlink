@@ -14,6 +14,7 @@
 
 package honhimw.jackson.dataformat.hyper.schema;
 
+import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.JavaType;
 import java.util.StringJoiner;
 import lombok.EqualsAndHashCode;
@@ -24,16 +25,19 @@ public final class Column {
     private final ColumnPointer _pointer;
     private final String _name;
     private final JavaType _type;
+    private final BeanProperty _beanProperty;
     private final boolean _leaf;
+    private Table _table;
 
-    public Column(final ColumnPointer pointer, final String name, final JavaType type) {
-        this(pointer, name, type, true);
+    public Column(final ColumnPointer pointer, final String name, final JavaType type, BeanProperty beanProperty) {
+        this(pointer, name, type, beanProperty, true);
     }
 
-    public Column(final ColumnPointer pointer, final String name, final JavaType type, boolean leaf) {
+    public Column(final ColumnPointer pointer, final String name, final JavaType type, BeanProperty beanProperty, boolean leaf) {
         this._pointer = pointer;
         this._name = name;
         this._type = type;
+        this._beanProperty = beanProperty;
         this._leaf = leaf;
     }
 
@@ -66,6 +70,18 @@ public final class Column {
             return _type.getContentType();
         }
         return _type;
+    }
+
+    public BeanProperty getProp() {
+        return _beanProperty;
+    }
+
+    public Table getTable() {
+        return _table;
+    }
+
+    public void setTable(final Table table) {
+        this._table = table;
     }
 
     public boolean isArray() {

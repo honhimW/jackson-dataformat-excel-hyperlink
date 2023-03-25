@@ -70,6 +70,23 @@ public final class CellValue {
         return _textValue;
     }
 
+    public Object getValue() {
+        switch (_cellType) {
+            case STRING -> {
+                return getStringValue();
+            }
+            case NUMERIC -> {
+                return getNumberValue();
+            }
+            case BOOLEAN -> {
+                return getBooleanValue();
+            }
+            default -> {
+                return null;
+            }
+        }
+    }
+
     public CellType getCellType() {
         return _cellType;
     }

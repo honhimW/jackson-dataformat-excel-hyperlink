@@ -176,6 +176,7 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
             for (final Column column : _columns) {
                 if (table.matches(column.getPointer().getParent()) && !table.getPointer().equals(column.getPointer())) {
                     table.getColumns().add(column);
+                    column.setTable(table);
                 }
             }
             table.setOrigin(_origin);

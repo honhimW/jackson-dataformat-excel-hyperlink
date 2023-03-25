@@ -98,6 +98,7 @@ public class Tests {
     public void one() {
         HyperMapper mapper = new HyperMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
         mapper.acceptWriteVisitor(bookWriteVisitor -> new BookWriteVisitor(bookWriteVisitor) {
             @Override
             public SheetWriteVisitor visitSheet(final Sheet sheet, final Table table) {

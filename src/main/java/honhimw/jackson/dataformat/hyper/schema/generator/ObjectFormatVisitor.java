@@ -65,7 +65,7 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
         }
 
         if (_wrapper.getPointer().isEmpty() && _wrapper.isEmpty()) {
-            _wrapper.add(new Column(_wrapper.getPointer(), "root", _type, false));
+            _wrapper.add(new Column(_wrapper.getPointer(), "root", _type, prop, false));
         }
 
         final ColumnPointer pointer = _wrapper.getPointer().resolve(prop.getName());
@@ -76,10 +76,11 @@ final class ObjectFormatVisitor extends JsonObjectFormatVisitor.Base {
         serializer.acceptJsonFormatVisitor(visitor, type);
         if (visitor.isEmpty()) {
             final String columnName = _resolveColumnName(prop);
-            _wrapper.add(new Column(pointer, columnName, type));
+            _wrapper.add(new Column(pointer, columnName, type, prop));
+
         } else {
             final String columnName = _resolveColumnName(prop);
-            _wrapper.add(new Column(pointer, columnName, type, false));
+            _wrapper.add(new Column(pointer, columnName, type, prop, false));
             _wrapper.addAll(visitor);
         }
         _wrapper.getTables().addAll(visitor.getTables());
