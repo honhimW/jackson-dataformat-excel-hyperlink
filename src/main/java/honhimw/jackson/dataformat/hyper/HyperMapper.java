@@ -292,6 +292,10 @@ public final class HyperMapper extends ObjectMapper {
     /**********************************************************
      */
 
+    public <T> T readValue(final Workbook src, final Class<T> valueType) throws IOException {
+        return sheetReaderFor(valueType).readValue(src);
+    }
+
     @Override
     public <T> T readValue(final File src, final Class<T> valueType) throws IOException {
         return sheetReaderFor(valueType).readValue(src);

@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -39,6 +42,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -46,13 +50,19 @@ import org.junit.jupiter.api.Test;
  * @since 2023-03-25
  */
 
-public class Validate {
+public class ValidateTests {
+
+    HyperMapper mapper;
+
+    @BeforeEach
+    public void prepare() {
+        mapper = new HyperMapper();
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
 
     @Test
     @SneakyThrows
     public void validate() {
-        HyperMapper mapper = new HyperMapper();
-        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.acceptReadVisitor(ValidateBookReadVisitor::new);
         File file = new File("E:\\temp\\person.xlsx");
         mapper.writeValue(file, Person.VALUES, Person.class);
@@ -92,6 +102,7 @@ public class Validate {
     }
 
     public static class ValidateSheetReaderVisitor extends SheetReadVisitor {
+
         private final List<String> _es;
 
         public ValidateSheetReaderVisitor(final SheetReadVisitor readVisitor, List<String> es) {
@@ -139,5 +150,24 @@ public class Validate {
         }
     }
 
+    @Test
+    @SneakyThrows
+    public void multi() {
+        mapper.acceptReadVisitor(ValidateBookReadVisitor::new);
+        int num = 4;
+        ExecutorService executorService = Executors.newFixedThreadPool(num);
+        for (int i = 0; i < num; i++) {
+            executorService.submit(() -> {
+                try {
+                    Workbook sheets = mapper.writeValueAsBook(Person.VALUES, Person.class);
+                    Person person = mapper.readValue(sheets, Person.class);
+                    System.out.println(person.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        executorService.awaitTermination(2, TimeUnit.SECONDS);
+    }
 
 }
