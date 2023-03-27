@@ -67,8 +67,11 @@ public class ValidateTests {
         File file = new File("E:\\temp\\person.xlsx");
         mapper.writeValue(file, Person.VALUES, Person.class);
 
-        Person person = mapper.readValue(file, Person.class);
-        System.out.println(person.toString());
+        try {
+            Person person = mapper.readValue(file, Person.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static class ValidateBookReadVisitor extends BookReadVisitor {
