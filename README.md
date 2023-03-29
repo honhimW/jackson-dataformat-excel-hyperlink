@@ -7,13 +7,15 @@ The project is forked from [scndry/jackson-dataformat-spreadsheet](https://githu
 ### Maven
 ```xml
 <project>
-  <repository>
-    <id>sonatype-snapshots</id>
-    <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-    <snapshots>
-      <enabled>true</enabled>
-    </snapshots>
-  </repository>
+  <repositories>
+    <repository>
+      <id>sonatype-snapshots</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
   <dependency>
     <groupId>io.github.honhimw</groupId>
