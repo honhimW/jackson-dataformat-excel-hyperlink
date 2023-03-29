@@ -19,9 +19,6 @@ plugins {
     id("maven-publish")
 }
 
-println(findProperty("SONATYPE_USERNAME") as String)
-println(findProperty("SONATYPE_PASSWORD") as String)
-
 group = "io.github.honhimw"
 version = "0.0.1-SNAPSHOT"
 description = "Support for reading and writing Excel-Hyperlink via Jackson abstractions."
