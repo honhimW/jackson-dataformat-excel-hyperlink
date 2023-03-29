@@ -93,25 +93,10 @@ publishing {
                         url.set("https://honhimW.github.io")
                     }
                 }
-//                scm {
-//                    connection.set("scm:git:git://github.com/honhimW/jackson-dataformat-excel-hyperlink.git")
-//                    developerConnection.set("scm:git:ssh://github.com/honhimW/jackson-dataformat-excel-hyperlink.git")
-//                    url.set("https://github.com/honhimW/jackson-dataformat-excel-hyperlink")
-//                }
             }
         }
     }
-//    repositories {
-//        maven {
-//            if ("repository" in properties) {
-//                name = properties["repository"] as String
-//                url = uri(properties[if (snapshots) "${name}Snapshots" else "${name}Releases"] as String)
-//                credentials(PasswordCredentials::class)
-//            } else {
-//                url = uri(layout.buildDirectory.dir(if (snapshots) "publications/snapshots" else "publications/releases"))
-//            }
-//        }
-//    }
+
     repositories {
         maven {
             name = "sonatype"
