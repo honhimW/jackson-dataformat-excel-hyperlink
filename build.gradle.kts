@@ -76,7 +76,7 @@ publishing {
             pom {
                 name.set(title)
                 description.set(project.description)
-//                url.set("https://github.com/scndry/jackson-dataformat-spreadsheet")
+                url.set("https://github.com/honhimW/jackson-dataformat-excel-hyperlink")
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
@@ -85,20 +85,16 @@ publishing {
                 }
                 developers {
                     developer {
-                        name.set("Ryan S. Yang")
-                        email.set("scndryan@gmail.com")
-                        url.set("https://scndry.github.io")
-                    }
-                    developer {
                         name.set("honhimw")
                         email.set("honhimw@outlook.com")
+                        url.set("https://honhimW.github.io")
                     }
                 }
-//                scm {
-//                    connection.set("scm:git:git://github.com/scndry/jackson-dataformat-spreadsheet.git")
-//                    developerConnection.set("scm:git:ssh://github.com/scndry/jackson-dataformat-spreadsheet.git")
-//                    url.set("https://github.com/scndry/jackson-dataformat-spreadsheet")
-//                }
+                scm {
+                    connection.set("scm:git:git://github.com/honhimW/jackson-dataformat-excel-hyperlink.git")
+                    developerConnection.set("scm:git:ssh://github.com/honhimW/jackson-dataformat-excel-hyperlink.git")
+                    url.set("https://github.com/honhimW/jackson-dataformat-excel-hyperlink")
+                }
             }
         }
     }
