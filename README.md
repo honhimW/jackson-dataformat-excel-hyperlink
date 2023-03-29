@@ -126,7 +126,7 @@ public class Person implements Serializable {
 ### ReadVisitor/WriteVisitor
 ```java
 HyperMapper mapper = new HyperMapper();
-mapper.acceptWriteVisitor(new BookWriteVisitor() {
+mapper.acceptWriteVisitor(visitor -> new BookWriteVisitor(visitor) {
     @Override
     public SheetWriteVisitor visitSheet(final Sheet sheet, final Table table) {
         SheetWriteVisitor sheetWriteVisitor = super.visitSheet(sheet, table);
@@ -146,7 +146,7 @@ mapper.acceptWriteVisitor(new BookWriteVisitor() {
         System.out.println("write done");
     }
 });
-mapper.acceptReadVisitor(new BookReadVisitor() {
+mapper.acceptReadVisitor(visitor -> new BookReadVisitor(visitor) {
     @Override
     public SheetReadVisitor visitSheet(final Sheet sheet) {
         SheetReadVisitor sheetReadVisitor = super.visitSheet(sheet);
