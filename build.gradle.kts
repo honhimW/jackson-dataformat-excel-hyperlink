@@ -19,6 +19,9 @@ plugins {
     id("maven-publish")
 }
 
+println(findProperty("SONATYPE_USERNAME") as String)
+println(findProperty("SONATYPE_PASSWORD") as String)
+
 group = "io.github.honhimw"
 version = "0.0.1-SNAPSHOT"
 description = "Support for reading and writing Excel-Hyperlink via Jackson abstractions."
@@ -90,22 +93,36 @@ publishing {
                         url.set("https://honhimW.github.io")
                     }
                 }
-                scm {
-                    connection.set("scm:git:git://github.com/honhimW/jackson-dataformat-excel-hyperlink.git")
-                    developerConnection.set("scm:git:ssh://github.com/honhimW/jackson-dataformat-excel-hyperlink.git")
-                    url.set("https://github.com/honhimW/jackson-dataformat-excel-hyperlink")
-                }
+//                scm {
+//                    connection.set("scm:git:git://github.com/honhimW/jackson-dataformat-excel-hyperlink.git")
+//                    developerConnection.set("scm:git:ssh://github.com/honhimW/jackson-dataformat-excel-hyperlink.git")
+//                    url.set("https://github.com/honhimW/jackson-dataformat-excel-hyperlink")
+//                }
             }
         }
     }
+//    repositories {
+//        maven {
+//            if ("repository" in properties) {
+//                name = properties["repository"] as String
+//                url = uri(properties[if (snapshots) "${name}Snapshots" else "${name}Releases"] as String)
+//                credentials(PasswordCredentials::class)
+//            } else {
+//                url = uri(layout.buildDirectory.dir(if (snapshots) "publications/snapshots" else "publications/releases"))
+//            }
+//        }
+//    }
     repositories {
         maven {
-            if ("repository" in properties) {
-                name = properties["repository"] as String
-                url = uri(properties[if (snapshots) "${name}Snapshots" else "${name}Releases"] as String)
-                credentials(PasswordCredentials::class)
+            name = "sonatype"
+            if (snapshots) {
+                url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
             } else {
-                url = uri(layout.buildDirectory.dir(if (snapshots) "publications/snapshots" else "publications/releases"))
+                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            }
+            credentials {
+                username = findProperty("SONATYPE_USERNAME") as String
+                password = findProperty("SONATYPE_PASSWORD") as String
             }
         }
     }

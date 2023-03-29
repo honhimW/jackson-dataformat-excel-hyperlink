@@ -3,6 +3,55 @@
 The project is forked from [scndry/jackson-dataformat-spreadsheet](https://github.com/scndry/jackson-dataformat-spreadsheet), which can dump data objects as (.xlsx) format, with Hyperlink links between objects. Structured data types (Class) correspond to a (Sheet), and array and class array types are dumped in a Sheet named “List”. It also supports reading/writing.
 
 ---
+
+### Maven
+```xml
+<project>
+  <repository>
+    <id>sonatype-snapshots</id>
+    <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+  </repository>
+
+  <dependency>
+    <groupId>io.github.honhimw</groupId>
+    <artifactId>jackson-dataformat-excel-hyperlink</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </dependency>
+</project>
+```
+
+### Gradle
+```groovy
+// Groovy
+repositories {
+    maven {
+        name 'sonatype-snapshots'
+        url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    implementation 'io.github.honhimw:jackson-dataformat-excel-hyperlink:0.0.1-SNAPSHOT'
+}
+```
+```kotlin
+// Kotlin
+repositories {
+    maven {
+        name = "sonatype-snapshots"
+        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+    }
+}
+
+dependencies {
+    implementation("io.github.honhimw:jackson-dataformat-excel-hyperlink:0.0.1-SNAPSHOT")
+}
+```
+
+---
 ## Excel-Hyperlink format
 
 The commonly used (.xlsx) format document for office suite spreadsheets, which consists of three basic parts: sheet, row, and cell.
