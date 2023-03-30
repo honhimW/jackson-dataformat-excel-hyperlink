@@ -20,7 +20,7 @@ The project is forked from [scndry/jackson-dataformat-spreadsheet](https://githu
   <dependency>
     <groupId>io.github.honhimw</groupId>
     <artifactId>jackson-dataformat-excel-hyperlink</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </dependency>
 </project>
 ```
@@ -36,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.honhimw:jackson-dataformat-excel-hyperlink:0.0.1-SNAPSHOT'
+    implementation 'io.github.honhimw:jackson-dataformat-excel-hyperlink:0.0.2-SNAPSHOT'
 }
 ```
 ```kotlin
@@ -49,7 +49,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.honhimw:jackson-dataformat-excel-hyperlink:0.0.1-SNAPSHOT")
+    implementation("io.github.honhimw:jackson-dataformat-excel-hyperlink:0.0.2-SNAPSHOT")
 }
 ```
 
