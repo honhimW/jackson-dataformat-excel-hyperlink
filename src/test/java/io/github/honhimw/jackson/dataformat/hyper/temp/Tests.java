@@ -12,20 +12,6 @@
  * limitations under the License.
  */
 
-/*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package io.github.honhimw.jackson.dataformat.hyper.temp;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -54,6 +40,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -89,12 +76,12 @@ public class Tests {
         List<Person> origin = new ArrayList<>(MockUtils.generate(Person.class, 10));
         HyperMapper mapper = new HyperMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        origin.forEach(person -> person.setProperties(List.of("hello", "world")));
+        origin.forEach(person -> person.setProperties(Arrays.asList("hello", "world")));
         List<Object> p2 = new ArrayList<>(MockUtils.generate(Ext.class,
             ThreadLocalRandom.current().nextInt(2,5)));
         p2.add("hello");
         p2.add(123);
-        p2.add(List.of("a", "b"));
+        p2.add(Arrays.asList("a", "b"));
         origin.forEach(person -> person.setProperties2(p2));
         origin.forEach(person -> person.setName(null));
         mapper.writeValue(file, origin, Person.class);
@@ -174,7 +161,7 @@ public class Tests {
                 super.visitEnd();
             }
         });
-        mapper.writeValue(file, List.of(Person.VALUE), Person.class);
+        mapper.writeValue(file, Arrays.asList(Person.VALUE), Person.class);
         Person person = mapper.readValue(file, Person.class);
         System.out.println(person.toString());
     }
@@ -185,12 +172,12 @@ public class Tests {
         List<Person> origin = new ArrayList<>(MockUtils.generate(Person.class, 10));
         HyperMapper mapper = new HyperMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        origin.forEach(person -> person.setProperties(List.of("hello", "world")));
+        origin.forEach(person -> person.setProperties(Arrays.asList("hello", "world")));
         List<Object> p2 = new ArrayList<>(MockUtils.generate(Ext.class,
             ThreadLocalRandom.current().nextInt(2,5)));
         p2.add("hello");
         p2.add(123);
-        p2.add(List.of("a", "b"));
+        p2.add(Arrays.asList("a", "b"));
         origin.forEach(person -> person.setProperties2(p2));
         origin.forEach(person -> person.setName(null));
 
@@ -206,9 +193,18 @@ public class Tests {
                 while (cellIterator.hasNext()) {
                     Cell cell = cellIterator.next();
                     switch (cell.getCellType()) {
-                        case STRING -> System.out.print(cell.getStringCellValue());
-                        case NUMERIC -> System.out.print(cell.getNumericCellValue());
-                        case BOOLEAN -> System.out.print(cell.getBooleanCellValue());
+                        case STRING: {
+                            System.out.print(cell.getStringCellValue());
+                            break;
+                        }
+                        case NUMERIC: {
+                            System.out.print(cell.getNumericCellValue());
+                            break;
+                        }
+                        case BOOLEAN: {
+                            System.out.print(cell.getBooleanCellValue());
+                            break;
+                        }
                     }
                     System.out.print(" | ");
                 }
@@ -229,8 +225,9 @@ public class Tests {
         Dates dates = new Dates();
         Date date = new Date();
         Instant instant = Instant.ofEpochMilli(date.getTime());
-        LocalDate localDate = LocalDate.ofInstant(instant, ZoneId.systemDefault());
+        instant.toEpochMilli();
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        LocalDate localDate = localDateTime.toLocalDate();
         dates.setDate(date);
         dates.setInstant(instant);
         dates.setLocalDate(localDate);

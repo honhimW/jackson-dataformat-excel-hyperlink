@@ -20,7 +20,7 @@ plugins {
 }
 
 group = "io.github.honhimw"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.2-SNAPSHOT"
 description = "Support for reading and writing Excel-Hyperlink via Jackson abstractions."
 
 val title = "Jackson dataformat: HyperLink"
@@ -63,8 +63,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
     withJavadocJar()
     withSourcesJar()
 }

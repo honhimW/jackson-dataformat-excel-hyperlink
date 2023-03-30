@@ -12,20 +12,6 @@
  * limitations under the License.
  */
 
-/*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package io.github.honhimw.jackson.dataformat.hyper.deser;
 
 import org.apache.poi.ss.formula.eval.ErrorEval;
@@ -86,16 +72,16 @@ public final class CellValue {
 
     public Object getValue() {
         switch (_cellType) {
-            case STRING -> {
+            case STRING: {
                 return getStringValue();
             }
-            case NUMERIC -> {
+            case NUMERIC: {
                 return getNumberValue();
             }
-            case BOOLEAN -> {
+            case BOOLEAN: {
                 return getBooleanValue();
             }
-            default -> {
+            default: {
                 return null;
             }
         }
@@ -118,14 +104,13 @@ public final class CellValue {
     }
 
     public String formatAsString() {
-        return switch (_cellType) {
-            case BLANK -> "<blank>";
-            case NUMERIC -> String.valueOf(_numberValue);
-            case STRING -> '"' + _textValue + '"';
-            case BOOLEAN -> _booleanValue ? "TRUE" : "FALSE";
-            case ERROR -> ErrorEval.getText(_errorCode);
-            default -> "<error unexpected cell type " + _cellType + ">";
-        };
-
+        switch (_cellType) {
+            case BLANK: return "<blank>";
+            case NUMERIC: return String.valueOf(_numberValue);
+            case STRING: return '"' + _textValue + '"';
+            case BOOLEAN: return _booleanValue ? "TRUE" : "FALSE";
+            case ERROR: return ErrorEval.getText(_errorCode);
+            default: return "<error unexpected cell type " + _cellType + ">";
+        }
     }
 }

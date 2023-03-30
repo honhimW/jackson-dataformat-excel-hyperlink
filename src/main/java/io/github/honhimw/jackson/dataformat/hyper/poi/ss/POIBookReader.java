@@ -12,20 +12,6 @@
  * limitations under the License.
  */
 
-/*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package io.github.honhimw.jackson.dataformat.hyper.poi.ss;
 
 import io.github.honhimw.jackson.dataformat.hyper.deser.BookReader;
@@ -94,7 +80,8 @@ public final class POIBookReader implements BookReader {
 
     @Override
     public boolean isDate1904() {
-        if (_workbook instanceof Date1904Support date1904Support) {
+        if (_workbook instanceof Date1904Support) {
+            Date1904Support date1904Support = (Date1904Support) _workbook;
             return date1904Support.isDate1904();
         }
         return false;
@@ -170,18 +157,20 @@ public final class POIBookReader implements BookReader {
         }
         final SheetToken token = _next;
         switch (token) {
-            case SHEET_DATA_START -> {
+            case SHEET_DATA_START: {
                 _sheetReadVisitor = _bookReadVisitor.visitSheet(_mainSheet);
                 _next = _mainRowIterator.hasNext() ? SheetToken.ROW_START : SheetToken.SHEET_DATA_END;
+                break;
             }
-            case ROW_START -> {
+            case ROW_START: {
                 final Row row = _mainRowIterator.next();
                 _rowIndex = row.getRowNum();
                 _cellIterator = row.cellIterator();
                 _rowReadVisitor = _sheetReadVisitor.visitRow(row);
                 _next = _cellIterator.hasNext() ? SheetToken.CELL_VALUE : SheetToken.ROW_END;
+                break;
             }
-            case CELL_VALUE -> {
+            case CELL_VALUE: {
                 _cell = _cellIterator.next();
                 _columnIndex = _cell.getColumnIndex();
                 _next = _cellIterator.hasNext() ? SheetToken.CELL_VALUE : SheetToken.ROW_END;
@@ -207,11 +196,12 @@ public final class POIBookReader implements BookReader {
                     }
 
                 }
+                break;
             }
-            case HYPER_LINK -> {
-
+            case HYPER_LINK: {
+                break;
             }
-            case ROW_END -> {
+            case ROW_END: {
                 _cell = null;
                 _cellIterator = null;
                 if (!_cellIteratorStack.isEmpty()) {
@@ -222,10 +212,12 @@ public final class POIBookReader implements BookReader {
                 } else {
                     _next = _mainRowIterator.hasNext() ? SheetToken.ROW_START : SheetToken.SHEET_DATA_END;
                 }
+                break;
             }
-            case SHEET_DATA_END -> {
+            case SHEET_DATA_END: {
                 _next = null;
                 _bookReadVisitor.visitEnd();
+                break;
             }
         }
         if (log.isTraceEnabled()) {

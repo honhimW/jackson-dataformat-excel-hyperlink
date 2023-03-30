@@ -12,20 +12,6 @@
  * limitations under the License.
  */
 
-/*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package io.github.honhimw.jackson.dataformat.hyper.deser;
 
 import com.fasterxml.jackson.core.Base64Variant;
@@ -185,12 +171,16 @@ public final class BookParser extends ParserMinimalBase {
             return;
         }
         switch (token) {
-            case SHEET_DATA_START -> _nextTokens.add(JsonToken.START_ARRAY);
-            case ROW_START -> {
+            case SHEET_DATA_START: {
+                _nextTokens.add(JsonToken.START_ARRAY);
+                break;
+            }
+            case ROW_START: {
                 _reference = new CellAddress(_reader.getRow(), -1);
                 _nextTokens.add(JsonToken.START_OBJECT);
+                break;
             }
-            case CELL_VALUE -> {
+            case CELL_VALUE: {
                 _reference = _reader.getReference();
                 _value = _reader.getCellValue();
                 String sheetName = _reader.getCell().getSheet().getSheetName();
@@ -222,8 +212,9 @@ public final class BookParser extends ParserMinimalBase {
                         _nextTokens.add(JsonToken.START_OBJECT);
                     }
                 }
+                break;
             }
-            case ROW_END -> {
+            case ROW_END: {
                 BookStreamContext temp = _parsingContext;
                 if (temp.getParent() != null && !temp.getParent().inRoot()) {
                     if (temp.inArray()) {
@@ -232,8 +223,12 @@ public final class BookParser extends ParserMinimalBase {
                         _nextTokens.add(JsonToken.END_OBJECT);
                     }
                 }
+                break;
             }
-            case SHEET_DATA_END -> _nextTokens.add(JsonToken.END_ARRAY);
+            case SHEET_DATA_END: {
+                _nextTokens.add(JsonToken.END_ARRAY);
+                break;
+            }
         }
     }
 
