@@ -14,18 +14,12 @@
 
 package io.github.honhimw.jackson.dataformat.hyper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import io.github.honhimw.jackson.dataformat.hyper.schema.generator.AnnotatedNameResolver;
 import io.github.honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
 import io.github.honhimw.jackson.dataformat.hyper.temp.ColumnCode;
 import io.github.honhimw.jackson.dataformat.hyper.temp.NameOf;
 import io.github.honhimw.jackson.dataformat.hyper.temp.Person;
-import java.io.File;
-import java.nio.file.Path;
-import java.util.List;
 import lombok.Data;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -33,6 +27,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SchemaGeneratorTest {
 
@@ -66,7 +67,7 @@ class SchemaGeneratorTest {
     void overwriteColumnNames() throws Exception {
         final HyperMapper mapper = new HyperMapper()
                 .setColumnNameResolver(prop -> prop.getName().toUpperCase());
-        mapper.writeValue(out, List.of(Person.VALUE), Person.class);
+        mapper.writeValue(out, Arrays.asList(Person.VALUE), Person.class);
         try (XSSFWorkbook workbook = new XSSFWorkbook(out)) {
             final XSSFSheet sheet = workbook.getSheetAt(0);
             row = sheet.getRow(0);

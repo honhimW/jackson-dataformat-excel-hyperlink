@@ -23,6 +23,7 @@ import io.github.honhimw.jackson.dataformat.hyper.support.FixtureAs;
 import io.github.honhimw.jackson.dataformat.hyper.temp.Person;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import lombok.SneakyThrows;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -121,7 +122,7 @@ class HyperMapperTest implements FixtureAs {
         @Test
         @SneakyThrows
         void writeValue() {
-            mapper.writeValue(out, List.of(Person.VALUE), Person.class);
+            mapper.writeValue(out, Arrays.asList(Person.VALUE), Person.class);
         }
     }
 }

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -48,13 +49,13 @@ import org.apache.commons.collections4.ListUtils;
 public class Person implements Serializable {
 
     public static final Person VALUE = new Person(0L, null, "hah", 200.00, false,
-        List.of("hello", "world"), List.of(1, "hello", new More("?", true)),
+        Arrays.asList("hello", "world"), Arrays.asList(1, "hello", new More("?", true)),
         new Ext("haha", 2.1, new More("blablabla", false)),
         new Ext("xixi", 2.2, new More("blablabla", false)),
         new Ext("hehe", 2.3, new More("blablabla", false))
     );
 
-    public static final List<Person> VALUES = List.of(VALUE);
+    public static final List<Person> VALUES = Arrays.asList(VALUE);
 
     @JsonProperty(index = 0)
     private Long id;
@@ -183,7 +184,7 @@ public class Person implements Serializable {
 
         @Override
         public List<String> convert(final String value) {
-            return Arrays.stream(value.split(";")).toList();
+            return Arrays.stream(value.split(";")).collect(Collectors.toList());
         }
 
         @Override

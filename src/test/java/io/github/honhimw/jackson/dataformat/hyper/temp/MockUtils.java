@@ -65,7 +65,7 @@ public class MockUtils {
             } else if (Long.class.isAssignableFrom(type)) {
                 value = random.nextLong(1, 10_000);
             } else if (Float.class.isAssignableFrom(type)) {
-                value = random.nextFloat(1, 10_000);
+                value = Double.valueOf(random.nextDouble(1, 10_000)).floatValue();
             } else if (Double.class.isAssignableFrom(type)) {
                 value = random.nextDouble(1, 10_000);
             } else if (Boolean.class.isAssignableFrom(type)) {
