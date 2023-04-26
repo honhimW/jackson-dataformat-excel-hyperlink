@@ -20,6 +20,7 @@ import io.github.honhimw.jackson.dataformat.hyper.schema.visitor.BookWriteVisito
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.poi.ss.util.CellAddress;
 
@@ -59,6 +60,11 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
 
     public Function<BookReadVisitor, BookReadVisitor> getBookReadVisitor() {
         return _bookReadVisitor;
+    }
+
+    public void filter(Predicate<Column> predicate) {
+        _columns.removeIf(next -> !predicate.test(next));
+        setupTables();
     }
 
     public Column findColumn(final CellAddress reference) {
@@ -171,8 +177,12 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
         return getOriginColumn() <= col;
     }
 
+    /**
+     * Two-way binding between Table and Column
+     */
     private void setupTables() {
         for (final Table table : _tables) {
+            table.getColumns().clear();
             for (final Column column : _columns) {
                 if (table.matches(column.getPointer().getParent()) && !table.getPointer().equals(column.getPointer())) {
                     table.getColumns().add(column);

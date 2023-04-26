@@ -20,7 +20,7 @@ plugins {
 }
 
 group = "io.github.honhimw"
-version = "0.0.2-SNAPSHOT"
+version = "0.0.3-SNAPSHOT"
 description = "Support for reading and writing Excel-Hyperlink via Jackson abstractions."
 
 val title = "Jackson dataformat: HyperLink"

@@ -53,7 +53,7 @@ final class POIRowReadVisitor extends RowReadVisitor {
             case ERROR:
                 return CellValue.getError(cell.getErrorCellValue());
             case BLANK:
-                return null;
+                return CellValue.BLANK;
             case _NONE:
             case FORMULA:
         }

@@ -28,9 +28,7 @@ import io.github.honhimw.jackson.dataformat.hyper.schema.visitor.SheetWriteVisit
 import io.github.honhimw.jackson.dataformat.hyper.ser.BookWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
@@ -107,7 +105,11 @@ public final class POIBookWriter implements BookWriter {
     @Override
     public Cell getCell() {
         final int row = _reference.getRow();
-        return CellUtil.getCell(CellUtil.getRow(row, _sheet), _reference.getColumn());
+        int column = _reference.getColumn();
+        if (column == -1) {
+            return null;
+        }
+        return CellUtil.getCell(CellUtil.getRow(row, _sheet), column);
     }
 
     @Override
@@ -141,7 +143,8 @@ public final class POIBookWriter implements BookWriter {
             final int col = _schema.getOriginColumn() + i;
             setReference(new CellAddress(row, col));
             Cell cell = getCell();
-            _rowWriteVisitor.visitHeader(cell, column);
+            Optional.ofNullable(cell)
+                .ifPresent(c -> _rowWriteVisitor.visitHeader(c, column));
         }
     }
 
@@ -181,6 +184,9 @@ public final class POIBookWriter implements BookWriter {
 
     private <T> void _write(final T value, final BiConsumer<Cell, T> consumer) {
         final Cell cell = getCell();
+        if (Objects.isNull(cell)) {
+            return;
+        }
         Column column = null;
         if (!RetainedSheets.isRetain(_sheet.getSheetName())) {
             column = _schema.getColumn(_sheet.getSheetName(), _reference);
