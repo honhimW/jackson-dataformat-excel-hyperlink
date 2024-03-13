@@ -14,17 +14,23 @@
 
 package io.github.honhimw.jackson.dataformat.hyper.temp;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import io.github.honhimw.jackson.dataformat.hyper.BookMappingIterator;
 import io.github.honhimw.jackson.dataformat.hyper.ExcelDateModule;
+import io.github.honhimw.jackson.dataformat.hyper.HyperGenerator;
 import io.github.honhimw.jackson.dataformat.hyper.HyperMapper;
+import io.github.honhimw.jackson.dataformat.hyper.deser.BookParser;
 import io.github.honhimw.jackson.dataformat.hyper.deser.CellValue;
 import io.github.honhimw.jackson.dataformat.hyper.schema.Column;
+import io.github.honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import io.github.honhimw.jackson.dataformat.hyper.schema.Table;
+import io.github.honhimw.jackson.dataformat.hyper.schema.generator.ColumnNameResolver;
 import io.github.honhimw.jackson.dataformat.hyper.schema.visitor.BookReadVisitor;
 import io.github.honhimw.jackson.dataformat.hyper.schema.visitor.BookWriteVisitor;
 import io.github.honhimw.jackson.dataformat.hyper.schema.visitor.RowReadVisitor;
@@ -33,27 +39,25 @@ import io.github.honhimw.jackson.dataformat.hyper.schema.visitor.SheetReadVisito
 import io.github.honhimw.jackson.dataformat.hyper.schema.visitor.SheetWriteVisitor;
 import io.github.honhimw.jackson.dataformat.hyper.temp.Person.Ext;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import lombok.SneakyThrows;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import lombok.*;
+import org.apache.commons.io.FileUtils;
+import org.apache.poi.ss.usermodel.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.StringUtils;
 
 /**
  * @author hon_him
@@ -76,6 +80,15 @@ public class Tests {
         List<Person> origin = new ArrayList<>(MockUtils.generate(Person.class, 10));
         HyperMapper mapper = new HyperMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        mapper.setColumnNameResolver(prop -> {
+            ColumnName annotation = prop.getAnnotation(ColumnName.class);
+            if (Objects.nonNull(annotation)) {
+                if (StringUtils.isNotBlank(annotation.value())) {
+                    return annotation.value();
+                }
+            }
+            return ColumnNameResolver.DEFAULT.resolve(prop);
+        });
         origin.forEach(person -> person.setProperties(Arrays.asList("hello", "world")));
         List<Object> p2 = new ArrayList<>(MockUtils.generate(Ext.class,
             ThreadLocalRandom.current().nextInt(2,5)));

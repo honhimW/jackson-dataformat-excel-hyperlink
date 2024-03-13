@@ -72,6 +72,7 @@ public class Person implements Serializable {
     private Double height;
 
     @AssertTrue
+    @ColumnName("性别")
     private Boolean gender;
 
 //    @JsonSerialize(converter = List2String.class)

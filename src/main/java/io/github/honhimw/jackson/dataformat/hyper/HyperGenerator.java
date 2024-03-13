@@ -14,11 +14,7 @@
 
 package io.github.honhimw.jackson.dataformat.hyper;
 
-import com.fasterxml.jackson.core.Base64Variant;
-import com.fasterxml.jackson.core.FormatSchema;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.StreamWriteFeature;
-import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import io.github.honhimw.jackson.dataformat.hyper.exception.BookStreamWriteException;
@@ -48,11 +44,13 @@ public final class HyperGenerator extends GeneratorBase {
     private final BookWriter _writer;
     private HyperSchema _schema;
     private BookStreamContext _outputContext;
+    private final int _formatFeatures;
 
-    public HyperGenerator(final IOContext ctxt, final int features, final ObjectCodec codec, final BookWriter writer) {
-        super(features, codec);
+    public HyperGenerator(final IOContext ctxt, final int features, final ObjectCodec codec, final BookWriter writer, final int formatFeatures) {
+        super(features, codec, ctxt);
         _ioContext = ctxt;
         _writer = writer;
+        this._formatFeatures = formatFeatures;
     }
 
     @Override
@@ -84,6 +82,13 @@ public final class HyperGenerator extends GeneratorBase {
         _writer.setSchema(_schema);
         _writer.writeHeaders();
         _outputContext = BookStreamContext.createRootContext(_schema);
+        if (!isEnabled(Feature.HYPERLINKE)) {
+            _writer.disableHyperlink();
+        }
+    }
+
+    public boolean isEnabled(final Feature f) {
+        return (_formatFeatures & f.getMask()) != 0;
     }
 
     public boolean isDate1904() {
@@ -312,4 +317,42 @@ public final class HyperGenerator extends GeneratorBase {
                 "No schema of type '" + HyperSchema.SCHEMA_TYPE + "' set, can not generate", this);
         }
     }
+
+    public enum Feature implements FormatFeature {
+        HYPERLINKE(true),
+        ;
+        final boolean _defaultState;
+        final int _mask;
+
+        Feature(final boolean defaultState) {
+            _defaultState = defaultState;
+            _mask = 1 << ordinal();
+        }
+
+        public static int collectDefaults() {
+            int flags = 0;
+            for (Feature f : values()) {
+                if (f.enabledByDefault()) {
+                    flags |= f.getMask();
+                }
+            }
+            return flags;
+        }
+
+        @Override
+        public boolean enabledByDefault() {
+            return _defaultState;
+        }
+
+        @Override
+        public int getMask() {
+            return _mask;
+        }
+
+        @Override
+        public boolean enabledIn(final int flags) {
+            return (flags & getMask()) != 0;
+        }
+    }
+
 }

@@ -7,20 +7,10 @@ The project is forked from [scndry/jackson-dataformat-spreadsheet](https://githu
 ### Maven
 ```xml
 <project>
-  <repositories>
-    <repository>
-      <id>sonatype-snapshots</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <dependency>
     <groupId>io.github.honhimw</groupId>
     <artifactId>jackson-dataformat-excel-hyperlink</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>1.0.0</version>
   </dependency>
 </project>
 ```
@@ -28,28 +18,14 @@ The project is forked from [scndry/jackson-dataformat-spreadsheet](https://githu
 ### Gradle
 ```groovy
 // Groovy
-repositories {
-    maven {
-        name 'sonatype-snapshots'
-        url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-    }
-}
-
 dependencies {
-    implementation 'io.github.honhimw:jackson-dataformat-excel-hyperlink:0.0.3-SNAPSHOT'
+    implementation 'io.github.honhimw:jackson-dataformat-excel-hyperlink:1.0.0'
 }
 ```
 ```kotlin
 // Kotlin
-repositories {
-    maven {
-        name = "sonatype-snapshots"
-        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-    }
-}
-
 dependencies {
-    implementation("io.github.honhimw:jackson-dataformat-excel-hyperlink:0.0.3-SNAPSHOT")
+    implementation("io.github.honhimw:jackson-dataformat-excel-hyperlink:1.0.0")
 }
 ```
 
@@ -93,6 +69,22 @@ The commonly used (.xlsx) format document for office suite spreadsheets, which c
 | more and more | nested loop | Map types are not supported | column index is array index |        | |
 
 ---
+
+## Feature
+
+### io.github.honhimw.jackson.dataformat.hyper.deser.BookParser.Feature
+
+| Features               | Default | Description                                    |
+|------------------------|---------|------------------------------------------------|
+| BLANK_ROW_AS_NULL      | true    | Blank row read as an null object in collection |
+| BREAK_ON_BLANK_ROW     | false   | Blank row as symbol for ending                 |
+| REORDER_BY_COLUMN_NAME | false   | Reorder schema by sheet title column           |
+
+### io.github.honhimw.jackson.dataformat.hyper.HyperGenerator.Feature
+
+| Features   | Default | Description                                                                                                            |
+|------------|---------|------------------------------------------------------------------------------------------------------------------------|
+| HYPERLINKE | true    | Using hyperlinks to describe object relationships<br/>**Note.** Number of hyperlinks is usually limited to 65536.<br/> |
 
 ## Usage
 

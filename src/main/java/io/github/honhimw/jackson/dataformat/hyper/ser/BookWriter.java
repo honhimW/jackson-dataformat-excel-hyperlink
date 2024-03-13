@@ -26,6 +26,10 @@ public interface BookWriter extends AutoCloseable {
 
     SpreadsheetVersion getSpreadsheetVersion();
 
+    default void disableHyperlink() {
+
+    }
+
     void switchSheet(Class<?> type);
 
     void link(final Class<?> type, String value, int row);
@@ -48,7 +52,8 @@ public interface BookWriter extends AutoCloseable {
 
     void writeBlank();
 
-    void adjustColumnWidth();
+    default void adjustColumnWidth() {
+    }
 
     void mergeScopedColumns(ColumnPointer pointer, int row, int size);
 

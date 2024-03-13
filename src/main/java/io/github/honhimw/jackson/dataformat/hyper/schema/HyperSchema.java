@@ -17,12 +17,14 @@ package io.github.honhimw.jackson.dataformat.hyper.schema;
 import com.fasterxml.jackson.core.FormatSchema;
 import io.github.honhimw.jackson.dataformat.hyper.schema.visitor.BookReadVisitor;
 import io.github.honhimw.jackson.dataformat.hyper.schema.visitor.BookWriteVisitor;
+import org.apache.poi.ss.util.CellAddress;
+
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.apache.poi.ss.util.CellAddress;
 
 public final class HyperSchema implements FormatSchema, Iterable<Column> {
 
@@ -62,6 +64,16 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
         return _bookReadVisitor;
     }
 
+    public void editColumns(Consumer<List<Column>> consumer) {
+        consumer.accept(_columns);
+        afterPropertySet();
+    }
+
+    public void editTables(Consumer<TablesEditor> consumer) {
+        consumer.accept(new TablesEditor(_tables));
+        afterPropertySet();
+    }
+
     public void filter(Predicate<Column> predicate) {
         _columns.removeIf(next -> !predicate.test(next));
         setupTables();
@@ -76,12 +88,24 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
 
     public Column getColumn(final String tableName, final CellAddress reference) {
         Table table = getTable(tableName);
-        return table.getColumns().get(reference.getColumn() - getOriginColumn());
+        List<Column> columns = table.getColumns();
+        int index = reference.getColumn() - getOriginColumn();
+        if (index < columns.size()) {
+            return columns.get(index);
+        } else {
+            return null;
+        }
     }
 
     public Column getColumn(final Class<?> clazz, final CellAddress reference) {
         Table table = getTable(clazz);
-        return table.getColumns().get(reference.getColumn() - getOriginColumn());
+        List<Column> columns = table.getColumns();
+        int index = reference.getColumn() - getOriginColumn();
+        if (index < columns.size()) {
+            return columns.get(index);
+        } else {
+            return null;
+        }
     }
 
     public Column getColumn(final CellAddress reference) {
@@ -177,6 +201,10 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
         return getOriginColumn() <= col;
     }
 
+    public void afterPropertySet() {
+        setupTables();
+    }
+
     /**
      * Two-way binding between Table and Column
      */
@@ -200,4 +228,36 @@ public final class HyperSchema implements FormatSchema, Iterable<Column> {
             }
         }
     }
+
+    public static class TablesEditor {
+
+        private final List<Table> _tables;
+
+        public TablesEditor(final List<Table> tables) {
+            _tables = tables;
+        }
+
+        /**
+         * @see io.github.honhimw.jackson.dataformat.hyper.HyperMapper#sheetSchemaFor(Class) type of specific directly
+         */
+        public Table getMainTable() {
+            return _tables.get(0);
+        }
+
+        public Table getByType(Class<?> type) {
+            return _tables.stream().filter(table -> table.getType().getRawClass().equals(type)).findFirst().orElse(null);
+        }
+
+        public Table getByName(String name) {
+            return _tables.stream().filter(table -> table.getName().equals(name)).findFirst().orElse(null);
+        }
+
+        public Table getByPointer(ColumnPointer pointer) {
+            return _tables.stream().filter(t -> t.matches(pointer.getParent()))
+                .findFirst()
+                .orElse(null);
+        }
+
+    }
+
 }

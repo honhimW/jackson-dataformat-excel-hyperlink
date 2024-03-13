@@ -201,7 +201,7 @@ public final class HyperMapper extends ObjectMapper {
 
     /*
     /**********************************************************
-    /* Configuration, simple features: SheetParser.Feature
+    /* Configuration, simple features: BookParser.Feature
     /**********************************************************
      */
 
@@ -219,6 +219,31 @@ public final class HyperMapper extends ObjectMapper {
 
     public HyperMapper disable(final BookParser.Feature... features) {
         for (BookParser.Feature f : features) {
+            tokenStreamFactory().disable(f);
+        }
+        return this;
+    }
+
+    /*
+    /**********************************************************
+    /* Configuration, simple features: BookParser.Feature
+    /**********************************************************
+     */
+
+    public HyperMapper configure(final HyperGenerator.Feature f, final boolean state) {
+        tokenStreamFactory().configure(f, state);
+        return this;
+    }
+
+    public HyperMapper enable(final HyperGenerator.Feature... features) {
+        for (HyperGenerator.Feature f : features) {
+            tokenStreamFactory().enable(f);
+        }
+        return this;
+    }
+
+    public HyperMapper disable(final HyperGenerator.Feature... features) {
+        for (HyperGenerator.Feature f : features) {
             tokenStreamFactory().disable(f);
         }
         return this;

@@ -29,6 +29,8 @@ public interface BookReader extends AutoCloseable, Iterator<SheetToken> {
 
     void setSchema(HyperSchema schema);
 
+    void reorderByColumnName();
+
     CellAddress getReference();
 
     CellValue getCellValue();

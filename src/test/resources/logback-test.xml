@@ -20,8 +20,8 @@
         </encoder>
     </appender>
 
-    <logger name="org.apache" level="TRACE"/>
-    <logger name="org.apache.poi.hssf" level="DEBUG"/>
+<!--    <logger name="org.apache" level="TRACE"/>-->
+<!--    <logger name="org.apache.poi.hssf" level="DEBUG"/>-->
 
     <root level="WARN">
         <appender-ref ref="STDOUT"/>

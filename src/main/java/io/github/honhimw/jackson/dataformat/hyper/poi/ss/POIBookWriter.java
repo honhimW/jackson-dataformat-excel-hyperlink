@@ -59,6 +59,8 @@ public final class POIBookWriter implements BookWriter {
     private SheetWriteVisitor _sheetWriteVisitor;
     private RowWriteVisitor _rowWriteVisitor;
 
+    private boolean _disableHyperlink = false;
+
     public POIBookWriter(final Workbook _workbook) {
         this._workbook = _workbook;
         this._bookWriteVisitor = new POIBookWriteVisitor();
@@ -77,6 +79,11 @@ public final class POIBookWriter implements BookWriter {
             this._bookWriteVisitor = bookWriteVisitor.apply(new POIBookWriteVisitor());
         }
         this._bookWriteVisitor.visitBook(_workbook, _schema);
+    }
+
+    @Override
+    public void disableHyperlink() {
+        this._disableHyperlink = true;
     }
 
     @Override
@@ -132,7 +139,7 @@ public final class POIBookWriter implements BookWriter {
         if (!_sheetMap.containsKey(clazz)) {
             String sheetName = table.getName();
             RetainedSheets.assertUsable(sheetName);
-            Sheet sheet = _workbook.createSheet(sheetName);
+            Sheet sheet = Optional.ofNullable(_workbook.getSheet(sheetName)).orElseGet(() -> _workbook.createSheet(sheetName));
             _sheetMap.put(clazz, sheet);
         }
         switchSheet(clazz);
@@ -155,9 +162,11 @@ public final class POIBookWriter implements BookWriter {
             String address = String.format("#%s!%d:%d", sheet.getSheetName(), row, row);
             String text = StringUtil.isNotBlank(s) ? s : address;
             CreationHelper creationHelper = _workbook.getCreationHelper();
-            Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
-            hyperlink.setAddress(address);
-            cell.setHyperlink(hyperlink);
+            if (!_disableHyperlink) {
+                Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
+                hyperlink.setAddress(address);
+                cell.setHyperlink(hyperlink);
+            }
             cell.setCellValue(text);
         });
     }
@@ -217,7 +226,7 @@ public final class POIBookWriter implements BookWriter {
 
     @Override
     public void write(final OutputStream out) throws IOException {
-        _sheet.getWorkbook().write(out);
+        _workbook.write(out);
     }
 
     @Override

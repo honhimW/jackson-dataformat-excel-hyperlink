@@ -14,15 +14,7 @@
 
 package io.github.honhimw.jackson.dataformat.hyper.deser;
 
-import com.fasterxml.jackson.core.Base64Variant;
-import com.fasterxml.jackson.core.FormatFeature;
-import com.fasterxml.jackson.core.FormatSchema;
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.io.ContentReference;
@@ -34,6 +26,11 @@ import io.github.honhimw.jackson.dataformat.hyper.poi.RetainedSheets;
 import io.github.honhimw.jackson.dataformat.hyper.poi.ss.POIBookReader;
 import io.github.honhimw.jackson.dataformat.hyper.schema.Column;
 import io.github.honhimw.jackson.dataformat.hyper.schema.HyperSchema;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.ss.util.CellAddress;
+
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -44,10 +41,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.regex.Matcher;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Hyperlink;
-import org.apache.poi.ss.util.CellAddress;
 
 @Slf4j
 public final class BookParser extends ParserMinimalBase {
@@ -95,6 +88,9 @@ public final class BookParser extends ParserMinimalBase {
 
     @Override
     public void setSchema(final FormatSchema schema) {
+        if (isEnabled(Feature.REORDER_BY_COLUMN_NAME)) {
+            _reader.reorderByColumnName();
+        }
         _schema = (HyperSchema) schema;
         _parsingContext = BookStreamContext.createRootContext(_schema);
         _reader.setSchema(_schema);
@@ -201,6 +197,9 @@ public final class BookParser extends ParserMinimalBase {
                     }
                 } else {
                     final Column column = _schema.getColumn(sheetName, _reference);
+                    if (Objects.isNull(column)) {
+                        return;
+                    }
                     if (column.isLeaf()) {
                         _nextTokens.add(JsonToken.FIELD_NAME);
                         _nextTokens.add(_scalarValueToken());
@@ -434,6 +433,7 @@ public final class BookParser extends ParserMinimalBase {
     public enum Feature implements FormatFeature {
         BLANK_ROW_AS_NULL(true),
         BREAK_ON_BLANK_ROW(false),
+        REORDER_BY_COLUMN_NAME(false),
         ;
         final boolean _defaultState;
         final int _mask;

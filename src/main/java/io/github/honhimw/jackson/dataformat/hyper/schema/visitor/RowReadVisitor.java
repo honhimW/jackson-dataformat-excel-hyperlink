@@ -38,7 +38,7 @@ public abstract class RowReadVisitor {
      * read value
      *
      * @param cell   to be read
-     * @param column column-level schema
+     * @param column column-level schema, maybe null
      * @return value holder
      */
     public CellValue visitCell(Cell cell, Column column) {

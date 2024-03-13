@@ -63,6 +63,7 @@ public final class POIBookReader implements BookReader {
     private Cell _cell;
     private int _rowIndex = -1;
     private int _columnIndex = -1;
+    private boolean _reorder = false;
     private boolean _closed;
 
     public POIBookReader(final Workbook workbook) {
@@ -89,16 +90,23 @@ public final class POIBookReader implements BookReader {
 
     @Override
     public void setSchema(HyperSchema schema) {
-        this._schema = schema;
-        final Table mainTable = _schema.getTables().get(0);
-        _mainSheet = _workbook.getSheet(mainTable.getName());
-        _workbook.sheetIterator().forEachRemaining(rows -> _sheetMap.put(rows.getSheetName(), rows));
-        _mainRowIterator = _mainSheet.rowIterator();
-        Function<BookReadVisitor, BookReadVisitor> bookReadVisitor = _schema.getBookReadVisitor();
-        if (bookReadVisitor != null) {
-            this._bookReadVisitor = bookReadVisitor.apply(new POIBookReadVisitor());
+        if (Objects.isNull(this._schema)) {
+            this._schema = schema;
+            final Table mainTable = _schema.getTables().get(0);
+            _mainSheet = _workbook.getSheet(mainTable.getName());
+            _workbook.sheetIterator().forEachRemaining(rows -> _sheetMap.put(rows.getSheetName(), rows));
+            _mainRowIterator = _mainSheet.rowIterator();
+            Function<BookReadVisitor, BookReadVisitor> bookReadVisitor = _schema.getBookReadVisitor();
+            if (bookReadVisitor != null) {
+                this._bookReadVisitor = bookReadVisitor.apply(new POIBookReadVisitor(_reorder));
+            }
+            _bookReadVisitor.visitBook(_workbook, _schema);
         }
-        _bookReadVisitor.visitBook(_workbook, _schema);
+    }
+
+    @Override
+    public void reorderByColumnName() {
+        this._reorder = true;
     }
 
     @Override

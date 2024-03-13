@@ -20,11 +20,11 @@ plugins {
 }
 
 group = "io.github.honhimw"
-version = "0.0.3-SNAPSHOT"
+version = "1.0.0"
 description = "Support for reading and writing Excel-Hyperlink via Jackson abstractions."
 
 val title = "Jackson dataformat: HyperLink"
-val jacksonVersion = "2.14.2"
+val jacksonVersion = "2.16.2"
 val poiVersion = "5.2.3"
 val snapshots = version.toString().endsWith("SNAPSHOT")
 
@@ -35,7 +35,7 @@ repositories {
 dependencies {
     api("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     api("org.apache.poi:poi-ooxml:$poiVersion")
-    implementation("org.slf4j:slf4j-api:2.0.6")
+    implementation("org.slf4j:slf4j-api:2.0.12")
 }
 
 dependencies {
@@ -97,10 +97,10 @@ publishing {
     repositories {
         maven {
             name = "sonatype"
-            if (snapshots) {
-                url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+            url = if (snapshots) {
+                uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
             } else {
-                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
             }
             credentials {
                 username = findProperty("SONATYPE_USERNAME") as String

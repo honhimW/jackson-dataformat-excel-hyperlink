@@ -14,11 +14,7 @@
 
 package io.github.honhimw.jackson.dataformat.hyper;
 
-import com.fasterxml.jackson.core.FormatSchema;
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.io.IOContext;
 import io.github.honhimw.jackson.dataformat.hyper.deser.BookInput;
 import io.github.honhimw.jackson.dataformat.hyper.deser.BookParser;
@@ -31,39 +27,41 @@ import io.github.honhimw.jackson.dataformat.hyper.poi.ss.POIBookWriter;
 import io.github.honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import io.github.honhimw.jackson.dataformat.hyper.ser.BookOutput;
 import io.github.honhimw.jackson.dataformat.hyper.ser.BookWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.util.TempFile;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
 @SuppressWarnings("java:S2177")
 public final class HyperFactory extends JsonFactory {
 
     public static final String FORMAT_NAME = "hyper";
-    public static final int DEFAULT_SHEET_PARSER_FEATURE_FLAGS = BookParser.Feature.collectDefaults();
+    public static final int DEFAULT_BOOK_PARSER_FEATURE_FLAGS = BookParser.Feature.collectDefaults();
+    public static final int DEFAULT_BOOK_GENERATOR_FEATURE_FLAGS = HyperGenerator.Feature.collectDefaults();
 
     private final transient WorkbookProvider _workbookProvider;
-    private int _sheetParserFeatures;
+    private int _bookParserFeatures = DEFAULT_BOOK_PARSER_FEATURE_FLAGS;
+    private int _bookGeneratorFeatures = DEFAULT_BOOK_GENERATOR_FEATURE_FLAGS;
 
     public HyperFactory() {
-        this(SXSSFWorkbook::new, DEFAULT_SHEET_PARSER_FEATURE_FLAGS);
+        this(SXSSFWorkbook::new);
     }
 
-    public HyperFactory(final WorkbookProvider workbookProvider, final int sheetParserFeatures) {
-        _workbookProvider = workbookProvider;
-        _sheetParserFeatures = sheetParserFeatures;
+    public HyperFactory(final WorkbookProvider workbookProvider) {
+        this._workbookProvider = workbookProvider;
     }
 
     public HyperFactory(final HyperFactory base) {
         _workbookProvider = base._workbookProvider;
-        _sheetParserFeatures = base._sheetParserFeatures;
+        _bookParserFeatures = base._bookParserFeatures;
     }
 
     @Override
@@ -101,7 +99,7 @@ public final class HyperFactory extends JsonFactory {
 
     /*
     /**********************************************************
-    /* Configuration, sheet parser configuration
+    /* Configuration, book parser configuration
     /**********************************************************
      */
 
@@ -110,12 +108,32 @@ public final class HyperFactory extends JsonFactory {
     }
 
     public HyperFactory enable(final BookParser.Feature f) {
-        _sheetParserFeatures |= f.getMask();
+        _bookParserFeatures |= f.getMask();
         return this;
     }
 
     public HyperFactory disable(final BookParser.Feature f) {
-        _sheetParserFeatures &= ~f.getMask();
+        _bookParserFeatures &= ~f.getMask();
+        return this;
+    }
+
+    /*
+    /**********************************************************
+    /* Configuration, book generator configuration
+    /**********************************************************
+     */
+
+    public HyperFactory configure(final HyperGenerator.Feature f, final boolean state) {
+        return state ? enable(f) : disable(f);
+    }
+
+    public HyperFactory enable(final HyperGenerator.Feature f) {
+        _bookGeneratorFeatures |= f.getMask();
+        return this;
+    }
+
+    public HyperFactory disable(final HyperGenerator.Feature f) {
+        _bookGeneratorFeatures &= ~f.getMask();
         return this;
     }
 
@@ -179,7 +197,7 @@ public final class HyperFactory extends JsonFactory {
      */
 
     private BookParser _createParser(final BookReader reader, final IOContext ctxt) {
-        return new BookParser(ctxt, _parserFeatures, _objectCodec, _sheetParserFeatures, reader);
+        return new BookParser(ctxt, _parserFeatures, _objectCodec, _bookParserFeatures, reader);
     }
 
     private BookReader _createFileSheetReader(final File src) throws IOException {
@@ -227,7 +245,7 @@ public final class HyperFactory extends JsonFactory {
      */
 
     private HyperGenerator _createGenerator(final BookWriter writer, final IOContext ctxt) {
-        return new HyperGenerator(ctxt, _generatorFeatures, _objectCodec, writer);
+        return new HyperGenerator(ctxt, _generatorFeatures, _objectCodec, writer, _bookGeneratorFeatures);
     }
 
     @SuppressWarnings("resource")

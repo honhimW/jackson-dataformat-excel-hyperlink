@@ -90,6 +90,11 @@ public final class SSMLBookReader implements BookReader {
     }
 
     @Override
+    public void reorderByColumnName() {
+
+    }
+
+    @Override
     public boolean isDate1904() {
         return _workbook.isDate1904();
     }

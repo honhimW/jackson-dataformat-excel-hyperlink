@@ -15,6 +15,7 @@
 package io.github.honhimw.jackson.dataformat.hyper.deser;
 
 import org.apache.poi.ss.formula.eval.ErrorEval;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 
 public final class CellValue {
@@ -36,6 +37,14 @@ public final class CellValue {
         _booleanValue = booleanValue;
         _textValue = textValue;
         _errorCode = errorCode;
+    }
+
+    public CellValue(final Cell cell) {
+        _cellType = cell.getCellType();
+        _numberValue = cell.getCellType() == CellType.NUMERIC ? cell.getNumericCellValue() : 0.0;
+        _booleanValue = cell.getCellType() == CellType.BOOLEAN && cell.getBooleanCellValue();
+        _textValue = cell.getCellType() == CellType.STRING ? cell.getStringCellValue() : null;
+        _errorCode = 0;
     }
 
     public CellValue(final double numberValue) {

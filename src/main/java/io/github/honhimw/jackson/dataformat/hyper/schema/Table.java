@@ -26,7 +26,7 @@ import org.apache.poi.ss.util.CellAddress;
 public final class Table {
 
     private final ColumnPointer _pointer;
-    private final String _name;
+    private String _name;
     private final JavaType _type;
     private final List<Column> _columns = new ArrayList<>();
     private CellAddress _origin;
@@ -51,6 +51,10 @@ public final class Table {
 
     public ColumnPointer getPointer() {
         return _pointer;
+    }
+
+    public void setName(final String name) {
+        _name = name;
     }
 
     public String getName() {
