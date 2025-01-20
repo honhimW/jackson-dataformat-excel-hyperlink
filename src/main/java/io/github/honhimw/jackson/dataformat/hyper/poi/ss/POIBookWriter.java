@@ -161,13 +161,17 @@ public final class POIBookWriter implements BookWriter {
         _write(value, (cell, s) -> {
             String address = String.format("#%s!%d:%d", sheet.getSheetName(), row, row);
             String text = StringUtil.isNotBlank(s) ? s : address;
-            CreationHelper creationHelper = _workbook.getCreationHelper();
             if (!_disableHyperlink) {
-                Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
-                hyperlink.setAddress(address);
-                cell.setHyperlink(hyperlink);
+                String formula = String.format("HYPERLINK(\"%s\", \"%s\")", address, text);
+                cell.setCellFormula(formula);
+//                CreationHelper creationHelper = _workbook.getCreationHelper();
+//                Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
+//                hyperlink.setAddress(address);
+//                cell.setHyperlink(hyperlink);
+                cell.setCellValue(text);
+            } else {
+                cell.setCellValue(text);
             }
-            cell.setCellValue(text);
         });
     }
 

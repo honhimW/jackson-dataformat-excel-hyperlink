@@ -24,8 +24,9 @@ version = "1.0.0"
 description = "Support for reading and writing Excel-Hyperlink via Jackson abstractions."
 
 val title = "Jackson dataformat: HyperLink"
-val jacksonVersion = "2.16.2"
-val poiVersion = "5.2.3"
+val jacksonVersion = "2.18.2"
+val poiVersion = "5.4.0"
+val lombokVersion = "1.18.36"
 val snapshots = version.toString().endsWith("SNAPSHOT")
 
 repositories {
@@ -56,10 +57,10 @@ dependencies {
 }
 
 dependencies {
-    annotationProcessor("org.projectlombok:lombok:1.18.24")
-    compileOnly("org.projectlombok:lombok:1.18.24")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
-    testCompileOnly("org.projectlombok:lombok:1.18.24")
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    testCompileOnly("org.projectlombok:lombok:$lombokVersion")
 }
 
 java {
