@@ -71,7 +71,7 @@ public class Tests {
     @BeforeEach
     @SneakyThrows
     public void tempFile() {
-        file = File.createTempFile("hyper", "tests");
+        file = File.createTempFile("hyper", "tests.xlsx");
     }
 
     @Test

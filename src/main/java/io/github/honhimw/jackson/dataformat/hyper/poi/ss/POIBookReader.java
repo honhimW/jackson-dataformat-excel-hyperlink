@@ -36,12 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.SpreadsheetVersion;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Date1904Support;
-import org.apache.poi.ss.usermodel.Hyperlink;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
 
 @Slf4j
@@ -182,9 +177,17 @@ public final class POIBookReader implements BookReader {
                 _cell = _cellIterator.next();
                 _columnIndex = _cell.getColumnIndex();
                 _next = _cellIterator.hasNext() ? SheetToken.CELL_VALUE : SheetToken.ROW_END;
-                Hyperlink hyperlink = _cell.getHyperlink();
-                if (Objects.nonNull(hyperlink)) {
-                    Matcher matcher = HYPER_LINK_PATTERN.matcher(hyperlink.getAddress());
+                String address = null;
+                if (_cell.getCellType() == CellType.FORMULA) {
+                    address = _cell.getStringCellValue();
+                } else {
+                    Hyperlink hyperlink = _cell.getHyperlink();
+                    if (Objects.nonNull(hyperlink)) {
+                        address = hyperlink.getAddress();
+                    }
+                }
+                if (Objects.nonNull(address)) {
+                    Matcher matcher = HYPER_LINK_PATTERN.matcher(address);
                     if (matcher.find()) {
                         String label = matcher.group("sheet");
                         String first = matcher.group("first");

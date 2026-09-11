@@ -27,6 +27,7 @@ import io.github.honhimw.jackson.dataformat.hyper.poi.ss.POIBookReader;
 import io.github.honhimw.jackson.dataformat.hyper.schema.Column;
 import io.github.honhimw.jackson.dataformat.hyper.schema.HyperSchema;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.util.CellAddress;
@@ -50,6 +51,7 @@ public final class BookParser extends ParserMinimalBase {
     private final Deque<JsonToken> _nextTokens;
     private final int _formatFeatures;
     private boolean _closed;
+    private boolean _end;
     private ObjectCodec _objectCodec;
     private HyperSchema _schema;
     private BookStreamContext _parsingContext;
@@ -109,13 +111,13 @@ public final class BookParser extends ParserMinimalBase {
     public JsonToken nextToken() throws IOException {
         _checkSchemaSet();
         _prepareDeterministicNext();
+        if (_nextTokens.isEmpty()) {
+            _currToken = null;
+            return null;
+        }
         final JsonToken token = _nextTokens.removeFirst();
         if (log.isTraceEnabled()) {
             log.trace("{}", token);
-        }
-        if (token == null) {
-            _currToken = null;
-            return null;
         }
         switch (token) {
             case START_ARRAY:
@@ -150,7 +152,7 @@ public final class BookParser extends ParserMinimalBase {
     }
 
     private void _prepareDeterministicNext() throws StreamReadException {
-        while (_nextTokens.isEmpty() || _isStartObject()) {
+        while (!_end && (_nextTokens.isEmpty() || _isStartObject())) {
             _prepareNext();
             _handleEmptyObject();
         }
@@ -163,7 +165,7 @@ public final class BookParser extends ParserMinimalBase {
     private void _prepareNext() throws StreamReadException {
         final SheetToken token = _readNext();
         if (token == null) {
-            _nextTokens.add(null);
+            _end = true;
             return;
         }
         switch (token) {
@@ -179,11 +181,20 @@ public final class BookParser extends ParserMinimalBase {
             case CELL_VALUE: {
                 _reference = _reader.getReference();
                 _value = _reader.getCellValue();
-                String sheetName = _reader.getCell().getSheet().getSheetName();
+                Cell cell = _reader.getCell();
+                String sheetName = cell.getSheet().getSheetName();
                 if (RetainedSheets.LIST.equals(sheetName)) {
-                    Hyperlink hyperlink = _reader.getCell().getHyperlink();
-                    if (Objects.nonNull(hyperlink)) {
-                        Matcher matcher = POIBookReader.HYPER_LINK_PATTERN.matcher(hyperlink.getAddress());
+                    String address = null;
+                    if (cell.getCellType() == CellType.FORMULA) {
+                        address = cell.getStringCellValue();
+                    } else {
+                        Hyperlink hyperlink = cell.getHyperlink();
+                        if (Objects.nonNull(hyperlink)) {
+                            address = hyperlink.getAddress();
+                        }
+                    }
+                    if (Objects.nonNull(address)) {
+                        Matcher matcher = POIBookReader.HYPER_LINK_PATTERN.matcher(address);
                         if (matcher.find()) {
                             String sheet = matcher.group("sheet");
                             if (RetainedSheets.LIST.equals(sheet)) {
@@ -279,7 +290,7 @@ public final class BookParser extends ParserMinimalBase {
         if (iterator.next() == JsonToken.START_OBJECT && iterator.next() == JsonToken.END_OBJECT) {
             _nextTokens.clear();
             if (isEnabled(Feature.BREAK_ON_BLANK_ROW)) {
-                _nextTokens.add(null);
+                _end = true;
             } else if (isEnabled(Feature.BLANK_ROW_AS_NULL)) {
                 _nextTokens.add(JsonToken.VALUE_NULL);
             }
