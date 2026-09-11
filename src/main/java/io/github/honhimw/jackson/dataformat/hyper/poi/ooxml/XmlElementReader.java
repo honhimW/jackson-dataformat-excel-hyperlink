@@ -185,7 +185,7 @@ final class XmlElementReader implements AutoCloseable {
     private void _append(final QName name, final XmlObject object) {
         final XmlObject parent = _deque.getFirst();
         try (final XmlCursor cursor = object.newCursor();
-            final XmlCursor parentCursor = parent.newCursor()) {
+             final XmlCursor parentCursor = parent.newCursor()) {
             parentCursor.toEndToken();
             parentCursor.beginElement(name);
             while (cursor.hasNextToken()) {

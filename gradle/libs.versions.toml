@@ -1,0 +1,32 @@
+[versions]
+version = "1.0.0"
+slf4j = "2.0.12"
+jackson = "2.22.1"
+poi = "5.4.0"
+lombok = "1.18.46"
+junit = "5.14.1"
+central-publish = "0.35.0"
+
+[libraries.slf4j]
+module = "org.slf4j:slf4j-api"
+version.ref = "slf4j"
+
+[libraries.jackson]
+module = "com.fasterxml.jackson.core:jackson-databind"
+version.ref = "jackson"
+
+[libraries.poi]
+module = "org.apache.poi:poi-ooxml"
+version.ref = "poi"
+
+[libraries.lombok]
+module = "org.projectlombok:lombok"
+version.ref = "lombok"
+
+[libraries.junit]
+module = "org.junit:junit-bom"
+version.ref = "junit"
+
+[plugins.publish]
+id = "com.vanniktech.maven.publish"
+version.ref = "central-publish"
