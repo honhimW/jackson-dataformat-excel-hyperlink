@@ -15,7 +15,7 @@
 import static java.nio.charset.StandardCharsets.UTF_8
 
 plugins {
-    id 'java'
+    id 'java-library'
     alias libs.plugins.publish
     id 'jacoco'
     id 'jacoco-report-aggregation'
@@ -51,8 +51,8 @@ configurations {
 }
 
 dependencies {
-    implementation libs.jackson
-    implementation libs.poi
+    api libs.jackson
+    api libs.poi
     implementation libs.slf4j
 
     testImplementation 'com.navercorp.fixturemonkey:fixture-monkey:0.5.0'

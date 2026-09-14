@@ -10,7 +10,7 @@ The project is forked from [scndry/jackson-dataformat-spreadsheet](https://githu
   <dependency>
     <groupId>io.github.honhimw</groupId>
     <artifactId>jackson-dataformat-excel-hyperlink</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
   </dependency>
 </project>
 ```
@@ -19,13 +19,7 @@ The project is forked from [scndry/jackson-dataformat-spreadsheet](https://githu
 ```groovy
 // Groovy
 dependencies {
-    implementation 'io.github.honhimw:jackson-dataformat-excel-hyperlink:1.0.0'
-}
-```
-```kotlin
-// Kotlin
-dependencies {
-    implementation("io.github.honhimw:jackson-dataformat-excel-hyperlink:1.0.0")
+    implementation 'io.github.honhimw:jackson-dataformat-excel-hyperlink:1.1.0'
 }
 ```
 
@@ -105,11 +99,11 @@ public static void main(String[]args){
 import java.io.Serializable;
 
 @JsonClassDescription("name for excel sheet")
-@ThisIsACustomAnnotation("name for excel sheet") // supported by using TableNameResolver.class
+@Name("name for excel sheet") // supported by using TableNameResolver.class
 public class Person implements Serializable {
     
     @JsonPropertyDescription("name for excel column")
-    @ThisIsACustomAnnotation("name for excel column") // supported by using ColumnNameResolver.class
+    @Name("name for excel column") // supported by using ColumnNameResolver.class
     private Long id;
     
     @JsonIgnore // jackson-annotations are supported

@@ -88,7 +88,10 @@ public final class POIBookReader implements BookReader {
         if (Objects.isNull(this._schema)) {
             this._schema = schema;
             final Table mainTable = _schema.getTables().get(0);
-            _mainSheet = _workbook.getSheet(mainTable.getName());
+            Sheet _sheet = _workbook.getSheet(mainTable.getName());
+            if (Objects.nonNull(_sheet)) {
+                _mainSheet = _sheet;
+            }
             _workbook.sheetIterator().forEachRemaining(rows -> _sheetMap.put(rows.getSheetName(), rows));
             _mainRowIterator = _mainSheet.rowIterator();
             Function<BookReadVisitor, BookReadVisitor> bookReadVisitor = _schema.getBookReadVisitor();

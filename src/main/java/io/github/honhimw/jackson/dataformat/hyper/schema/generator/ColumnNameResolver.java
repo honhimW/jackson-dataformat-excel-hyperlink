@@ -16,15 +16,27 @@ package io.github.honhimw.jackson.dataformat.hyper.schema.generator;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.BeanProperty;
+import io.github.honhimw.jackson.dataformat.hyper.Name;
 
 public interface ColumnNameResolver {
 
     ColumnNameResolver DEFAULT = prop -> {
-        JsonPropertyDescription annotation = prop.getAnnotation(JsonPropertyDescription.class);
-        if (annotation != null) {
-            String value = annotation.value();
-            if (value != null && !value.isBlank()) {
-                return value;
+        {
+            Name annotation = prop.getAnnotation(Name.class);
+            if (annotation != null) {
+                String value = annotation.value();
+                if (value != null && !value.isEmpty()) {
+                    return value;
+                }
+            }
+        }
+        {
+            JsonPropertyDescription annotation = prop.getAnnotation(JsonPropertyDescription.class);
+            if (annotation != null) {
+                String value = annotation.value();
+                if (value != null && !value.isEmpty()) {
+                    return value;
+                }
             }
         }
         return prop.getName();
